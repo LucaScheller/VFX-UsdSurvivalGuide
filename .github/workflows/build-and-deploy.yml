@@ -14,7 +14,7 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Install latest Rust Toolchain
         uses: actions-rs/toolchain@v1
@@ -25,15 +25,14 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command: install
-          args: mdbook mdbook-catppuccin mdbook-admonish 
-      - uses: actions/checkout@v3
+          args: mdbook
       - name: Checkout repository
         uses: actions/checkout@v3
         with:
           ref: main
       - name: Build documentation
         run: mdbook build -d docs/dst docs
-      - name: Upload built book artifact
+      - name: Upload built documentation artifact
         uses: actions/upload-artifact@v3
         with:
           name: docs
