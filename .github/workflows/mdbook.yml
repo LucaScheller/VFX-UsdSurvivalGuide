@@ -32,12 +32,12 @@ jobs:
         id: pages
         uses: actions/configure-pages@v3
       - name: Build with mdBook
-        run: mdbook build -d ./book docs
+        run: mdbook build -d docs/book docs
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v1
         with:
           name: book
-          path: ./book
+          path: docs/book
 
   deploy:
     environment:
