@@ -1,1 +1,2 @@
 # VFX-UsdSurvivalGuide
+[![Deploy Documentation to GitHub Pages](https://github.com/LucaScheller/VFX-UsdSurvivalGuide/actions/workflows/mdbook.yml/badge.svg)](https://github.com/LucaScheller/VFX-UsdSurvivalGuide/actions/workflows/mdbook.yml)

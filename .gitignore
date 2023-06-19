@@ -1,3 +1,4 @@
 workspace
 playground
 docs/book
+*.code-workspace
