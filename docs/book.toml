@@ -1,0 +1,6 @@
+[book]
+authors = ["Luca Scheller"]
+language = "en"
+multilingual = false
+src = "src"
+title = "Usd Survival Guide"
