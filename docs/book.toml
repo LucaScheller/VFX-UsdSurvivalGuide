@@ -4,3 +4,26 @@ language = "en"
 multilingual = false
 src = "src"
 title = "Usd Survival Guide"
+description = "This repository holds the docs and examples for the Usd Survival Guide."
+
+[build]
+build-dir = "book"
+create-missing = true
+
+[preprocessor.admonish]
+command = "mdbook-admonish"
+assets_version = "2.0.1" # do not edit: managed by `mdbook-admonish install`
+
+[output.html]
+default-theme = "ayu"
+git-repository-url = "https://github.com/LucaScheller/VFX-UsdSurvivalGuide"
+git-repository-icon = "fa-github"
+edit-url-template = "https://github.com/LucaScheller/VFX-UsdSurvivalGuide/edit/main/docs/{path}"
+additional-css = ["src/css/custom.css", "src/css/mdbook-admonish.css"]
+
+[output.html.fold]
+enable = false
+level = 10
+
+[output.html.playground]
+line-numbers = true
