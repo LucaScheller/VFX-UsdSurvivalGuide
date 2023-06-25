@@ -1,4 +1,10 @@
 workspace
 playground
+backup
+build
+dist
+tools
 docs/book
 *.code-workspace
+*.usdnc
+__pycache__
