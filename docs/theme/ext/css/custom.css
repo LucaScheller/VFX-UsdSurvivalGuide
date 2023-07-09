@@ -1,3 +1,8 @@
 table {
     width:100%;
 }
+
+:root {
+    --sidebar-width: 450px;
+    --content-max-width: 1200px;
+}

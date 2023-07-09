@@ -1,12 +1,12 @@
 # SUMMARY
-[USD Survival Guide]()
+[USD Survival Guide](./introduction/overview.md)
 
 ----------------------
 
 - [Introduction](./introduction/overview.md)
     - [Motivation](./introduction/motivation.md) 
     - [Guide Structure](./introduction/structure.md)
-    - [Building Docs](./introduction/docs.md)
+    - [Building the guide locally](./introduction/docs.md)
 - [Core Elements](./core/overview.md)
     - [API Overview](./core/api.md)
     - [Basic Building Blocks of Usd](./core/elements/overview.md)

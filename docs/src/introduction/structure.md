@@ -1,4 +1,9 @@
 
+# Structure
+
+~~~admonish info
+This page is still under construction. Please check back at a later time.
+~~~
 
 
 ```mermaid

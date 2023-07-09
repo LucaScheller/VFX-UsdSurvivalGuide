@@ -13,7 +13,14 @@ This guide aims to solve the following 'niche':
 - It aims be practical first (as to being an introduction guide that offers a high level overview). This means you'll find a lot of code examples from actual production scenarios as well as a more hands on approach instead of overviews/terminology explanations. We'll often link to resources you can look into before a certain section to have a better understanding should vocabulary issues arise.
 - It aims to soften the steep learning curve that some aspects of Usd have by having a look at common production examples so you can have those sweet "aha, that's how it works" moments.  
 
-Basically think of it as a balance of links listed in the below resource section.
+Basically think of it as a balance of links listed in the below resources section.
+```admonish tip
+If this is your first time working with Usd, we recommend watching this 20 minute video from Apple:
+
+[Understand USD fundamentals (Frm WWDC 2022)](https://developer.apple.com/videos/play/wwdc2022/10129/)
+
+It covers the basic terminology in a very succinct manner.
+```
 
 ## Resources
 We highly recommend also checking out the following resources:
@@ -23,6 +30,7 @@ We highly recommend also checking out the following resources:
 - [USD - Working Group](https://wiki.aswf.io/display/WGUSD)
 - [USD - SideFX/Houdini](https://www.sidefx.com/docs/houdini/solaris/usd.html)
 - [Book Of USD - Remedy Entertainment](https://remedy-entertainment.github.io/USDBook/index.html)
+- [USD CookBook - Colin Kennedy](https://github.com/ColinKennedy/USD-Cookbook)
 - [USD - Nvidia](https://developer.nvidia.com/usd)
 - [USD - Apple](https://developer.apple.com/videos/play/wwdc2022/10129/)
 

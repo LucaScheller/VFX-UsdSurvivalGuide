@@ -28,10 +28,13 @@ line-numbers = true
 
 [output.html.fold]
 enable = true
-level = 10
+level = 1
 
 [output.html.playground]
 editable = false
 copyable = true
 line-numbers = true
 show-line-numbers = true
+
+[output.html.print]
+page-break = true
