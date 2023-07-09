@@ -14,16 +14,22 @@ create-missing = true
 command = "mdbook-admonish"
 assets_version = "2.0.1" # do not edit: managed by `mdbook-admonish install`
 
+[preprocessor.mermaid]
+command = "mdbook-mermaid"
+
 [output.html]
 default-theme = "ayu"
 git-repository-url = "https://github.com/LucaScheller/VFX-UsdSurvivalGuide"
 git-repository-icon = "fa-github"
 edit-url-template = "https://github.com/LucaScheller/VFX-UsdSurvivalGuide/edit/main/docs/{path}"
-additional-css = ["src/css/custom.css", "src/css/mdbook-admonish.css"]
+additional-css = ["theme/ext/css/custom.css", "theme/ext/css/mdbook-admonish.css"]
+additional-js = ["theme/ext/js/mermaid.min.js", "theme/ext/js/mermaid-init.js", "theme/ext/js/custom.js"]
 
 [output.html.fold]
-enable = false
+enable = true
 level = 10
 
 [output.html.playground]
+editable = true
 line-numbers = true
+runnable = false

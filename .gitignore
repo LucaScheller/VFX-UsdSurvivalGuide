@@ -5,6 +5,9 @@ build
 dist
 tools
 docs/book
+examples
+geo
 *.code-workspace
+*.vscode
 *.usdnc
 __pycache__
