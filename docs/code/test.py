@@ -1,5 +1,5 @@
 #// ANCHOR: component
-def component():
+def componentExample():
     print("here")
 #// ANCHOR_END: component
 

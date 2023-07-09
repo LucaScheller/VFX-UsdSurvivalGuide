@@ -13,5 +13,12 @@ print("yes")
 
 
 ```python
-{{#include test.py:component}}
+{{#include ../../code/test.py:component}}
+```
+
+
+
+
+```python
+{{#include ../../../code/test.py:component}}
 ```
