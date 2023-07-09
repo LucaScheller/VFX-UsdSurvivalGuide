@@ -1,46 +1,37 @@
 
-![](../../theme/UsdSurvivalGuide.png#center)
+# Motivation
 
-# Usd Survival Guide
-[![Deploy Documentation to GitHub Pages](https://github.com/LucaScheller/VFX-UsdAssetResolver/actions/workflows/mdbook.yml/badge.svg)](https://github.com/LucaScheller/VFX-UsdSurvivalGuide/actions/workflows/mdbook.yml)
-
-This guide aims an onboarding manualto [Usd](https://openusd.org/release/index.html) for software developers and pipeline TDs.
-For more information what makes this guide unique, see the [motivation](./motivation.md) section.
+As [Usd](https://openusd.org/release/index.html) has been consistently increasing its market share in the recent years, it is definitely a technology to be aware of when working in any industry that uses 3d related data. It is becoming the de facto standard format on how different applications and vendors exchange their data.
 
 You might be thinking:
-Oh no another guide! Do we needs
-
-This guide aims to solve the following:
-- It aims to be an onboarding guide for pipeline developers
-- Practica 
-
-
-## Next Steps
-To build the various resolvers, follow the instructions in the [install guide](./installation/overview.md). 
-
-```admonish info
-Currently this guide only covers building against Houdini on Linux.
+```admonish question title=""
+Oh no another guide! Do we really need this?
 ```
 
+This guide aims to solve the following 'niche':
+- It aims to be an onboarding guide for software developers & pipeline developers so that you can hit the ground running.
+- It aims be practical first (as to being an introduction guide that offers a high level overview). This means you'll find a lot of code examples from actual production scenarios as well as a more hands on approach instead of overviews/terminology explanations. We'll often link to resources you can look into before a certain section to have a better understanding should vocabulary issues arise.
+- It aims to soften the steep learning curve that some aspects of Usd have by having a look at common production examples so you can have those sweet "aha, that's how it works" moments.  
 
+Basically think of it as a balance of links listed in the below resource section.
 
+## Resources
+We highly recommend also checking out the following resources:
 
-```mermaid
-graph TD;
-    A-->B;
-    A-->C;
-    B-->D;
-    C-->D;
+- [USD - Pixar](https://openusd.org/release/index.html)
+- [USD - Interest Forum](https://groups.google.com/g/usd-interest)
+- [USD - Working Group](https://wiki.aswf.io/display/WGUSD)
+- [USD - SideFX/Houdini](https://www.sidefx.com/docs/houdini/solaris/usd.html)
+- [Book Of USD - Remedy Entertainment](https://remedy-entertainment.github.io/USDBook/index.html)
+- [USD - Nvidia](https://developer.nvidia.com/usd)
+- [USD - Apple](https://developer.apple.com/videos/play/wwdc2022/10129/)
+
+```admonish info title="A big thank you to the VFX community!"
+At this point of the guide, we just want to state, that we didn't re-invent the wheel here: A big thank you to all the (open-source) projects/tutorials/guides that cover different aspects of Usd. You have been a big help in designing this guide as well as giving great insights. There is no one-to-rule them all documentation, so please consider contributing back to these projects if possible!
 ```
 
-```python,noplayground
-print("yes")
-```
+## Contributing and Acknowledgements
+Please consider contributing back to the Usd project in the  official [Usd Repository](https://github.com/PixarAnimationStudios/USD) and via the [Usd User groups](https://wiki.aswf.io/display/WGUSD/USD+Working+Group).
 
-
-~~~admonish example title=" Example"
-```python
-{{#include ../../../code/test.py:component}}
-```
-~~~
-
+Feel free to fork this repository and share further examples/improvements.
+If you run into issues, please flag them by [submitting a ticket](https://github.com/LucaScheller/VFX-UsdSurvivalGuide/issues/new).

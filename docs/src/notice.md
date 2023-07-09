@@ -43,6 +43,27 @@ listener.Revoke()
 
 
 
+```mermaid
+flowchart LR
+    prim([Prim]) --> property([Property])
+    property --> attribute([Attribute])
+    property --> relationship([Relationship])
+```
+
+```python,noplayground
+print("yes")
+```
+
+
+~~~admonish example title=" Example"
+```python
+{{#include ../../../code/test.py:component}}
+```
+~~~
+
+
+
+
 
 
 ```mermaid
