@@ -3,10 +3,10 @@
 
 ----------------------
 
-
 - [Introduction](./introduction/overview.md)
     - [Motivation](./introduction/motivation.md) 
     - [Guide Structure](./introduction/structure.md)
+    - [Building Docs](./introduction/docs.md)
 - [Core Elements](./core/overview.md)
     - [API Overview](./core/api.md)
     - [Basic Building Blocks of Usd](./core/elements/overview.md)

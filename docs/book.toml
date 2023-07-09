@@ -24,12 +24,14 @@ git-repository-icon = "fa-github"
 edit-url-template = "https://github.com/LucaScheller/VFX-UsdSurvivalGuide/edit/main/docs/{path}"
 additional-css = ["theme/ext/css/custom.css", "theme/ext/css/mdbook-admonish.css"]
 additional-js = ["theme/ext/js/mermaid.min.js", "theme/ext/js/mermaid-init.js", "theme/ext/js/custom.js"]
+line-numbers = true
 
 [output.html.fold]
 enable = true
 level = 10
 
 [output.html.playground]
-editable = true
+editable = false
+copyable = true
 line-numbers = true
-runnable = false
+show-line-numbers = true
