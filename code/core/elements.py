@@ -27,8 +27,8 @@ path = Sdf.Path("/set/bicycle")
 path_name = path.name     # Similar to os.path.basename(), returns the last element of the path
 path_empty = path.isEmpty # Property to check if path is empty
 # Path validation (E.g. for user created paths)
-Sdf.Path.IsValidPathString("/some/_wrong!_/path") # Returns: False, 'Error Message'
-# Joint paths (Similar to os.path.join())
+Sdf.Path.IsValidPathString("/some/_wrong!_/path") # Returns: (False, 'Error Message')
+# Join paths (Similar to os.path.join())
 path = Sdf.Path("/set/bicycle")
 path.AppendPath(Sdf.Path("frame/screws")) # Returns: Sdf.Path("/set/bicycle/frame/screws")
 # Manually join individual path elements
@@ -99,7 +99,7 @@ prim_path = path.GetPrimPath(path) # Returns: Sdf.Path('/set/bicycle')
 
 # We can't actually differentiate between a attribute and relationship based on the property path.
 # Hence the "Property" terminology.
-# In practise we rarely use/see this as this is a pretty low level API usecase.
+# In practice we rarely use/see this as this is a pretty low level API use case.
 # The only 'common' case, where you will see this is when calling the Sdf.Layer.Traverse function.
 # To encode prim relation targets, we can use:
 prim_rel_target_path = Sdf.Path("/set.bikes[/set/bicycle]")
