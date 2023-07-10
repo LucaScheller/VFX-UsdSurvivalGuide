@@ -6,7 +6,28 @@ def example():
 #// ANCHOR_END: contentId
 """
 
-"""Path.md"""
+"""api.md"""
+
+#// ANCHOR: apiHighVsLowLevel
+# High Level (Notice how we still use elements of the low level API)
+from pxr import Sdf
+stage = Usd.Stage.CreateInMemory()
+prim_path = Sdf.Path("/bicycle")
+prim = stage.DefinePrim(prim_path, "Xform")
+attr = prim.CreateAttribute("tire:size", pxr.Sdf.ValueTypeNames.Float)
+attr.Set(10)
+# Low Level
+from pxr import Sdf
+layer = Sdf.Layer.CreateAnonymous()
+prim_path = Sdf.Path("/bicycle")
+prim_spec = Sdf.CreatePrimInLayer(layer, prim_path)
+prim_spec.specifier = Sdf.SpecifierDef
+prim_spec.typeName = "Xform"
+attr_spec = Sdf.AttributeSpec(prim_spec, "tire:size", Sdf.ValueTypeNames.Float)
+attr_spec.default = 10
+#// ANCHOR_END: apiHighVsLowLevel
+
+"""path.md"""
 
 #// ANCHOR: pathSummary
 from pxr import Sdf

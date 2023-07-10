@@ -40,6 +40,7 @@ If you are interested in diving into topics yourself, here is a rough categoriza
         - [Stage Statistics](https://openusd.org/release/api/introspection_8h.html)
         - [Profiling Performance(Tracing)](https://openusd.org/release/api/trace_page_front.html)
     - [Utils](https://openusd.org/release/api/usd_utils_page_front.html)
+
 ### Low Level API
 
 - [Sdf - Scene Description Foundations](https://openusd.org/release/api/sdf_page_front.html)

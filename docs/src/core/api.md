@@ -25,8 +25,15 @@ Here is the TL;DR version. Usd is made up of two main APIs:
 
 Individual components of Usd are loaded via a [plugin based system](https://openusd.org/release/api/plug_page_front.html), for example Hydra, kinds, file plugins (Vdbs, abc) etc.
 
+Here is a simple comparison:
+~~~admonish info title=""
+```python
+{{#include ../../../code/core/elements.py:apiHighVsLowLevel}}
+```
+~~~
+
 ## Resources
-Check out a API overview here: [API Overview Resources](./resources.md)
+Check out a API overview here: [API Overview](./resources.md)
 
 ## When should I use what?
 
@@ -54,7 +61,7 @@ Basically everything in the pxr.Usd namespace nicely wraps things in the pxr.Sdf
 
 Therefore it is a bit more OOP oriented and follows C++ code design patterns.
 
-This level always operates on the composed state of the stage. This means as soon as you are working stages, you'll be using the higher level API.
+This level always operates on the composed state of the stage. This means as soon as you are working stages, you'll be using the higher level API. It also takes care of validation data/setting common data, whereas the lower level api leaves everything up to the user.
 
 ## Low Level API
 
