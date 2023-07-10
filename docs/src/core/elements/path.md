@@ -11,7 +11,7 @@ pxr.Sdf.Path("/My/Example/Path")
 ## Resources
 - [API Docs](https://openusd.org/release/api/class_sdf_path.html#sec_SdfPath_Overview)
 
-## TL;DR - Paths In-A-Nutshell
+## TL;DR - API Overview In-A-Nutshell
 Here is the TL;DR version:
 Paths can encode the following path data:
 - Prims ("/set/bicycle")

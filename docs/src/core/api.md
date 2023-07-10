@@ -15,12 +15,18 @@ Most tutorials focus primarily on the high level API, as it is a bit more conven
 We'd actually recommend starting out with the lower level API as soon as you can, as it will force you to write performant code from the start.
 ~~~
 
+## TL;DR - Paths In-A-Nutshell
+Here is the TL;DR version. Usd is made up of two main APIs:
+- High level API:
+    - [Usd Core API](https://openusd.org/release/api/usd_page_front.html)
+- Low level API:
+    - [Sdf - Scene Description Foundations](https://openusd.org/release/api/sdf_page_front.html)
+    - [Pcp - PrimCache Population (Composition)](https://openusd.org/release/api/pcp_page_front.html)
+
+Individual components of Usd are loaded via a [plugin based system](https://openusd.org/release/api/plug_page_front.html), for example Hydra, kinds, file plugins (Vdbs, abc) etc.
 
 ## Resources
-- [Usd Core API](https://openusd.org/release/api/usd_page_front.html)
-- [Sdf - Scene Description Foundations](https://openusd.org/release/api/sdf_page_front.html)
-- [Pcp - PrimCache Population (Composition)](https://openusd.org/release/api/pcp_page_front.html)
-
+Check out a API overview here: [API Overview Resources](./resources.md)
 
 ## When should I use what?
 
@@ -44,7 +50,7 @@ The Usd Core API docs page is a great place to get an overview over the high lev
 
 - [Usd Core API](https://openusd.org/release/api/usd_page_front.html)
 
-Basically everything in the pxr.Usd namespace nicely wraps everything in the pxr.Sdf/pxr.Pcp namespace with nice getters/setters and convenience classes and functions.
+Basically everything in the pxr.Usd namespace nicely wraps things in the pxr.Sdf/pxr.Pcp namespace with getters/setters, convenience classes and functions.
 
 Therefore it is a bit more OOP oriented and follows C++ code design patterns.
 
@@ -78,7 +84,7 @@ Sounds simple, right? Ehm right??
 
 Well yes and no. This guide tries to give you good pointers of common pitfalls you might run into.
 
-
+So let's get started with specifics!
 
 
 

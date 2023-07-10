@@ -9,6 +9,7 @@
     - [Building the guide locally](./introduction/docs.md)
 - [Core Elements](./core/overview.md)
     - [API Overview](./core/api.md)
+        - [Resources](./core/resources.md)
     - [Basic Building Blocks of Usd](./core/elements/overview.md)
         - [Paths](./core/elements/path.md)
         - [Prims/Properties/Attributes/Relationships](./core/elements/data_container.md)
