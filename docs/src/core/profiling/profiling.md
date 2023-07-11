@@ -53,6 +53,6 @@ Tree view  ==============
 ```
 ~~~
 
-Here is an example of a report to a Google Chrome trace.json file opened in [`chrome://tracing`](chrome://tracing) in Google Chrome with a custom python trace marked scope.
+Here is an example of a report to a Google Chrome trace .json file opened at [`chrome://tracing`](chrome://tracing) in Google Chrome with a custom python trace marked scope.
 
 ![](./GoogleChromePythonScopeTraceProfiling.jpg#center)
