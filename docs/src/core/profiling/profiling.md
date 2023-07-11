@@ -3,6 +3,8 @@ For low level profiling Usd ships with the `trace` profiling module.
 
 This is also what a few DCCs (like Houdini) expose to profile Usd writing/rendering.
 
+![](./GoogleChromeTraceProfiling.jpg#center)
+
 ## TL;DR - Profiling In-A-Nutshell
 - The trace module offers easy to attach Python decorators (`@Trace.TraceMethod/TraceFunction`) that you can wrap your functions with to expose them to the profiler.
 - You can dump the profiling result to .txt or the GoogleChrome tracing format you can open under [`chrome://tracing`](chrome://tracing). Even if you don't attach custom traces, you'll get extensive profiling stats of the underlying Usd API execution.
@@ -18,7 +20,7 @@ The trace module is made up of two parts:
 
 Via the C++ API, you can customize the behavior further, for Python 'only' the global collector is exposed.
 
-First you mark what to trace (You can also mark nothing, you'll still have access to all the default profiling):
+First you mark what to trace. You can also mark nothing, you'll still have access to all the default profiling:
 ~~~admonish info title=""
 ```python
 {{#include ../../../../code/core/elements.py:profilingTraceAttach}}
@@ -32,8 +34,8 @@ Then you enable the collector during the runtime of what you want to trace and w
 ~~~
 
 Here is an example (from the Usd docs) of a report to a .txt file. If you have ever rendered with Houdini this will be similar to when you increase the log levels.
-
-```
+~~~admonish info title=""
+```text
 Tree view  ==============
    inclusive    exclusive        
   358.500 ms                    1 samples    Main Thread
@@ -49,3 +51,8 @@ Tree view  ==============
     9.141 ms     0.053 ms       1 samples    | PrCreatePathResolverForUnit
     0.002 ms     0.002 ms       6 samples    |   UcIsKnownUnit
 ```
+~~~
+
+Here is an example of a report to a Google Chrome trace.json file opened in [`chrome://tracing`](chrome://tracing) in Google Chrome with a custom python trace marked scope.
+
+![](./GoogleChromePythonScopeTraceProfiling.jpg#center)

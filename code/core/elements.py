@@ -189,28 +189,30 @@ def foo(stage):
         bar = Bar()
         for prim in stage.Traverse():
             prim.HasAttribute("size")
-        stage = Usd.Stage.Open("/opt/hfs19.5/houdini/usd/assets/pig/pig.usd")
 #// ANCHOR_END: profilingTraceAttach
 
 #// ANCHOR: profilingTraceCollect
 import os
 from pxr import Trace, Usd
-# The pxr.Trace.Collector() returns a singleton
-# The default traces all go to TraceCategory::Default, this is not configurable via
-# Python
+# The Trace.Collector() and Trace.Reporter.globalReporter return a singletons
+# The default traces all go to TraceCategory::Default, this is not configurable via python
+global_reporter = pxr.Trace.Reporter.globalReporter
+global_reporter.ClearTree()
 collector = Trace.Collector()
 collector.Clear()
 # Start recording events.
 collector.enabled = True
-# Enable the Python decorators/functions
+# Enable the Usd Python API tracing (No the manually attached tracers)
 collector.pythonTracingEnabled = False
 # Run code
+stage = Usd.Stage.CreateInMemory()
+prim_path = Sdf.Path("/bicycle")
+prim = stage.DefinePrim(prim_path, "Xform")
 foo(stage)
 # Stop recording events.
 collector.enabled = False
 # Print the ASCII report
 trace_dir_path = os.path.dirname(os.path.expanduser("~/Desktop/UsdTracing"))
-global_reporter = Trace.Reporter.globalReporter
 global_reporter.Report(os.path.join(trace_dir_path, "report.trace"))
 global_reporter.ReportChromeTracingToFile(os.path.join(trace_dir_path,"report.json"))
 #// ANCHOR_END: profilingTraceCollect

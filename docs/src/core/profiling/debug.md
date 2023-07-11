@@ -11,10 +11,10 @@ The Usd API ships with a [debug class](https://openusd.org/dev/api/class_tf_debu
 ## Overview
 Environment Variables:
 
-|    Name               | Value               |
-|-----------------------|---------------------|
-| TF_DEBUG              | 'DEBUG_SYMBOL_NAME' |
-| TF_DEBUG_OUTPUT_FILE  | 'stdout' or 'stderr |
+| Name                  | Value                |
+|-----------------------|----------------------|
+| TF_DEBUG              | 'DEBUG_SYMBOL_NAME'  |
+| TF_DEBUG_OUTPUT_FILE  | 'stdout' or 'stderr' |
 
 ~~~admonish tip
 Activating the log output via bash:
@@ -23,12 +23,12 @@ export TF_DEBUG=AR_RESOLVER_INIT
 ```
 Then launch your app.
 ~~~
-You can also set the interactively in the active session via Python:
+You can also set them interactively in the active session via Python. Wildcarding is allowd to turn on multiple debug symbols in batch.
 
 ~~~admonish tip
 ```python
-pxr.Tf.Debug.SetDebugSymbolsByName("AR_RESOLVER_INIT", True)
-pxr.Tf.Debug.SetDebugSymbolsByName("AR_*", True)
+activated_symbols = pxr.Tf.Debug.SetDebugSymbolsByName("AR_RESOLVER_INIT", True) # Returns: ["AR_RESOLVER_INIT"]
+activated_symbols = pxr.Tf.Debug.SetDebugSymbolsByName("AR_*", True)
 ```
 ~~~
 
