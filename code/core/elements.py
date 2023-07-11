@@ -153,6 +153,29 @@ variant_path = Sdf.Path('/set/bicycle{style=blue}frame/screws')
 prim_rel_target_path = variant_path.StripAllVariantSelections() # Returns: Sdf.Path('/set/bicycle/frame/screws')
 #// ANCHOR_END: pathVariants
 
+
+#// ANCHOR: debuggingTokens
+from pxr import Tf
+# To check if a symbol is active:
+pxr.Tf.Debug.IsDebugSymbolNameEnabled("MY_SYMBOL_NAME")
+# To print all symbols
+docs = Tf.Debug.GetDebugSymbolDescriptions()
+for name in Tf.Debug.GetDebugSymbolNames():
+    desc = Tf.Debug.GetDebugSymbolDescription(name)
+    print("{:<50} | {}".format(name, desc))
+#// ANCHOR_END: debuggingTokens
+
+#// ANCHOR: debuggingTokensMarkdown
+from pxr import Tf
+docs = Tf.Debug.GetDebugSymbolDescriptions()
+print("| Variable Name | Description |")
+print("|-|-|")
+for name in Tf.Debug.GetDebugSymbolNames():
+    desc = Tf.Debug.GetDebugSymbolDescription(name)
+    print("| {} | {} |".format(name, desc))
+#// ANCHOR_END: debuggingTokensMarkdown
+
+
 #// ANCHOR: profilingTrace
 
 node = hou.pwd()
