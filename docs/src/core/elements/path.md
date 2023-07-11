@@ -8,9 +8,6 @@ pxr.Sdf.Path("/My/Example/Path")
 ```
 ~~~
 
-## Resources
-- [API Docs](https://openusd.org/release/api/class_sdf_path.html#sec_SdfPath_Overview)
-
 ## TL;DR - API Overview In-A-Nutshell
 Here is the TL;DR version:
 Paths can encode the following path data:
@@ -27,6 +24,9 @@ Paths can encode the following path data:
 {{#include ../../../../code/core/elements.py:pathSummary}}
 ```
 ~~~
+
+## Resources
+- [API Docs](https://openusd.org/release/api/class_sdf_path.html#sec_SdfPath_Overview)
 
 ## Basics
 Each element in the path between the "/" symbol is a [prim](https://openusd.org/release/glossary.html#usdglossary-prim) similar to how on disk file paths mark a folder or a file.

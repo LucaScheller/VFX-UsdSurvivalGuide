@@ -152,3 +152,43 @@ if variant_path.ContainsPrimVariantSelection():          # Returns: True # For a
 variant_path = Sdf.Path('/set/bicycle{style=blue}frame/screws')
 prim_rel_target_path = variant_path.StripAllVariantSelections() # Returns: Sdf.Path('/set/bicycle/frame/screws')
 #// ANCHOR_END: pathVariants
+
+#// ANCHOR: profilingTrace
+
+node = hou.pwd()
+stage = node.editableStage()
+
+import pxr
+import os
+
+trace_dir_path = os.path.dirname(hou.hipFile.path())
+# The pxr.Trace.Collector() returns a singleton
+# The default traces all go to TraceCategory::Default, this is not configureable via
+# Python
+collector = pxr.Trace.Collector()
+collector.Clear()
+# Start recording events.
+collector.enabled = True
+collector.pythonTracingEnabled = False
+
+class Bar():
+    @pxr.Trace.TraceMethod
+    def foo(self):
+        print("Bar.foo")
+
+@pxr.Trace.TraceFunction
+def foo(stage):
+    with pxr.Trace.TraceScope("InnerScope"):
+        bar = Bar()
+        for prim in stage.Traverse():
+            prim.HasAttribute("test")
+        stage = pxr.Usd.Stage.Open("/opt/hfs19.5.605/houdini/usd/assets/pig/pig.usd")
+foo(stage)
+# Stop recording events.
+collector.enabled = False
+# Print the ASCII report
+global_reporter = pxr.Trace.Reporter.globalReporter
+global_reporter.Report(os.path.join(trace_dir_path, "report.trace"))
+global_reporter.ReportChromeTracingToFile(os.path.join(trace_dir_path,"report.json"))
+
+#// ANCHOR_END: pathVariants
