@@ -6,7 +6,7 @@ The Usd API ships with a [debug class](https://openusd.org/dev/api/class_tf_debu
 - You can also activate a symbol in the active session via Python: ```pxr.Tf.Debug.SetDebugSymbolsByName("AR_RESOLVER_INIT", True)```
 
 ## Resources
-- [API Docs](https://openusd.org/dev/api/class_tf_debug.html)
+- [Debug API Docs](https://openusd.org/dev/api/class_tf_debug.html)
 
 ## Overview
 Environment Variables:
@@ -35,10 +35,11 @@ pxr.Tf.Debug.SetDebugSymbolsByName("AR_*", True)
 External plugins (like asset resolvers) often register own debug symbols which you can then use to see exactly what is going on.
 
 To get a list of value `TF_DEBUG`values you can run:
-
+~~~admonish info title=""
 ```python
 {{#include ../../../../code/core/elements.py:debuggingTokens}}
 ```
+~~~
 
 Full list of debug codes:
 

@@ -153,7 +153,6 @@ variant_path = Sdf.Path('/set/bicycle{style=blue}frame/screws')
 prim_rel_target_path = variant_path.StripAllVariantSelections() # Returns: Sdf.Path('/set/bicycle/frame/screws')
 #// ANCHOR_END: pathVariants
 
-
 #// ANCHOR: debuggingTokens
 from pxr import Tf
 # To check if a symbol is active:
@@ -175,43 +174,43 @@ for name in Tf.Debug.GetDebugSymbolNames():
     print("| {} | {} |".format(name, desc))
 #// ANCHOR_END: debuggingTokensMarkdown
 
-
-#// ANCHOR: profilingTrace
-
-node = hou.pwd()
-stage = node.editableStage()
-
-import pxr
+#// ANCHOR: profilingTraceAttach
 import os
-
-trace_dir_path = os.path.dirname(hou.hipFile.path())
-# The pxr.Trace.Collector() returns a singleton
-# The default traces all go to TraceCategory::Default, this is not configureable via
-# Python
-collector = pxr.Trace.Collector()
-collector.Clear()
-# Start recording events.
-collector.enabled = True
-collector.pythonTracingEnabled = False
-
+from pxr import Trace, Usd
+# Code with trace attached
 class Bar():
-    @pxr.Trace.TraceMethod
+    @Trace.TraceMethod
     def foo(self):
         print("Bar.foo")
 
-@pxr.Trace.TraceFunction
+@Trace.TraceFunction
 def foo(stage):
-    with pxr.Trace.TraceScope("InnerScope"):
+    with Trace.TraceScope("InnerScope"):
         bar = Bar()
         for prim in stage.Traverse():
-            prim.HasAttribute("test")
-        stage = pxr.Usd.Stage.Open("/opt/hfs19.5.605/houdini/usd/assets/pig/pig.usd")
+            prim.HasAttribute("size")
+        stage = Usd.Stage.Open("/opt/hfs19.5/houdini/usd/assets/pig/pig.usd")
+#// ANCHOR_END: profilingTraceAttach
+
+#// ANCHOR: profilingTraceCollect
+import os
+from pxr import Trace, Usd
+# The pxr.Trace.Collector() returns a singleton
+# The default traces all go to TraceCategory::Default, this is not configurable via
+# Python
+collector = Trace.Collector()
+collector.Clear()
+# Start recording events.
+collector.enabled = True
+# Enable the Python decorators/functions
+collector.pythonTracingEnabled = False
+# Run code
 foo(stage)
 # Stop recording events.
 collector.enabled = False
 # Print the ASCII report
-global_reporter = pxr.Trace.Reporter.globalReporter
+trace_dir_path = os.path.dirname(os.path.expanduser("~/Desktop/UsdTracing"))
+global_reporter = Trace.Reporter.globalReporter
 global_reporter.Report(os.path.join(trace_dir_path, "report.trace"))
 global_reporter.ReportChromeTracingToFile(os.path.join(trace_dir_path,"report.json"))
-
-#// ANCHOR_END: pathVariants
+#// ANCHOR_END: profilingTraceCollect
