@@ -181,3 +181,5 @@ Full list of debug codes:
 | USD_STAGE_OPEN | USD stage opening details |
 | USD_VALIDATE_VARIABILITY | USD attribute variability validation |
 | USD_VALUE_RESOLUTION | USD trace of layers inspected as values are resolved |
+
+You scrolled all the way to the end 🥳. Congratulations, you have now earned the rank of "Usd Nerd"!

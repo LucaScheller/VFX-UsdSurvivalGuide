@@ -216,3 +216,70 @@ trace_dir_path = os.path.dirname(os.path.expanduser("~/Desktop/UsdTracing"))
 global_reporter.Report(os.path.join(trace_dir_path, "report.trace"))
 global_reporter.ReportChromeTracingToFile(os.path.join(trace_dir_path,"report.json"))
 #// ANCHOR_END: profilingTraceCollect
+
+#// ANCHOR: assetResolverBound
+from pxr import Ar
+from usdAssetResolver import FileResolver
+print(Ar.GetResolver())
+print(Ar.GetUnderlyingResolver()) # Returns: <usdAssetResolver.FileResolver.Resolver object at <address>>
+#// ANCHOR_END: assetResolverBound
+
+#// ANCHOR: assetResolverScopedCache
+from pxr import Ar
+with Ar.ResolverScopedCache() as scope:
+    resolver = Ar.GetResolver()
+    path = resolver.Resolve("box.usda")
+#// ANCHOR_END: assetResolverScopedCache
+
+#// ANCHOR: assetResolverContextAccess
+context_collection = stage.GetPathResolverContext()
+activeResolver_context = context_collection.Get()[0]
+#// ANCHOR_END: assetResolverContextAccess 
+
+#// ANCHOR: assetResolverContextCreation
+from pxr import Ar, Usd
+from usdAssetResolver import FileResolver
+resolver = Ar.GetUnderlyingResolver()
+context_collection = resolver.CreateDefaultContext() # Returns: Ar.ResolverContext(FileResolver.ResolverContext())
+context = context_collection.Get()[0]
+context.ModifySomething() # Call specific functions of your resolver.
+# Create a stage that uses the context
+stage = Usd.Stage.CreateInMemory("/output/stage/filePath.usd", pathResolverContext=context)
+# Or
+stage = Usd.Stage.Open("/Existing/filePath/to/UsdFile.usd", pathResolverContext=context)
+#// ANCHOR_END: assetResolverContextCreation
+
+#// ANCHOR: assetResolverContextRefresh
+from pxr import Ar
+...
+resolver = Ar.GetResolver()
+# The resolver context is actually a list, as there can be multiple resolvers 
+# running at the same time. In this example we only have a single non-URI resolver
+# running, therefore we only have a single element in the list.
+context_collection = stage.GetPathResolverContext()
+activeResolver_context = context_collection.Get()[0]
+# Your asset resolver has to Python expose methods to modify the context.
+activeResolver_context.ModifySomething()
+# Trigger Refresh (Some DCCs, like Houdini, additionally require node re-cooks.)
+resolver.RefreshContext(context_collection)
+...
+#// ANCHOR_END: assetResolverContextRefresh
+
+#// ANCHOR: assetResolverStageContextResolve
+resolved_path = stage.ResolveIdentifierToEditTarget("someAssetIdentifier")
+resolved_path_str = path.GetPathString() # Or str(resolved_path)
+#// ANCHOR_END: assetResolverStageContextResolve
+
+#// ANCHOR: assetResolverResolve
+from pxr import Ar
+resolver = Ar.GetResolver()
+resolved_path = resolver.Resolve("someAssetIdentifier")
+resolved_path_str = path.GetPathString() # Or str(resolved_path)
+#// ANCHOR_END: assetResolverResolve
+
+#// ANCHOR: assetResolverAssetPath
+from pxr import Sdf
+asset_path = Sdf.AssetPath("someAssetIdentifier", "/some/Resolved/Path.usd")
+print(asset_path.path)         # Returns: "someAssetIdentifier"
+print(asset_path.resolvedPath) # Returns: "/some/Resolved/Path.usd"
+#// ANCHOR_END: assetResolverAssetPath

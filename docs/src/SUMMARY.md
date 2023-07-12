@@ -1,5 +1,5 @@
 # SUMMARY
-[USD Survival Guide](./introduction/overview.md)
+[USD Survival Guide]()
 
 ----------------------
 

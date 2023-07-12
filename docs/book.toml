@@ -19,6 +19,7 @@ command = "mdbook-mermaid"
 
 [output.html]
 default-theme = "ayu"
+input-404 = "not-found.md"
 git-repository-url = "https://github.com/LucaScheller/VFX-UsdSurvivalGuide"
 git-repository-icon = "fa-github"
 edit-url-template = "https://github.com/LucaScheller/VFX-UsdSurvivalGuide/edit/main/docs/{path}"
