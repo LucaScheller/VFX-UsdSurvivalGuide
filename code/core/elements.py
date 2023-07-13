@@ -153,6 +153,51 @@ variant_path = Sdf.Path('/set/bicycle{style=blue}frame/screws')
 prim_rel_target_path = variant_path.StripAllVariantSelections() # Returns: Sdf.Path('/set/bicycle/frame/screws')
 #// ANCHOR_END: pathVariants
 
+
+#// ANCHOR metadataBasics
+# Prims
+# For the predefined 'AssetInfo' and 'customData' we have
+# dedicated getters/setters/clear methods.
+# Prims
+'ClearAssetInfo', 'ClearAssetInfoByKey', 
+'GetAssetInfo', 'GetAssetInfoByKey', 
+'HasAssetInfoKey', 
+'HasAuthoredAssetInfo', 'SetAssetInfo', 'SetAssetInfoByKey', 
+
+
+
+ 'GetCustomData',
+ 'GetCustomDataByKey',  'HasAuthoredCustomDataKey',
+ 'ClearCustomData',  'ClearCustomDataByKey',
+ 'SetCustomData',
+
+ 'HasAuthoredCustomData',
+ 'HasCustomData',
+
+'HasCustomDataKey',  'SetCustomDataByKey',
+
+
+
+
+
+'ClearMetadata',
+'ClearMetadataByDictKey',
+'GetAllAuthoredMetadata',
+'GetAllMetadata', 
+'GetMetadata',
+'GetMetadataByDictKey',
+'HasAuthoredMetadata',
+'HasAuthoredMetadataDictKey',
+'HasMetadata',
+'HasMetadataDictKey',
+'SetMetadata',
+'SetMetadataByDictKey',
+
+valid_metadata = Sdf.ConvertToValidMetadataDictionary(metadata)
+
+#// ANCHOR_END: 
+
+
 #// ANCHOR: debuggingTokens
 from pxr import Tf
 # To check if a symbol is active:
@@ -216,6 +261,23 @@ trace_dir_path = os.path.dirname(os.path.expanduser("~/Desktop/UsdTracing"))
 global_reporter.Report(os.path.join(trace_dir_path, "report.trace"))
 global_reporter.ReportChromeTracingToFile(os.path.join(trace_dir_path,"report.json"))
 #// ANCHOR_END: profilingTraceCollect
+
+#// ANCHOR: profilingStopWatch
+from pxr import Tf
+sw = Tf.Stopwatch()
+sw.Start()
+sw.Stop()
+sw.Start()
+sw.Stop()
+print(sw.GetMilliseconds(), sw.sampleCount)
+sw.Reset()
+# Add sampleCount + accumulated time from other stop watch
+other_sw = Tf.StopWatch()
+other_sw.Start()
+other_sw.Stop()
+sw.AddFrom(other_sw) 
+print(sw.GetMilliseconds(), sw.sampleCount)
+#// ANCHOR_END: profilingStopWatch
 
 #// ANCHOR: assetResolverBound
 from pxr import Ar
@@ -288,41 +350,106 @@ print(asset_path.resolvedPath) # Returns: "/some/Resolved/Path.usd"
 
 
 #// ANCHOR: noticeRegisterRevoke
-import pxr
+from pxr import Tf, Usd
 def callback(notice, sender):
     print(notice, sender)
 # Add
 # Global
-listener = pxr.Tf.Notice.RegisterGlobally(pxr.Usd.Notice.StageContentsChanged, callback)
+listener = Tf.Notice.RegisterGlobally(Usd.Notice.StageContentsChanged, callback)
 # Per Stage
-listener = pxr.Tf.Notice.Register(pxr.Usd.Notice.StageContentsChanged, callback, stage)
+listener = Tf.Notice.Register(Usd.Notice.StageContentsChanged, callback, stage)
 # Remove
 listener.Revoke()
 #// ANCHOR_END: noticeRegisterRevoke
 
 
 #// ANCHOR: noticeCommon
+from pxr import Usd
 # Generic (Do not send what stage they are from)
-notice = pxr.Usd.Notice.StageContentsChanged
-notice = pxr.Usd.Notice.StageEditTargetChanged
+notice = Usd.Notice.StageContentsChanged
+notice = Usd.Notice.StageEditTargetChanged
 # Layer Muting
-notice = pxr.Usd.Notice.LayerMutingChanged
+notice = Usd.Notice.LayerMutingChanged
 # In the callback you can get the changed layers by calling:
 # notice.GetMutedLayers()
 # notice.GetUnmutedLayers()
 # Object Changed
-notice = pxr.Usd.Notice.ObjectsChanged
+notice = Usd.Notice.ObjectsChanged
 # In the callback you can get the following info by calling:
-# notice.GetResyncedPaths()          # Composition Changes
+# notice.GetResyncedPaths()          # Changed Paths (Composition or Creation/Rename/Removal)
 # notice.GetChangedInfoOnlyPaths()   # Attribute/Metadata value changes
 # With these methods you can test if a Usd object 
 # (UsdObject==BaseClass for Prims/Properties/Metadata) has been affected.
 # notice.AffectedObject(UsdObject) (Generic)
 # notice.ResyncedObject(UsdObject) (Composition Change)
 # notice.ChangedInfoOnly(UsdObject) (Value Change)
-# notice.GetChangedFields(UsdObject/SdfPath)
 # notice.HasChangedFields(UsdObject/SdfPath) 
+# notice.GetChangedFields(UsdObject/SdfPath)
 #// ANCHOR_END: noticeCommon
+
+
+#// ANCHOR: noticeCommonApplied
+from pxr import Tf, Usd, Sdf
+
+def ObjectsChanged_callback(notice, sender):
+    stage = notice.GetStage()
+    print("---")
+    print(">", notice, sender)
+    print(">> (notice.GetResyncedPaths) - Updated paths", notice.GetResyncedPaths())
+    print(">> (notice.GetChangedInfoOnlyPaths) - Attribute/Metadata value changes", notice.GetChangedInfoOnlyPaths())
+    
+    prim = stage.GetPrimAtPath("/bicycle")
+    if prim:
+        # Check if a specific UsdObject was affected
+        print(">> (notice.AffectedObject) - Something changed for", prim.GetPath(), notice.AffectedObject(prim))
+        print(">> (notice.ResyncedObject) - Updated path for", prim.GetPath(), notice.ResyncedObject(prim))
+        print(">> (notice.ChangedInfoOnly) - Attribute/Metadata ChangedInfoOnly", prim.GetPath(), notice.ChangedInfoOnly(prim))
+        print(">> (notice.HasChangedFields) - Attribute/Metadata HasChanges", prim.GetPath(), notice.HasChangedFields(prim))
+        print(">> (notice.GetChangedFields) - Attribute/Metadata ChangedFields", prim.GetPath(), notice.GetChangedFields(prim))
+
+    attr = stage.GetAttributeAtPath("/bicycle.tire:size")
+    if attr:
+        # Check if a specific UsdObject was affected
+        print(">> (notice.AffectedObject) - Something changed for", attr.GetPath(), notice.AffectedObject(attr))
+        print(">> (notice.ResyncedObject) - Updated path for", attr.GetPath(), notice.ResyncedObject(attr))
+        print(">> (notice.ChangedInfoOnly) - Attribute/Metadata ChangedInfoOnly", attr.GetPath(), notice.ChangedInfoOnly(attr))
+        print(">> (notice.HasChangedFields) - Attribute/Metadata HasChanges", attr.GetPath(), notice.HasChangedFields(attr))
+        print(">> (notice.GetChangedFields) - Attribute/Metadata ChangedFields", attr.GetPath(), notice.GetChangedFields(attr))
+
+# Add
+listener = Tf.Notice.RegisterGlobally(Usd.Notice.ObjectsChanged, ObjectsChanged_callback)
+# Edit
+stage = Usd.Stage.CreateInMemory()
+# Create Prim
+prim = stage.DefinePrim("/bicycle")
+# Results:
+# >> <pxr.Usd.ObjectsChanged object at 0x7f071d58e820> Usd.Stage.Open(rootLayer=Sdf.Find('anon:0x7f06927ccc00:tmp.usda'), sessionLayer=Sdf.Find('anon:0x7f06927cdb00:tmp-session.usda'))
+# >> (notice.GetResyncedPaths) - Updated paths [Sdf.Path('/bicycle')]
+# >> (notice.GetChangedInfoOnlyPaths) - Attribute/Metadata value changes []
+# >> (notice.AffectedObject) - Something changed for /bicycle True
+# >> (notice.ResyncedObject) - Updated path for /bicycle True
+# >> (notice.ChangedInfoOnly) - Attribute/Metadata ChangedFieldsOnly /bicycle False
+# >> (notice.HasChangedFields) - Attribute/Metadata HasChanges /bicycle True
+# >> (notice.GetChangedFields) - Attribute/Metadata ChangedFields /bicycle ['specifier']
+# Create Attribute
+attr = prim.CreateAttribute("tire:size", Sdf.ValueTypeNames.Float)
+# Results:
+# >> <pxr.Usd.ObjectsChanged object at 0x7f071d58e820> Usd.Stage.Open(rootLayer=Sdf.Find('anon:0x7f06927ccc00:tmp.usda'), sessionLayer=Sdf.Find('anon:0x7f06927cdb00:tmp-session.usda'))
+# >> (notice.GetResyncedPaths) - Updated paths [Sdf.Path('/bicycle.tire:size')]
+# >> (notice.GetChangedInfoOnlyPaths) - Attribute/Metadata value changes []
+# >> (notice.AffectedObject) - Something changed for /bicycle False
+# >> (notice.ResyncedObject) - Updated path for /bicycle False
+# >> (notice.ChangedInfoOnly) - Attribute/Metadata ChangedInfoOnly /bicycle False
+# >> (notice.HasChangedFields) - Attribute/Metadata HasChanges /bicycle False
+# >> (notice.GetChangedFields) - Attribute/Metadata ChangedFields /bicycle []
+# >> (notice.AffectedObject) - Something changed for /bicycle.tire:size True
+# >> (notice.ResyncedObject) - Updated path for /bicycle.tire:size True
+# >> (notice.ChangedInfoOnly) - Attribute/Metadata ChangedInfoOnly /bicycle.tire:size False
+# >> (notice.HasChangedFields) - Attribute/Metadata HasChanges /bicycle.tire:size True
+# >> (notice.GetChangedFields) - Attribute/Metadata ChangedFields /bicycle.tire:size ['custom']
+# Remove
+listener.Revoke()
+#// ANCHOR_END: noticeCommonApplied
 
 
 #// ANCHOR: noticeCustom
@@ -336,9 +463,12 @@ class CustomNotice(Tf.Notice):
 # Get fully qualified domain name
 CustomNotice_FQN = "{}.{}".format(CustomNotice.__module__, CustomNotice.__name__)
 # Register notice
-custom_notice_type = Tf.Type.FindByName(CustomNotice_FQN)
-if not custom_notice_type:
-    custom_notice_type = Tf.Type.Define(CustomNotice)
+# Important: If you overwrite the CustomNotice Class in the same Python session
+# (for example when running this snippet twice in a DCC Python session), you
+# cannot send anymore notifications as the defined type will have lost the pointer
+# to the class, but you can't re-define it because of how the type definition works.
+if not Tf.Type.FindByName(CustomNotice_FQN):
+    Tf.Type.Define(CustomNotice)
 # Register notice listeners
 # Globally
 listener = Tf.Notice.RegisterGlobally(CustomNotice, callback)

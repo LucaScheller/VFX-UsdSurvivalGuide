@@ -25,11 +25,18 @@ Paths can encode the following path data:
 ```
 ~~~
 
+# What should I use it for?
+~~~admonish tip
+Anything that is path related in your hierarchy, use Sdf.Path objects. It will make your live a lot easier than if you were to use strings.
+~~~
+
 ## Resources
 - [API Docs](https://openusd.org/release/api/class_sdf_path.html#sec_SdfPath_Overview)
 
 ## Basics
 Each element in the path between the "/" symbol is a [prim](https://openusd.org/release/glossary.html#usdglossary-prim) similar to how on disk file paths mark a folder or a file.
+
+Most Usd API calls that expect Sdf.Path objects implicitly take Python strings as well, we'd recommend using Sdf.Paths from the start though, as it is faster and more convenient.
 
 We recommend going through these small examples (5-10 min), just to get used to the Path class.
 

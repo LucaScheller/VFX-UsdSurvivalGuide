@@ -9,6 +9,11 @@ This is also what a few DCCs (like Houdini) expose to profile Usd writing/render
 - The trace module offers easy to attach Python decorators (`@Trace.TraceMethod/TraceFunction`) that you can wrap your functions with to expose them to the profiler.
 - You can dump the profiling result to .txt or the GoogleChrome tracing format you can open under [`chrome://tracing`](chrome://tracing). Even if you don't attach custom traces, you'll get extensive profiling stats of the underlying Usd API execution.
 
+# What should I use it for?
+~~~admonish tip
+If you want to benchmark you Usd stage operations, the profiling module offers a fast and easy way to visualize performance.
+~~~
+
 ## Resources
 - [Trace Overview](https://openusd.org/dev/api/trace_page_front.html)
 - [Trace Details](https://openusd.org/dev/api/trace_page_detail.html)
@@ -20,12 +25,15 @@ The trace module is made up of two parts:
 
 Via the C++ API, you can customize the behavior further, for Python 'only' the global collector is exposed.
 
+#### Marking what to trace
 First you mark what to trace. You can also mark nothing, you'll still have access to all the default profiling:
 ~~~admonish info title=""
 ```python
 {{#include ../../../../code/core/elements.py:profilingTraceAttach}}
 ```
 ~~~
+
+#### Trace collector & reporter
 Then you enable the collector during the runtime of what you want to trace and write the result to the disk.
 ~~~admonish info title=""
 ```python
@@ -56,3 +64,12 @@ Tree view  ==============
 Here is an example of a report to a Google Chrome trace .json file opened at [`chrome://tracing`](chrome://tracing) in Google Chrome with a custom python trace marked scope.
 
 ![](./GoogleChromePythonScopeTraceProfiling.jpg#center)
+
+
+#### Measuring time deltas
+Usd ships with a simpel stop watch class that offers high precision time deltas.
+~~~admonish info title=""
+```python
+{{#include ../../../../code/core/elements.py:profilingStopWatch}}
+```
+~~~

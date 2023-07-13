@@ -27,6 +27,13 @@ A common case for using it with Python is sending update notifications to UIs.
 ```
 ~~~
 
+If we run this on a simple example stage, we get the following results:
+~~~admonish info title=""
+```python
+{{#include ../../../../code/core/elements.py:noticeCommonApplied}}
+```
+~~~
+
 #### Setup a custom notice:
 ~~~admonish info title=""
 ```python
