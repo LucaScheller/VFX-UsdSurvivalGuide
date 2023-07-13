@@ -267,6 +267,7 @@ resolver.RefreshContext(context_collection)
 
 #// ANCHOR: assetResolverStageContextResolve
 resolved_path = stage.ResolveIdentifierToEditTarget("someAssetIdentifier")
+# Get the Python string
 resolved_path_str = path.GetPathString() # Or str(resolved_path)
 #// ANCHOR_END: assetResolverStageContextResolve
 
@@ -274,6 +275,7 @@ resolved_path_str = path.GetPathString() # Or str(resolved_path)
 from pxr import Ar
 resolver = Ar.GetResolver()
 resolved_path = resolver.Resolve("someAssetIdentifier")
+# Get the Python string
 resolved_path_str = path.GetPathString() # Or str(resolved_path)
 #// ANCHOR_END: assetResolverResolve
 
@@ -283,3 +285,71 @@ asset_path = Sdf.AssetPath("someAssetIdentifier", "/some/Resolved/Path.usd")
 print(asset_path.path)         # Returns: "someAssetIdentifier"
 print(asset_path.resolvedPath) # Returns: "/some/Resolved/Path.usd"
 #// ANCHOR_END: assetResolverAssetPath
+
+
+#// ANCHOR: noticeRegisterRevoke
+import pxr
+def callback(notice, sender):
+    print(notice, sender)
+# Add
+# Global
+listener = pxr.Tf.Notice.RegisterGlobally(pxr.Usd.Notice.StageContentsChanged, callback)
+# Per Stage
+listener = pxr.Tf.Notice.Register(pxr.Usd.Notice.StageContentsChanged, callback, stage)
+# Remove
+listener.Revoke()
+#// ANCHOR_END: noticeRegisterRevoke
+
+
+#// ANCHOR: noticeCommon
+# Generic (Do not send what stage they are from)
+notice = pxr.Usd.Notice.StageContentsChanged
+notice = pxr.Usd.Notice.StageEditTargetChanged
+# Layer Muting
+notice = pxr.Usd.Notice.LayerMutingChanged
+# In the callback you can get the changed layers by calling:
+# notice.GetMutedLayers()
+# notice.GetUnmutedLayers()
+# Object Changed
+notice = pxr.Usd.Notice.ObjectsChanged
+# In the callback you can get the following info by calling:
+# notice.GetResyncedPaths()          # Composition Changes
+# notice.GetChangedInfoOnlyPaths()   # Attribute/Metadata value changes
+# With these methods you can test if a Usd object 
+# (UsdObject==BaseClass for Prims/Properties/Metadata) has been affected.
+# notice.AffectedObject(UsdObject) (Generic)
+# notice.ResyncedObject(UsdObject) (Composition Change)
+# notice.ChangedInfoOnly(UsdObject) (Value Change)
+# notice.GetChangedFields(UsdObject/SdfPath)
+# notice.HasChangedFields(UsdObject/SdfPath) 
+#// ANCHOR_END: noticeCommon
+
+
+#// ANCHOR: noticeCustom
+from pxr import Tf, Usd
+# Create notice callback
+def callback(notice, sender):
+    print(notice, sender)
+# Create a new notice type
+class CustomNotice(Tf.Notice):
+    '''My custom notice'''
+# Get fully qualified domain name
+CustomNotice_FQN = "{}.{}".format(CustomNotice.__module__, CustomNotice.__name__)
+# Register notice
+custom_notice_type = Tf.Type.FindByName(CustomNotice_FQN)
+if not custom_notice_type:
+    custom_notice_type = Tf.Type.Define(CustomNotice)
+# Register notice listeners
+# Globally
+listener = Tf.Notice.RegisterGlobally(CustomNotice, callback)
+# For a specific stage
+sender = Usd.Stage.CreateInMemory()
+listener = Tf.Notice.Register(CustomNotice, callback, sender)
+# Send notice
+CustomNotice().SendGlobally()
+CustomNotice().Send(sender)
+# Remove listener
+listener.Revoke()
+#// ANCHOR_END: noticeCustom
+
+
