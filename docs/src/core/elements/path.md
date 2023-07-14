@@ -18,15 +18,15 @@ pxr.Sdf.Path("/My/Example/Path")
     3. [Variants ](#pathVariants)
     4. [Properties](#pathProperties)
 
-## TL;DR - API Overview In-A-Nutshell <a name="summary"></a>
+## TL;DR - Paths In-A-Nutshell <a name="summary"></a>
 Here is the TL;DR version:
 Paths can encode the following path data:
-- Prims ("/set/bicycle")
+- Prims: "/set/bicycle" - Separator `/`
 - Properties:
-    - Attributes: "." ("/set/bicycle.size")
-    - Relationships: "." ("/set.bikes")
-        - Prim to prim: ("/set.bikes[/set/bicycles]") (E.g. Collections of primpaths)
-        - Attribute to attribute: ("/set.size[/set/bicycles].size") (E.g. Serializing node graph connections)
+    - Attributes: "/set/bicycle.size"  - Separator `.`
+    - Relationships: "/set.bikes"  - Separator `.` / Targets `[]` 
+        - Prim to prim target paths: "/set.bikes[/set/bicycles]" (E.g. Collections of primpaths)
+        - Attribute to attribute target paths: "/set.size[/set/bicycles].size" (E.g. Serializing node graph connections)
 - Variants ("/set/bicycle{style=blue}wheel.size")
 
 ~~~admonish info title=""

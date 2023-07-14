@@ -40,6 +40,9 @@ property_with_namespace_path = Sdf.Path("/set/bicycle.tire:size")
 # Relationship targets
 prim_rel_target_path = pxr.Sdf.Path("/set.bikes[/set/bicycles]")           # Prim to prim linking (E.g. path collections)
 attribute_rel_target_path = pxr.Sdf.Path("/set.bikes[/set/bicycles].size") # Attribute to attribute linking (E.g. serializing node graph connections to Usd)
+# Variants
+variant_path = prim_path.AppendVariantSelection("style", "blue") # Returns: Sdf.Path('/set/bicycle{style=blue}')
+variant_path = Sdf.Path('/set/bicycle{style=blue}frame/screws')
 #// ANCHOR_END: pathSummary
 
 #// ANCHOR: pathBasics
@@ -152,6 +155,27 @@ if variant_path.ContainsPrimVariantSelection():          # Returns: True # For a
 variant_path = Sdf.Path('/set/bicycle{style=blue}frame/screws')
 prim_rel_target_path = variant_path.StripAllVariantSelections() # Returns: Sdf.Path('/set/bicycle/frame/screws')
 #// ANCHOR_END: pathVariants
+
+## Data Containers ##
+
+#// ANCHOR: dataContainerPrimOverview
+# High Level (Notice how we still use elements of the low level API)
+from pxr import Sdf, Usd
+stage = Usd.Stage.CreateInMemory()
+prim_path = Sdf.Path("/bicycle")
+prim = stage.DefinePrim(prim_path, "Xform")
+attr = prim.CreateAttribute("tire:size", pxr.Sdf.ValueTypeNames.Float)
+attr.Set(10)
+# Low Level
+from pxr import Sdf
+layer = Sdf.Layer.CreateAnonymous()
+prim_path = Sdf.Path("/bicycle")
+prim_spec = Sdf.CreatePrimInLayer(layer, prim_path)
+prim_spec.specifier = Sdf.SpecifierDef
+prim_spec.typeName = "Xform"
+attr_spec = Sdf.AttributeSpec(prim_spec, "tire:size", Sdf.ValueTypeNames.Float)
+attr_spec.default = 10
+#// ANCHOR_END: dataContainerPrimOverview
 
 
 #// ANCHOR: metadataSummary
