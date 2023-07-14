@@ -1,6 +1,9 @@
 # Resources
 If you are interested in diving into topics yourself, here is a rough categorization:
 
+### General
+- [C++ Classes](https://openusd.org/release/api/annotated.html)
+
 ### High Level API
 
 - [Usd Core API](https://openusd.org/release/api/usd_page_front.html)
@@ -9,8 +12,7 @@ If you are interested in diving into topics yourself, here is a rough categoriza
         - [Frustum](https://openusd.org/release/api/class_gf_frustum.html)
     - [Collections](https://openusd.org/release/api/class_usd_collection_a_p_i.html)
         - [Utils](https://openusd.org/release/api/authoring_8h.html)
-    - [Event Listeners](https://openusd.org/release/api/class_tf_notice.html)
-    - [Event Notifications](https://openusd.org/release/api/class_tf_notice.html) / [Notices](https://openusd.org/release/api/page_tf__notification.html)
+    - [Event Listeners/Notifications](https://openusd.org/release/api/class_tf_notice.html) / [Notices](https://openusd.org/release/api/page_tf__notification.html)
     - [Hierarchy Iteration](https://openusd.org/release/api/class_usd_prim_range.html)
     - [Kinds](https://openusd.org/release/api/kind_page_front.html)
     - [Layers](https://openusd.org/release/api/class_sdf_layer.html)

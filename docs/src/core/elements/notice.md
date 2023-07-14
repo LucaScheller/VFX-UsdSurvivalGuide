@@ -7,6 +7,11 @@ A common case for using it with Python is sending update notifications to UIs.
 - The event system is uni-directional: The listeners subscribe to senders, but can't send information back to the senders. The senders are also not aware of the listeners, senders just send the event and the event system distributes it to the senders.
 - The listeners are called synchronously in a random order (per thread where the listener was created), so make sure your listeners action is fast or forwards its execution into a separate thread. 
 
+## What should I use it for? <a name="usage"></a>
+~~~admonish tip
+In production, the mose common use case you'll use the notification system for is changes in the stage. You can use these notifications to track user interaction and to trigger UI refreshes.
+~~~
+
 ## Resources
 - [Usd Notice API Docs](https://openusd.org/dev/api/class_usd_notice.html)
 - [Tf Notification API Docs](https://openusd.org/dev/api/group__group__tf___notification.html)
@@ -31,6 +36,14 @@ If we run this on a simple example stage, we get the following results:
 ~~~admonish info title=""
 ```python
 {{#include ../../../../code/core/elements.py:noticeCommonApplied}}
+```
+~~~
+
+#### Plugin Register Notice
+The plugin system sends a notice whenever a new plugin was registered.
+~~~admonish info title=""
+```python
+{{#include ../../../../code/core/elements.py:noticePlugins}}
 ```
 ~~~
 

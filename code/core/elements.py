@@ -10,7 +10,7 @@ def example():
 
 #// ANCHOR: apiHighVsLowLevel
 # High Level (Notice how we still use elements of the low level API)
-from pxr import Sdf
+from pxr import Sdf, Usd
 stage = Usd.Stage.CreateInMemory()
 prim_path = Sdf.Path("/bicycle")
 prim = stage.DefinePrim(prim_path, "Xform")
@@ -152,6 +152,18 @@ if variant_path.ContainsPrimVariantSelection():          # Returns: True # For a
 variant_path = Sdf.Path('/set/bicycle{style=blue}frame/screws')
 prim_rel_target_path = variant_path.StripAllVariantSelections() # Returns: Sdf.Path('/set/bicycle/frame/screws')
 #// ANCHOR_END: pathVariants
+
+
+#// ANCHOR: metadataSummary
+from pxr import Sdf, Usd
+stage = Usd.Stage.CreateInMemory()
+prim_path = Sdf.Path("/bicycle")
+prim = stage.DefinePrim(prim_path, "Xform")
+prim.SetMetadata("assetInfo", {"version": 1})
+prim.SetAssetInfoByKey("identifier", Sdf.AssetPath("bicycler.usd"))
+prim.SetMetadata("customData", {"sizeUnit": "meter"})
+prim.SetCustomDataByKey("nested:shape", "round")
+#// ANCHOR_END: metadataSummary
 
 
 #// ANCHOR: metadataBasics
@@ -309,8 +321,8 @@ print(attr_spec.GetMetaDataInfoKeys())
 'elementSize', 'allowedTokens', 'customData', 'prefix', 'renderType', 'symmetryArguments', 
 'hidden', 'displayName', 'sdrMetadata', 'faceOffsetPrimvar', 'weight', 'documentation', 
 'colorSpace', 'symmetricPeer', 'connectability']
+"""
 #// ANCHOR_END: metadataPrimPropertySpec
-
 
 #// ANCHOR: metadataDocs
 from pxr import Usd, Sdf
@@ -327,9 +339,10 @@ for attr in prim.GetAttributes():
     # Or
     print(attr.GetMetadata("documentation"))
 #// ANCHOR_END: metadataDocs
+
 #// ANCHOR: metadataDocsResult
 """
- doubleSided Although some renderers treat all parametric or polygonal
+doubleSided Although some renderers treat all parametric or polygonal
         surfaces as if they were effectively laminae with outward-facing
         normals on both sides, some renderers derive significant optimizations
         by considering these surfaces to have only a single outward side,
@@ -390,6 +403,63 @@ xformOpOrder Encodes the sequence of transformation operations in the
 """
 #// ANCHOR_END: metadataDocsResult
 
+#// ANCHOR: metadataAssetInfo
+from pxr import Sdf, Usd
+# High level API
+stage = Usd.Stage.CreateInMemory()
+prim_path = Sdf.Path("/bicycle")
+prim = stage.DefinePrim(prim_path, "Xform")
+prim.SetMetadata("assetInfo", {"version": 1})
+prim.SetAssetInfoByKey("identifier", Sdf.AssetPath("bicycler.usd"))
+# Low level API
+layer = Sdf.Layer.CreateAnonymous()
+prim_path = Sdf.Path("/cube")
+prim_spec = Sdf.CreatePrimInLayer(layer, prim_path)
+prim_spec.assetInfo = {"identifier": Sdf.AssetPath("bicycle.usd")}
+#// ANCHOR_END: metadataAssetInfo
+
+#// ANCHOR: metadataCustomData
+from pxr import Sdf, Usd
+# High level API
+stage = Usd.Stage.CreateInMemory()
+prim_path = Sdf.Path("/bicycle")
+prim = stage.DefinePrim(prim_path, "Xform")
+prim.SetMetadata("customData", {"sizeUnit": "meter"})
+prim.SetCustomDataByKey("nested:shape", "round")
+# Low level API
+layer = Sdf.Layer.CreateAnonymous()
+prim_path = Sdf.Path("/cube")
+prim_spec = Sdf.CreatePrimInLayer(layer, prim_path)
+prim_spec.customData = {"myCoolData": "myCoolValue"}
+#// ANCHOR_END: metadataCustomData
+
+#// ANCHOR: metadataPayloadAssetDependencies
+from pxr import Sdf, Usd
+# High level API
+stage = Usd.Stage.CreateInMemory()
+prim_path = Sdf.Path("/bicycle")
+prim = stage.DefinePrim(prim_path, "Xform")
+prim.SetAssetInfoByKey("payloadAssetDependencies", Sdf.AssetPathArray(["@assetIndentifierA", "@assetIndentifierA"]))
+# Low level API
+layer = Sdf.Layer.CreateAnonymous()
+prim_path = Sdf.Path("/cube")
+prim_spec = Sdf.CreatePrimInLayer(layer, prim_path)
+prim_spec.assetInfo["payloadAssetDependencies"] = Sdf.AssetPathArray(["@assetIndentifierA", "@assetIndentifierA"])
+#// ANCHOR_END: metadataPayloadAssetDependencies
+
+#// ANCHOR: metadataComment
+from pxr import Sdf, Usd
+# High level API
+stage = Usd.Stage.CreateInMemory()
+prim_path = Sdf.Path("/bicycle")
+prim = stage.DefinePrim(prim_path, "Xform")
+prim.SetMetadata("comment", "This is a cool prim!")
+# Low level API
+layer = Sdf.Layer.CreateAnonymous()
+prim_path = Sdf.Path("/cube")
+prim_spec = Sdf.CreatePrimInLayer(layer, prim_path)
+prim_spec.SetInfo("comment", "This is a cool prim spec!")
+#// ANCHOR_END: metadataComment
 
 #// ANCHOR: debuggingTokens
 from pxr import Tf
@@ -557,7 +627,7 @@ listener.Revoke()
 
 
 #// ANCHOR: noticeCommon
-from pxr import Usd
+from pxr import Usd, Plug
 # Generic (Do not send what stage they are from)
 notice = Usd.Notice.StageContentsChanged
 notice = Usd.Notice.StageEditTargetChanged
@@ -578,7 +648,21 @@ notice = Usd.Notice.ObjectsChanged
 # notice.ChangedInfoOnly(UsdObject) (Value Change)
 # notice.HasChangedFields(UsdObject/SdfPath) 
 # notice.GetChangedFields(UsdObject/SdfPath)
+# Plugin registered
+notice = Plug.Notice.DidRegisterPlugins
+# notice.GetNewPlugins() # Get new plugins
 #// ANCHOR_END: noticeCommon
+
+
+#// ANCHOR: noticePlugins
+from pxr import Tf, Usd, Plug
+
+def DidRegisterPlugins_callback(notice):
+    print(notice, notice.GetNewPlugins())
+
+listener = Tf.Notice.RegisterGlobally(Plug.Notice.DidRegisterPlugins, DidRegisterPlugins_callback)
+listener.Revoke()
+#// ANCHOR_END: noticePlugins
 
 
 #// ANCHOR: noticeCommonApplied
