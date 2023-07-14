@@ -9,7 +9,7 @@ This is also what a few DCCs (like Houdini) expose to profile Usd writing/render
 - The trace module offers easy to attach Python decorators (`@Trace.TraceMethod/TraceFunction`) that you can wrap your functions with to expose them to the profiler.
 - You can dump the profiling result to .txt or the GoogleChrome tracing format you can open under [`chrome://tracing`](chrome://tracing). Even if you don't attach custom traces, you'll get extensive profiling stats of the underlying Usd API execution.
 
-# What should I use it for?
+## What should I use it for?
 ~~~admonish tip
 If you want to benchmark you Usd stage operations, the profiling module offers a fast and easy way to visualize performance.
 ~~~

@@ -25,9 +25,9 @@ Paths can encode the following path data:
 ```
 ~~~
 
-# What should I use it for?
+## What should I use it for?
 ~~~admonish tip
-Anything that is path related in your hierarchy, use Sdf.Path objects. It will make your live a lot easier than if you were to use strings.
+Anything that is path related in your hierarchy, use Sdf.Path objects. It will make your life a lot easier than if you were to use strings.
 ~~~
 
 ## Resources

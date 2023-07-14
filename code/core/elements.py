@@ -154,48 +154,241 @@ prim_rel_target_path = variant_path.StripAllVariantSelections() # Returns: Sdf.P
 #// ANCHOR_END: pathVariants
 
 
-#// ANCHOR metadataBasics
-# Prims
-# For the predefined 'AssetInfo' and 'customData' we have
-# dedicated getters/setters/clear methods.
-# Prims
-'ClearAssetInfo', 'ClearAssetInfoByKey', 
-'GetAssetInfo', 'GetAssetInfoByKey', 
-'HasAssetInfoKey', 
-'HasAuthoredAssetInfo', 'SetAssetInfo', 'SetAssetInfoByKey', 
+#// ANCHOR: metadataBasics
+"""
+### General
+# Has:   'HasAuthoredMetadata'/'HasAuthoredMetadataDictKey'/'HasMetadata'/'HasMetadataDictKey'
+# Get:   'GetAllAuthoredMetadata'/'GetAllMetadata'/'GetMetadata'/'GetMetadataByDictKey'
+# Set:   'SetMetadata'/'SetMetadataByDictKey', 
+# Clear: 'ClearMetadata'/'ClearMetadataByDictKey'
+### Asset Info (Prims only)
+# Has: 'HasAssetInfo'/'HasAssetInfoKey'/'HasAuthoredAssetInfo'/'HasAuthoredAssetInfoKey'
+# Get: 'GetAssetInfo'/'GetAssetInfoByKey'
+# Set: 'SetAssetInfo'/'SetAssetInfoByKey', 
+# Clear: 'ClearAssetInfo'/'ClearAssetInfoByKey'
+### Custom Data (Prims, Properties(Attributes/Relationships), Layers)
+# Has: 'HasCustomData'/'HasCustomDataKey'/'HasAuthoredCustomData'/'HasAuthoredCustomDataKey'
+# Get: 'GetCustomData'/'GetCustomDataByKey'
+# Set: 'SetCustomData'/'SetCustomDataByKey', 
+# Clear: 'ClearCustomData'/'ClearCustomDataByKey'
+"""
+from pxr import Usd, Sdf
+
+stage = Usd.Stage.CreateInMemory()
+prim_path = Sdf.Path("/bicycle")
+prim = stage.DefinePrim(prim_path, "Xform")
+prim.SetAssetInfoByKey("identifier", Sdf.AssetPath("bicycler.usd"))
+prim.SetAssetInfoByKey("nested", {"assetPath": Sdf.AssetPath("bicycler.usd"), "version": 1})
+prim.SetMetadataByDictKey("assetInfo", "nested:color", "blue")
+attr = prim.CreateAttribute("tire:size", Sdf.ValueTypeNames.Float)
+attr.SetMetadata("customData", {"sizeUnit": "meter"})
+attr.SetCustomDataByKey("nested:shape", "round")
+
+print(prim.HasAuthoredMetadata("assetInfo")) # Returns: True
+print(prim.HasAuthoredMetadataDictKey("assetInfo", "identifier")) # Returns: True
+print(prim.HasMetadata("assetInfo")) # Returns: True
+print(prim.HasMetadataDictKey("assetInfo", "nested:color")) # Returns: True
+# prim.ClearMetadata("assetInfo") # Remove all assetInfo in the current layer.
+#// ANCHOR_END: metadataBasics
 
 
-
- 'GetCustomData',
- 'GetCustomDataByKey',  'HasAuthoredCustomDataKey',
- 'ClearCustomData',  'ClearCustomDataByKey',
- 'SetCustomData',
-
- 'HasAuthoredCustomData',
- 'HasCustomData',
-
-'HasCustomDataKey',  'SetCustomDataByKey',
+#// ANCHOR: metadataValidateDict
+data = {"myCustomKey": 1}
+success_state, metadata, error_message = Sdf.ConvertToValidMetadataDictionary(data)
+#// ANCHOR_END: metadataValidateDict
 
 
+#// ANCHOR: metadataNestedKeyPath
+from pxr import Usd, Sdf
+stage = Usd.Stage.CreateInMemory()
+prim_path = Sdf.Path("/bicycle")
+prim = stage.DefinePrim(prim_path, "Xform")
+prim.SetAssetInfoByKey("nested:color", "blue")
+print(prim.GetAssetInfo()) # Returns: {'nested': {'color': 'blue'}}
+print(prim.GetAssetInfoByKey("nested:color")) # Returns: "blue"
+#// ANCHOR_END: metadataNestedKeyPath
 
 
+#// ANCHOR: metadataAuthored
+from pxr import Usd, Sdf
+stage = Usd.Stage.CreateInMemory()
+prim_path = Sdf.Path("/bicycle")
+prim = stage.DefinePrim(prim_path, "Xform")
+prim.SetAssetInfoByKey("identifier", "bicycle.usd")
+# The difference between "authored" and non "authored" methods is
+# that "authored" methods don't return fallback values that come from schemas.
+print(prim.GetAllAuthoredMetadata()) 
+# Returns:
+# {'assetInfo': {'identifier': 'bicycle.usd'}, 
+#  'specifier': Sdf.SpecifierDef, 
+#  'typeName': 'Xform'}
+print(prim.GetAllMetadata()) 
+# Returns:
+#{'assetInfo': {'identifier': 'bicycle.usd'}, 
+# 'documentation': 'Concrete prim schema for a transform, which implements Xformable ',
+# 'specifier': Sdf.SpecifierDef,
+# 'typeName': 'Xform'}
+#// ANCHOR_END: metadataAuthored
 
-'ClearMetadata',
-'ClearMetadataByDictKey',
-'GetAllAuthoredMetadata',
-'GetAllMetadata', 
-'GetMetadata',
-'GetMetadataByDictKey',
-'HasAuthoredMetadata',
-'HasAuthoredMetadataDictKey',
-'HasMetadata',
-'HasMetadataDictKey',
-'SetMetadata',
-'SetMetadataByDictKey',
 
-valid_metadata = Sdf.ConvertToValidMetadataDictionary(metadata)
+#// ANCHOR: metadataStage
+from pxr import Usd, Sdf
+stage = Usd.Stage.CreateInMemory()
+stage.SetMetadata("customLayerData", {"myCustomStageData": 1})
+# Is the same as:
+layer = stage.GetRootLayer()
+metadata = layer.customLayerData
+metadata["myCustomRootData"] = 1
+layer.metadata = metadata
+# Or:
+layer = stage.GetSessionLayer()
+metadata = layer.customLayerData
+metadata["myCustomSessionData"] = 1
+layer.metadata = metadata
+# To get the composed value from the session and root layer:
+# This actually only returns the value of the root layer, I'm guessing this is a bug?
+stage.GetMetadata("customLayerData")
+#// ANCHOR_END: metadataStage
 
-#// ANCHOR_END: 
+
+#// ANCHOR: metadataLayer
+from pxr import Usd, Sdf
+layer = Sdf.Layer.CreateAnonymous()
+layer.customLayerData = {"myCustomPipelineKey": "myCoolValue"}
+#// ANCHOR_END: metadataLayer
+
+
+#// ANCHOR: metadataPrimPropertySpec
+from pxr import Sdf
+layer = Sdf.Layer.CreateAnonymous()
+### Prims ###
+prim_spec = Sdf.CreatePrimInLayer(layer, "/bicycle")
+prim_spec.specifier = Sdf.SpecifierDef
+# Asset Info and Custom Data
+prim_spec.assetInfo = {"identifier": Sdf.AssetPath("bicycle.usd")}
+prim_spec.customData = {"myCoolData": "myCoolValue"}
+# General metadata
+# Has: 'HasInfo'
+# Get: 'ListInfoKeys', 'GetMetaDataInfoKeys', 'GetInfo', 'GetFallbackForInfo', 'GetMetaDataDisplayGroup'
+# Set: 'SetInfo', 'SetInfoDictionaryValue'
+# Clear: 'ClearInfo'
+print(prim_spec.ListInfoKeys()) # Returns: ['assetInfo', 'customData', 'specifier']
+# To get all registered schema keys run:
+print(prim_spec.GetMetaDataInfoKeys())
+"""Returns: ['payloadAssetDependencies', 'payload', 'kind', 'suffix', 'inactiveIds', 'clipSets',
+'HDAKeepEngineOpen', 'permission', 'displayGroupOrder', 'assetInfo', 'HDAParms', 'instanceable', 
+'symmetryFunction', 'HDATimeCacheMode', 'clips', 'HDAAssetName', 'active', 'HDATimeCacheEnd', 
+'customData', 'HDAOptions', 'prefix', 'apiSchemas', 'suffixSubstitutions', 'symmetryArguments',
+'hidden', 'HDATimeCacheStart', 'sdrMetadata', 'typeName', 'HDATimeCacheInterval', 'documentation',
+'prefixSubstitutions', 'symmetricPeer']"""
+# For the fallback values and UI grouping hint you can use
+# 'GetFallbackForInfo' and 'GetMetaDataDisplayGroup'.
+# Prim spec core data is actually also just metadata info
+prim_spec.SetInfo("specifier", Sdf.SpecifierDef)
+prim_spec.SetInfo("typeName", "Xform")
+# Is the same as:
+prim_spec.specifier = Sdf.SpecifierDef
+prim_spec.typeName = "Xform"
+
+### Properties ###
+attr_spec = Sdf.AttributeSpec(prim_spec, "tire:size", Sdf.ValueTypeNames.Float)
+# Custom Data
+attr_spec.customData = {"myCoolData": "myCoolValue"}
+# We can actually use the attr_spec.customData assignment here too,
+# doesn't make that much sense though
+# General metadata
+# Has: 'HasInfo'
+# Get: 'ListInfoKeys', 'GetMetaDataInfoKeys', 'GetInfo', 'GetFallbackForInfo', 'GetMetaDataDisplayGroup'
+# Set: 'SetInfo', 'SetInfoDictionaryValue'
+# Clear: 'ClearInfo'
+# The API here is the same as for the prim_spec, as it all inherits from Sdf.Spec
+# To get all registered schema keys run:
+print(attr_spec.GetMetaDataInfoKeys())
+"""Returns: ['unauthoredValuesIndex', 'interpolation', 'displayGroup', 'faceIndexPrimvar', 
+'suffix', 'constraintTargetIdentifier', 'permission', 'assetInfo', 'symmetryFunction', 'uvPrimvar',
+'elementSize', 'allowedTokens', 'customData', 'prefix', 'renderType', 'symmetryArguments', 
+'hidden', 'displayName', 'sdrMetadata', 'faceOffsetPrimvar', 'weight', 'documentation', 
+'colorSpace', 'symmetricPeer', 'connectability']
+#// ANCHOR_END: metadataPrimPropertySpec
+
+
+#// ANCHOR: metadataDocs
+from pxr import Usd, Sdf
+stage = Usd.Stage.CreateInMemory()
+prim_path = Sdf.Path("/bicycle")
+prim = stage.DefinePrim(prim_path, "Cube")
+# Shortcut to get the docs metadata
+# Has: 'HasAuthoredDocumentation'
+# Get: 'GetDocumentation'
+# Set: 'SetDocumentation'
+# Clear: 'ClearDocumentation'
+for attr in prim.GetAttributes():
+    print(attr.GetName(), attr.GetDocumentation())
+    # Or
+    print(attr.GetMetadata("documentation"))
+#// ANCHOR_END: metadataDocs
+#// ANCHOR: metadataDocsResult
+"""
+ doubleSided Although some renderers treat all parametric or polygonal
+        surfaces as if they were effectively laminae with outward-facing
+        normals on both sides, some renderers derive significant optimizations
+        by considering these surfaces to have only a single outward side,
+        typically determined by control-point winding order and/or 
+        orientation.  By doing so they can perform "backface culling" to
+        avoid drawing the many polygons of most closed surfaces that face away
+        from the viewer.
+        
+        However, it is often advantageous to model thin objects such as paper
+        and cloth as single, open surfaces that must be viewable from both
+        sides, always.  Setting a gprim's doubleSided attribute to 
+        \c true instructs all renderers to disable optimizations such as
+        backface culling for the gprim, and attempt (not all renderers are able
+        to do so, but the USD reference GL renderer always will) to provide
+        forward-facing normals on each side of the surface for lighting
+        calculations.
+extent Extent is re-defined on Cube only to provide a fallback value.
+        \sa UsdGeomGprim::GetExtentAttr().
+orientation Orientation specifies whether the gprim's surface normal 
+        should be computed using the right hand rule, or the left hand rule.
+        Please see for a deeper explanation and
+        generalization of orientation to composed scenes with transformation
+        hierarchies.
+primvars:displayColor It is useful to have an "official" colorSet that can be used
+        as a display or modeling color, even in the absence of any specified
+        shader for a gprim.  DisplayColor serves this role; because it is a
+        UsdGeomPrimvar, it can also be used as a gprim override for any shader
+        that consumes a displayColor parameter.
+primvars:displayOpacity Companion to displayColor that specifies opacity, broken
+        out as an independent attribute rather than an rgba color, both so that
+        each can be independently overridden, and because shaders rarely consume
+        rgba parameters.
+purpose Purpose is a classification of geometry into categories that 
+        can each be independently included or excluded from traversals of prims 
+        on a stage, such as rendering or bounding-box computation traversals.
+
+        See for more detail about how 
+        purpose is computed and used.
+size Indicates the length of each edge of the cube.  If you
+        author size you must also author extent.
+        
+        \sa GetExtentAttr()
+visibility Visibility is meant to be the simplest form of "pruning" 
+        visibility that is supported by most DCC apps.  Visibility is 
+        animatable, allowing a sub-tree of geometry to be present for some 
+        segment of a shot, and absent from others; unlike the action of 
+        deactivating geometry prims, invisible geometry is still 
+        available for inspection, for positioning, for defining volumes, etc.
+xformOpOrder Encodes the sequence of transformation operations in the
+        order in which they should be pushed onto a transform stack while
+        visiting a UsdStage's prims in a graph traversal that will effect
+        the desired positioning for this prim and its descendant prims.
+        
+        You should rarely, if ever, need to manipulate this attribute directly.
+        It is managed by the AddXformOp(), SetResetXformStack(), and
+        SetXformOpOrder(), and consulted by GetOrderedXformOps() and
+        GetLocalTransformation().
+"""
+#// ANCHOR_END: metadataDocsResult
 
 
 #// ANCHOR: debuggingTokens

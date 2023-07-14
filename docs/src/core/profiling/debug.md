@@ -5,7 +5,7 @@ The Usd API ships with a [debug class](https://openusd.org/dev/api/class_tf_debu
 - You can set the `TF_DEBUG` environment variable to one the the values listed below or symbol name from a plugin.
 - You can also activate a symbol in the active session via Python: ```pxr.Tf.Debug.SetDebugSymbolsByName("AR_RESOLVER_INIT", True)```
 
-# What should I use it for?
+## What should I use it for?
 ~~~admonish tip
 Enabling debug symbols, allows you to inspect specific log outputs of Usd. Typical use cases are to check if plugins are loaded correctly or if data is properly being refreshed.
 ~~~

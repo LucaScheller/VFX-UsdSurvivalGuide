@@ -32,7 +32,7 @@ Here is a simple comparison:
 ```
 ~~~
 
-# What should I use it for?
+## What should I use it for?
 ~~~admonish tip
 You'll be using these two API levels all the time when working with Usd.
 The high level API is often used with read ops, the low level with write ops or inspecting the underlying caches of the high level API.
