@@ -177,6 +177,58 @@ attr_spec = Sdf.AttributeSpec(prim_spec, "tire:size", Sdf.ValueTypeNames.Float)
 attr_spec.default = 10
 #// ANCHOR_END: dataContainerPrimOverview
 
+
+#// ANCHOR: dataContainerPrimCoreHighLevel
+# Available prim methods for core metadata:
+# Has: 'HasDefiningSpecifier', 'HasAuthoredTypeName', 'HasAuthoredDocumentation'
+# Get: 'GetSpecifier', 'GetTypeName', 'GetDocumentation', 'GetDescription'
+# Set: 'SetSpecifier', 'SetTypeName', 'SetDocumentation', 'SetDescription'
+# Clear: 'ClearTypeName', 'ClearDocumentation'
+from pxr import Sdf, Usd
+stage = Usd.Stage.CreateInMemory()
+prim_path = Sdf.Path("/cube")
+prim = stage.DefinePrim(prim_path, "Xform") # Here defining the prim uses a `Sdf.SpecifierDef` define op by default.
+# The specifier and type name is something you'll usually always set.
+prim.SetSpecifier(Sdf.SpecifierOver)
+prim.SetTypeName("Cube")
+# The other core specs are set via schema APIs, for example:
+model_API = Usd.ModelAPI(prim)
+if not model_API.GetKind():
+    model_API.SetKind(Kind.Tokens.group)
+#// ANCHOR_END: dataContainerPrimCoreHighLevel
+
+
+#// ANCHOR: dataContainerPrimCoreLowLevel
+from pxr import Sdf
+layer = Sdf.Layer.CreateAnonymous()
+prim_path = Sdf.Path("/cube")
+prim_spec = Sdf.CreatePrimInLayer(layer, prim_path) # Here defining the prim uses a `Sdf.SpecifierOver` define op by default.
+# The specifier and type name is something you'll usually always set.
+prim_spec.specifier = Sdf.SpecifierDef # Or Sdf.SpecifierOver/Sdf.SpecifierClass
+prim_spec.typeName = "Cube"
+prim_spec.active = True # There is also a prim_spec.ClearActive() shortcut for removing active metadata
+prim_spec.kind = "group"    # There is also a prim_spec.ClearKind() shortcut for removing kind metadata
+prim_spec.instanceable = False # There is also a prim_spec.ClearInstanceable() shortcut for removing instanceable metadata.
+prim_spec.hidden = False # A hint for UI apps to hide the spec for viewers
+
+
+# You can also set them via the standard metadata commands:
+from pxr import Sdf
+layer = Sdf.Layer.CreateAnonymous()
+prim_path = Sdf.Path("/cube")
+prim_spec = Sdf.CreatePrimInLayer(layer, prim_path)
+# The specifier and type name is something you'll usually always set.
+prim_spec.SetInfo(prim_spec.SpecifierKey, Sdf.SpecifierDef) # Or Sdf.SpecifierOver/Sdf.SpecifierClass
+prim_spec.SetInfo(prim_spec.TypeNameKey, "Cube")
+# These are some other common specs:
+prim_spec.SetInfo(prim_spec.ActiveKey, True)
+prim_spec.SetInfo(prim_spec.KindKey, "group")
+prim_spec.SetInfo("instanceable", False) 
+prim_spec.SetInfo(prim_spec.HiddenKey, False)
+#// ANCHOR_END: dataContainerPrimCoreLowLevel
+
+
+
 #// ANCHOR: dataContainerPrimBasicsSpecifierDef
 # High Level
 from pxr import Sdf, Usd
@@ -229,7 +281,7 @@ layer = Sdf.Layer.CreateAnonymous()
 prim_path = Sdf.Path("/bicycle")
 # The .CreatePrimInLayer method uses a Sdf.SpecifierOver specifier by default
 prim_spec = Sdf.CreatePrimInLayer(layer, prim_path)
-prim_spec.specifier = Sdf.SpecifierOver
+prim_spec.specifier = Sdf.SpecifierClass
 #// ANCHOR_END: dataContainerPrimBasicsSpecifierClass
 
 #// ANCHOR: dataContainerPrimBasicsTypeName
@@ -252,40 +304,157 @@ prim_spec.typeName = "Scope"
 #// ANCHOR_END: dataContainerPrimBasicsTypeName
 
 
-
 #// ANCHOR: dataContainerPrimBasicsKinds
+# High Level
 from pxr import Kind, Sdf, Usd
 stage = Usd.Stage.CreateInMemory()
-prim_path = Sdf.Path("/cube")
+prim_path = Sdf.Path("/bicycle")
 prim = stage.DefinePrim(prim_path, "Xform")
-prim.SetSpecifier(Sdf.SpecifierOver)
-prim.SetTypeName("Cube")
 model_API = Usd.ModelAPI(prim)
-model_API.SetKind(component)
-# Here are the API counterparts
+model_API.SetKind(Kind.Token.component)
+# The prim class' IsModel/IsGroup method checks if a prim (and all its parents) are (sub-) kinds of model/group.
+model_API.SetKind(Kind.Token.model)
 kind = model_API.GetKind()
-print(prim.GetSpecifier() == Sdf.SpecifierClass, prim.IsAbstract()) # IsAbstract also checks parents to be of "Class" specifier type. 
-print(prim.GetSpecifier() == Sdf.SpecifierSdf, prim.IsDefined()) # IsAbstract also checks parents to be of "Defined" specifier type. 
-print((pxr.Kind.Registry.GetBaseKind(kind) or kind)_ == Kind.Token.model, prim.IsModel())
-print((pxr.Kind.Registry.GetBaseKind(kind) or kind ) == Kind.Token.group, prim.IsGroup())
+print(kind, (pxr.Kind.Registry.GetBaseKind(kind) or kind) == Kind.Token.model, prim.IsModel())
+model_API.SetKind(Kind.Token.group)
+kind = model_API.GetKind()
+print(kind, (pxr.Kind.Registry.GetBaseKind(kind) or kind) == Kind.Token.group, prim.IsGroup())
+# Low Level
+from pxr import Kind, Sdf
+layer = Sdf.Layer.CreateAnonymous()
+prim_path = Sdf.Path("/bicycle")
+prim_spec = Sdf.CreatePrimInLayer(layer, prim_path)
+prim_spec.SetInfo("kind", Kind.Token.component)
+#// ANCHOR_END: dataContainerPrimBasicsKinds
+
+#// ANCHOR: dataContainerPrimBasicsTokens
+from pxr import Sdf
+layer = Sdf.Layer.CreateAnonymous()
+prim_path = Sdf.Path("/cube")
+prim_spec = Sdf.CreatePrimInLayer(layer, prim_path)
+prim_spec.SetInfo(prim_spec.KindKey, "group")
+#// ANCHOR_END: dataContainerPrimBasicsTokens
+
+
+#// ANCHOR: dataContainerPrimBasicsDebugging
+from pxr import Sdf
+layer = Sdf.Layer.CreateAnonymous()
+prim_path = Sdf.Path("/cube")
+prim_spec = Sdf.CreatePrimInLayer(layer, prim_path)
+prim_spec.specifier = Sdf.SpecifierDef
+prim_spec.SetInfo(prim_spec.KindKey, "group")
+attr_spec = Sdf.AttributeSpec(prim_spec, "size", Sdf.ValueTypeNames.Float)
+# Running this
+print(prim_spec.GetAsText())
+# Returns:
+"""
+def "cube" (
+    kind = "group"
+)
+{
+    float size
+}
+"""
+#// ANCHOR_END: dataContainerPrimBasicsDebugging
+
+
+#// ANCHOR: dataContainerPrimHierarchy
 # High Level
+# Has: 'IsPseudoRoot' 
+# Get: 'GetParent', 'GetPath', 'GetName', 'GetStage',
+#      'GetChild', 'GetChildren', 'GetAllChildren',   
+#      'GetChildrenNames', 'GetAllChildrenNames',
+#      'GetFilteredChildren', 'GetFilteredChildrenNames', 
+# The GetAll<MethodNames> return children that have specifiers other than Sdf.SpecifierDef
+from pxr import Sdf, Usd
+stage = Usd.Stage.CreateInMemory()
+prim_path = Sdf.Path("/set/bicycle")
+prim = stage.DefinePrim(prim_path, "Xform")
+parent_prim = prim.GetParent()
+print(prim.GetPath()) # Returns: Sdf.Path("/set/bicycle")
+print(prim.GetParent()) # Returns: Usd.Prim("/set")
+print(parent_prim.GetChildren()) # Returns: [Usd.Prim(</set/bicycle>)]
+print(parent_prim.GetChildrenNames()) # Returns: ['bicycle']
+# Low Level
+from pxr import Sdf
+layer = Sdf.Layer.CreateAnonymous()
+prim_path = Sdf.Path("/set/bicycle")
+prim_spec = Sdf.CreatePrimInLayer(layer, prim_path)
+print(prim_spec.path) # Returns: Sdf.Path("/set/bicycle")
+print(prim_spec.name) # Returns: "bicycle"
+# To rename a prim, you can simply set the name attribute to something else.
+# If you want to batch-rename, you should use the Sdf.BatchNamespaceEdit class, see our explanation [here]()
+prim_spec.name = "coolBicycle"
+print(prim_spec.nameParent) # Returns: Sdf.PrimSpec("/set")
+print(prim_spec.nameParent.nameChildren) # Returns: {'coolCube': Sdf.Find('anon:0x7f6e5a0e3c00:LOP:/stage/pythonscript3', '/set/coolBicycle')}
+print(prim_spec.layer) # Returns: The active layer object the spec is on.
+#// ANCHOR_END: dataContainerPrimHierarchy
+
+
+#// ANCHOR: dataContainerPrimSchemas
+# High Level
+# Has: 'IsA', 'HasAPI', 'CanApplyAPI'
+# Get: 'GetAppliedSchemas'
+# Set: 'AddAppliedSchema', 'ApplyAPI'
+# Clear: 'RemoveAppliedSchema', 'RemoveAPI'
 from pxr import Sdf, Usd
 stage = Usd.Stage.CreateInMemory()
 prim_path = Sdf.Path("/bicycle")
 prim = stage.DefinePrim(prim_path, "Xform")
-prim.SetTypeName("Xform")
+# Applied schemas
+prim.AddAppliedSchema("SkelBindingAPI")
+# prim.RemoveAppliedSchema("SkelBindingAPI")
+# Single-Apply API Schemas
+prim.ApplyAPI("UsdGeomModelAPI")
 # Low Level
+# To set applied API schemas via the low level API, we just 
+# need to set the `apiSchemas` key to a Token Listeditable Op.
 from pxr import Sdf
 layer = Sdf.Layer.CreateAnonymous()
 prim_path = Sdf.Path("/bicycle")
 prim_spec = Sdf.CreatePrimInLayer(layer, prim_path)
-prim_spec.typeName = "Xform"
+schemas = Sdf.TokenListOp.Create(
+    prependedItems=["SkelBindingAPI", "UsdGeomModelAPI"]
+)
+prim_spec.SetInfo("apiSchemas", schemas)
+#// ANCHOR_END: dataContainerPrimSchemas
 
-# Default type without any fancy bells and whistles:
-prim.SetTypeName("Scope")
-prim_spec.typeName = "Scope"
-#// ANCHOR_END: dataContainerPrimBasicsKinds
+#// ANCHOR: dataContainerPrimTypeDefinition
+from pxr import Sdf, Tf, Usd, UsdGeom
+stage = Usd.Stage.CreateInMemory()
+prim_path = Sdf.Path("/bicycle")
+prim = stage.DefinePrim(prim_path, "Xform")
+prim.ApplyAPI("UsdGeomModelAPI")
+prim_def = prim.GetPrimDefinition()
+print(prim_def.GetAppliedAPISchemas()) # Returns: ['GeomModelAPI']
+print(prim_def.GetPropertyNames()) 
+# Returns: All properties that come from the type name schema and applied schemas
+"""
+['model:drawModeColor', 'model:cardTextureZPos', 'model:drawMode', 'model:cardTextureZNeg', 
+'model:cardTextureYPos', 'model:cardTextureYNeg', 'model:cardTextureXPos', 'model:cardTextur
+eXNeg', 'model:cardGeometry', 'model:applyDrawMode', 'proxyPrim', 'visibility', 'xformOpOrde
+r', 'purpose']
+"""
+# You can also bake down the prim definition, this won't flatten custom properties though.
+dst_prim = stage.DefinePrim("/flattenedExample")
+dst_prim = prim_def.FlattenTo("/flattenedExample")
+# This will also flatten all metadata (docs etc.), this should only be used, if you need to export
+# a custom schema to an external vendor.
+#// ANCHOR_END: dataContainerPrimTypeDefinition
 
+#// ANCHOR: dataContainerPrimTypeInfo
+from pxr import Sdf, Tf, Usd, UsdGeom
+stage = Usd.Stage.CreateInMemory()
+prim_path = Sdf.Path("/bicycle")
+prim = stage.DefinePrim(prim_path, "Xform")
+prim.ApplyAPI("UsdGeomModelAPI")
+print(prim.IsA(UsdGeom.Xform)) # Returns: True
+print(prim.IsA(Tf.Type.FindByName('UsdGeomXform'))) # Returns: True
+prim_type_info = prim.GetPrimTypeInfo()
+print(prim_type_info.GetAppliedAPISchemas()) # Returns: ['GeomModelAPI']
+print(prim_type_info.GetSchemaType()) # Returns: Tf.Type.FindByName('UsdGeomXform')
+print(prim_type_info.GetSchemaTypeName()) # Returns: Xform
+#// ANCHOR_END: dataContainerPrimTypeInfo
 
 #// ANCHOR: metadataSummary
 from pxr import Sdf, Usd

@@ -16,27 +16,53 @@
         1. [Specifier](#primSpecifier)
         2. [Type Name](#primTypeName)
         3. [Kind](#primKind)
-        1. [Metadata](#primMetadata)
-        1. [Tokens](#primTokens)
-        1. [Debugging](#primDebugging)
-    2. [Hierarchy (Parent/Child/Iteration)](#pathSpecialPaths)
-    3. [Composition](#pathVariants)
+        4. [Metadata](#primMetadata)
+        5. [Tokens (Low Level API)](#primTokens)
+        6. [Debugging](#primDebugging)
+    2. [Hierarchy (Parent/Child/Iteration)](#primHierarchy)
+    3. [Schemas](#primSchemas)
+    4. [Composition](#primComposition)
         1. [Instancing]()
-    1. [Schemas](#pathVariants)
-    1. [Population (Loading Data)](#pathProperties)
-    1. [Properties (Attributes/Relationships)]
+    5. [Population (Loading Data)](#pathProperties)
+    6. [Properties (Attributes/Relationships)]
     
 
 ## Overview
 Let's look at the details of prims. The below examples demonstrate the difference between the higher and lower level API where possible. Some aspects of prims are only available via the high level API, as it acts on composition/stage related aspects. 
 
-### Prim Basics
+~~~admonish warning title=""
+There is a lot of code duplication in the below examples, so that each example works by itself. In practice editing data is very concise and simple to read, so don't get overwhelmed by all the examples.
+~~~
+
+### Prim Basics <a name="primBasics"></a>
+Setting core metadata via the high level is not all exposed on the prim itself via getters/setters, instead
+the getters/setters come in part from schemas or schema APIs. For example setting the kind is done via the Usd.ModelAPI.
+
+##### High Level
+~~~admonish info title=""
+```python
+{{#include ../../../../code/core/elements.py:dataContainerPrimCoreHighLevel}}
+```
+~~~
+
+We are also a few "shortcuts" that check specifiers/kinds (`.IsAbstract`, `.IsDefined`, `.IsGroup`, `.IsModel`), more about these in the kind section below.
+
+##### Low Level
+The Python lower level Sdf.PrimSpec offers quick access to setting common core metadata via standard class attributes:
+~~~admonish info title=""
+```python
+{{#include ../../../../code/core/elements.py:dataContainerPrimCoreLowLevel}}
+```
+~~~
+
+We will look at specifics in the below examples, so don't worry if you didn't understand everything just yet :)
+
 
 #### Specifiers <a name="primSpecifier"></a>
 Usd has the concept of [specifiers](https://openusd.org/release/glossary.html#usdglossary-specifier). 
 
 ~~~admonish important
-The job of specifiers is mainly to define if a prim should be visible to hierarchy traversals. More info about traversals in our [Layer & Stage]() section.
+The job of specifiers is mainly to define if a prim should be visible to hierarchy traversals. More info about traversals in our [Layer & Stage](./layer.md) section.
 ~~~
 
 Here is an example USD ascii file with all three specifiers.
@@ -66,11 +92,11 @@ This specifier is used to specify a prim in a hierarchy, so that is it always vi
 ~~~
 
 ##### Sdf.SpecifierOver: `over`
-Prims defined with `over` only get loaded if the prim in another layer has been specified with a `def`specified. It gets used when you want to add data to an existing hierarchy, for example layering only position and normals data onto a character model, where the based model has all the static attributes like topology or uvs.
+Prims defined with `over` only get loaded if the prim in another layer has been specified with a `def`specified. It gets used when you want to add data to an existing hierarchy, for example layering only position and normals data onto a character model, where the base model has all the static attributes like topology or UVs.
 
+~~~admonish important
 By default stage traversals will skip over `over` only prims.
-
-
+~~~
 
 ~~~admonish info title=""
 ```python
@@ -81,10 +107,9 @@ By default stage traversals will skip over `over` only prims.
 ##### Sdf.SpecifierClass: `class`
 The `class` specifier gets used to define "template" hierarchies that can then get attached to other prims. A typical example would be to create a set of geometry render settings that then get applied to different parts of the scene by creating an inherit composition arc. This way you have a single control point if you want to adjust settings that then instantly get reflected across your whole hierarchy. 
 
-By default stage traversals will skip over `class` prims.
-
 ~~~admonish important
-Usd refers to class prims as "abstract", as they never directly contribute to the hierarchy.
+- By default stage traversals will skip over `class` prims.
+- Usd refers to class prims as "abstract", as they never directly contribute to the hierarchy.
 ~~~
 
 ~~~admonish info title=""
@@ -125,127 +150,89 @@ You should always tag all prims with kinds at least to the asset level in the hi
 So this means you should have `group` kinds set for all parent prims of `model` prims.
 ~~~
 
-
-
-
 ~~~admonish info title=""
 ```python
-{{#include ../../../../code/core/elements.py:dataContainerPrimBasicsTypeName}}
+{{#include ../../../../code/core/elements.py:dataContainerPrimBasicsKinds}}
 ```
 ~~~
 
-#### Metadata
+#### Metadata <a name="primMetadata"></a>
+We go into more detail about metadata in our [Metadata](./metadata.md) section. 
 
-#### Tokens
+~~~admonish important
+As you can see on this page, most of the prim functionality is actually done via metadata, except path, composition and property related functions/attributes.
+~~~
 
-#### Debugging
-
-
-
-
-
-
-
-
-
-
-
-
-#### Core Metadata (Low Level API)
-The Python lower level Sdf.PrimSpec offers quick access to setting common core metadata via standard class attributes:
-```
-from pxr import Sdf
-layer = Sdf.Layer.CreateAnonymous()
-prim_path = Sdf.Path("/cube")
-prim_spec = Sdf.CreatePrimInLayer(layer, prim_path) # Here defining the prim uses a `Sdf.SpecifierOver` define op by default.
-# The specifier and type name is something you'll usually always set.
-prim_spec.specifier = Sdf.SpecifierDef # Or Sdf.SpecifierOver/Sdf.SpecifierClass
-prim_spec.typeName = "Cube"
-prim_spec.active = True # There is also a prim_spec.ClearActive() shortcut for removing active metadata
-prim_spec.kind = "group"    # There is also a prim_spec.ClearKind() shortcut for removing kind metadata
-prim_spec.instanceable = False # There is also a prim_spec.ClearInstanceable() shortcut for removing instanceable metadata.
-prim_spec.hidden = False # A hint for UI apps to hide the spec for viewers
-```
-
-You can also set them via the standard metadata commands:
-```
-from pxr import Sdf
-layer = Sdf.Layer.CreateAnonymous()
-prim_path = Sdf.Path("/cube")
-prim_spec = Sdf.CreatePrimInLayer(layer, prim_path)
-# The specifier and type name is something you'll usually always set.
-prim_spec.SetInfo(prim_spec.SpecifierKey, Sdf.SpecifierDef) # Or Sdf.SpecifierOver/Sdf.SpecifierClass
-prim_spec.SetInfo(prim_spec.TypeNameKey, "Cube")
-# These are some other common specsz:
-prim_spec.SetInfo(prim_spec.ActiveKey, True)
-prim_spec.SetInfo(prim_spec.KindKey, "group")
-prim_spec.SetInfo("instanceable", False) 
-prim_spec.SetInfo(prim_spec.HiddenKey, False)
-```
-
-#### Core Metadata (High Level API))
-Setting core metadata via the high level is not all exposed on the prim iteself via getters/setters, instead
-the getters/setters come in part from schemas or schema APIs.
-
+#### Tokens (Low Level API) <a name="primTokens"></a>
+Prim(property, attribute and relationship specs) also have the tokens they can set as their metadata as class attributes ending with 'Key'.
+These 'Key' attributes are the token names that can be set on the spec via `SetInfo`, for example prim_spec.SetInfo(prim_spec.KindKey, "group")
+~~~admonish info title=""
 ```python
-# Has: 'HasDefiningSpecifier', 'HasAuthoredTypeName', 'HasAuthoredDocumentation'
-# Get: 'GetSpecifier', 'GetTypeName', 'GetDocumentation', 'GetDescription'
-# Set: 'SetSpecifier', 'SetTypeName', 'SetDocumentation', 'SetDescription'
-# Clear: 'ClearTypeName', 'ClearDocumentation'
-
-from pxr import Sdf, Usd
-stage = Usd.Stage.CreateInMemory()
-prim_path = Sdf.Path("/cube")
-prim = stage.DefinePrim(prim_path, "Xform") # Here defining the prim uses a `Sdf.SpecifierDef` define op by default.
-# The specifier and type name is something you'll usually always set.
-prim.SetSpecifier(Sdf.SpecifierOver)
-prim.SetTypeName("Cube")
-# The other core specs are set via schema APIs, for example:
-model_API = Usd.ModelAPI(prim)
-if not model_API.GetKind():
-    model_API.SetKind(Kind.Tokens.group)
+{{#include ../../../../code/core/elements.py:dataContainerPrimBasicsTokens}}
 ```
+~~~
 
-We are also a few "shortcuts" that check specifiers/kinds. (Personal opinion: We rarely use these in production, it feels more like an older API feature.)
-Shortcuts: 'IsAbstract', 'IsDefined', 'IsGroup', 'IsModel'
+#### Debugging (Low Level API) <a name="primDebugging"></a>
+You can also print a spec as its ascii representation (as it would be written to .usda files):
+~~~admonish info title=""
+```python
+{{#include ../../../../code/core/elements.py:dataContainerPrimBasicsDebugging}}
 ```
-from pxr import Kind, Sdf, Usd
-stage = Usd.Stage.CreateInMemory()
-prim_path = Sdf.Path("/cube")
-prim = stage.DefinePrim(prim_path, "Xform")
-prim.SetSpecifier(Sdf.SpecifierOver)
-prim.SetTypeName("Cube")
-model_API = Usd.ModelAPI(prim)
-model_API.SetKind(component)
-# Here are the API counterparts
-kind = model_API.GetKind()
-print(prim.GetSpecifier() == Sdf.SpecifierClass, prim.IsAbstract()) # IsAbstract also checks parents to be of "Class" specifier type. 
-print(prim.GetSpecifier() == Sdf.SpecifierSdf, prim.IsDefined()) # IsAbstract also checks parents to be of "Defined" specifier type. 
-print((pxr.Kind.Registry.GetBaseKind(kind) or kind)_ == Kind.Token.model, prim.IsModel())
-print((pxr.Kind.Registry.GetBaseKind(kind) or kind ) == Kind.Token.group, prim.IsGroup())
+~~~
+
+### Hierarchy (Parent/Child/Iteration) <a name="primHierarchy"></a>
+From any prim you can navigate to its hierarchy neighbors via the path related methods.
+The lower level API is dict based when accessing children, the high level API returns iterators or lists.
+~~~admonish info title=""
+```python
+{{#include ../../../../code/core/elements.py:dataContainerPrimHierarchy}}
 ```
+~~~
 
+### Schemas <a name="primSchemas"></a>
 
+We explain in more detail what schemas are in our [schemas](./schemas.md) section.
+In short: They are the "base classes" of Usd. Applied schemas are schemas that don't 
+define the prim type and instead just "apply" (provide values) for specific metadata/properties
 
-### Prim Spec Low Level API
+~~~admonish important
+The 'IsA' check is a very valueable check to see if something is an instance of a (base) class. It is similar to Python's isinstance method.
+~~~
 
-### Path based Ops
+~~~admonish info title=""
+```python
+{{#include ../../../../code/core/elements.py:dataContainerPrimSchemas}}
 ```
-from pxr import Sdf
-layer = Sdf.Layer.CreateAnonymous()
-prim_path = Sdf.Path("/root_grp/cube")
-prim_spec = Sdf.CreatePrimInLayer(layer, prim_path)
-print(prim_spec.path) # Returns: Sdf.Path("/root_grp/cube")
-print(prim_spec.name) # Returns: Sdf.Path("cube")
-# To rename a prim, you can simply set the name attribute to something else.
-# If you want to batch-rename, you should use the Sdf.BatchNamespaceEdit class, see our explanation [here]()
-prim_spec.name = "coolCube"
-print(prim_spec.nameParent) # Returns: Sdf.Path("/root_grp/coolCube")
-print(prim_spec.nameParent.nameChildren) # Returns: {'coolCube': Sdf.Find('anon:0x7f6e5a0e3c00:LOP:/stage/pythonscript3', '/root_grp/coolCube')}
-print(prim_spec.layer) # Returns: The active layer object the spec is on.
-```
+~~~
 
-### Composition
+We can also get data about the [prim definition](https://openusd.org/dev/api/class_usd_prim_definition.html) and [prim type info](https://openusd.org/dev/api/class_usd_prim_type_info.html).
+
+
+#### Prim Type Definition
+With the prim type definition you can inspect what the schemas provide. Basically you are inspecting the class (as to the prim being the instance, if we compare it to OOP paradigms).
+In production, you won't be using this a lot, it is good to be aware of it though.
+
+~~~admonish info title=""
+```python
+{{#include ../../../../code/core/elements.py:dataContainerPrimTypeDefinition}}
+```
+~~~
+
+#### Prim Type Info
+The prim type info holds the composed type info of a prim. You can think of it as as the class that answers Python `type()` like queries for Usd. It caches the results of type name and applied API schema names, so that `prim.IsA(<typeName>)` checks can be used to see if the prim matches a given type.
+
+~~~admonish tip
+The prim's `prim.IsA(<typeName>)` checks are highly performant, you should use them as often as possible when traversing stages to filter what prims you want to edit. Doing property based queries to determine if a prim is of interest to you, is a lot slower.
+~~~
+
+~~~admonish info title=""
+```python
+{{#include ../../../../code/core/elements.py:dataContainerPrimTypeInfo}}
+```
+~~~
+
+
+### Composition <a name="primComposition"></a>
 We discuss handling composition in our [Composition] seciton as it follows some different rules and is a bigger topic to tackle.
 
 #### Inherits:
@@ -260,53 +247,7 @@ We discuss handling composition in our [Composition] seciton as it follows some 
 #### Specialize
 - 'specializesList',
 
-### Schemas
-To set applied API schemas via the low level API, we just need to set the `apiSchemas` key to a Token Listeditable Op.
-```
-from pxr import Sdf
-layer = Sdf.Layer.CreateAnonymous()
-prim_path = Sdf.Path("/cube")
-prim_spec = Sdf.CreatePrimInLayer(layer, prim_path)
-prim_spec.SetInfo = Sdf.SpecifierDef
-schemas = pxr.Sdf.TokenListOp.Create(
-    prependedItems=["SkelBindingAPI"]
-)
-prim_spec.SetInfo("apiSchemas", schemas)
-```
 
-### Debugging 
-You can also print a spec as its ascii representation (as it would be written to .usda files):
-```
-from pxr import Sdf
-layer = Sdf.Layer.CreateAnonymous()
-prim_path = Sdf.Path("/cube")
-prim_spec = Sdf.CreatePrimInLayer(layer, prim_path)
-prim_spec.specifier = Sdf.SpecifierDef
-prim_spec.SetInfo(prim_spec.KindKey, "group")
-attr_spec = Sdf.AttributeSpec(prim_spec, "size", Sdf.ValueTypeNames.Float)
-# Running this
-print(prim_spec.GetAsText())
-# Returns:
-"""
-def "cube" (
-    kind = "group"
-)
-{
-    float size
-}
-"""
-```
-
-### Tokens
-Prim, property, attribute and relationship specs also have the tokens they can set as their metadata as class attributes ending with 'Key'.
-These 'Key' attributes are the token names that can be set on the spec via `SetInfo`, for example prim_spec.SetInfo(prim_spec.KindKey, "group")
-```
-from pxr import Sdf
-layer = Sdf.Layer.CreateAnonymous()
-prim_path = Sdf.Path("/cube")
-prim_spec = Sdf.CreatePrimInLayer(layer, prim_path)
-prim_spec.SetInfo(prim_spec.KindKey, "group")
-```
 
 
 
@@ -333,27 +274,6 @@ We
 # Set: 'SetPayload', 'SetTypeName', 'GetSpecializes', 'HasAuthoredSpecializes'
 # Clear: 'ClearPayload', 'ClearDocumentation'
 
-
-
-## Schemas
-We explain in more detail what schemas are in our [schemas]() section.
-In short: They are the "base classes" of Usd. Applied schemas are schemas that don't 
-define the prim type and instead just "apply" (provide values) for specific metadata/properties
-
-``` Important
-The 'IsA' check is a very valueable check to see if something is an instance of a (base) class. It is similar to Python's isinstance method.
-```
-
-```
-# Has: 'IsA', 'HasAPI', 'CanApplyAPI'
-# Get: 'GetAppliedSchemas'
-# Set: 'ApplyAPI',
-# Clear: 'RemoveAPI', 'RemoveAppliedSchema'
-
-```
-
-We can also get data about the prim definition:
-'GetPrimDefinition', 'GetPrimTypeInfo',
 
 
 
@@ -408,17 +328,12 @@ print(prim.ComputeExpandedPrimIndex()) # More on this in our [Pcp section](). yo
 
 
 
-### Metadata
-We go into more detail about metadta in our [Metadata] section. As you can see most of the data in this section is actually done via metadta, except path, composition and property related functions/attributes.
-
-
 
 
 
 
 ## Path related
- 'IsPseudoRoot' 'GetParent', 'GetPath', 'GetName',  'GetAllChildren', 'GetAllChildrenNames',  'GetChildren', 'GetChildrenNames', 'GetChild', 'GetFilteredChildren', 'GetFilteredChildrenNames', 
-'GetStage',
+
 
 
 ## Properties
