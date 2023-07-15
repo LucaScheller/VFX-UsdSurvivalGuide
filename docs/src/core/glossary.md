@@ -7,3 +7,5 @@ This page is a cheatsheet for Usd vocabulary.
 - property -> attribute/relationship
 - stage
 - authored == explicitly written
+
+- authored: The high level API also has the extra destinction of <ContainerType>.HasAuthored<Name>() vs .Has<Name>(). HasAuthored only returns explicitly defined values, where Has is allowed to return schema fallbacks.

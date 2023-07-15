@@ -25,13 +25,13 @@ Metadata is the smallest building block in Usd. It is part of the base class fro
 ## TL;DR - Metadata In-A-Nutshell <a name="summary"></a>
 - Metadata attaches additional non-animatable data to prims/properties/layers via a dictionary
 - Composition arcs and core data (specifiers/type names) is added via metadata
-- 'assetInfo' and 'customData' are predefined keys for prim metadata you can track asset/custom data with
+- `assetInfo` and `customData` are predefined keys for prim metadata you can track asset/custom data with
 - To write to other keys, they must be registered via schemas.
 
 ## What should I use it for? <a name="usage"></a>
 ~~~admonish tip
-In production, you'll use the 'assetInfo'/'customData' prim metadata fields to track any production related data.
-
+In production, you'll use the `assetInfo`/`customData` prim metadata fields to track any production related data.
+You can also use metadata to edit composition arcs, though the high level API offers nice class wrappers that wrap this for you.
 ```python
 {{#include ../../../../code/core/elements.py:metadataSummary}}
 ```
@@ -45,6 +45,7 @@ In production, you'll use the 'assetInfo'/'customData' prim metadata fields to t
 ## Overview <a name="overview"></a>
 
 Here is the class structure for the different API levels:
+
 High Level API
 ```mermaid
 flowchart TD
@@ -76,8 +77,8 @@ Metadata is different in that it:
     - Metadata stored in value clip files is ignored
 - Is strongly typed via schemas, so you need to register a custom schema if you want custom keys. This way we can ensure fallback values/documentation per key/value and avoid random data flying through your pipelines. For example all your mesh attributes have metadata for exactly what type/role they must match.
 - There are two special metadata keys for prims:
-    - "assetInfo": Here you should dump asset related data. This is just a predefined standardized location all vendors/companies should adhere to when writing asset data that should be tracked.
-    - "customData": Here you can dump any data you want, a kind of scratch space, so you don't need to add you own schema. If you catch yourself misusing it too much, you should probably generate your own schema.
+    - `assetInfo`: Here you should dump asset related data. This is just a predefined standardized location all vendors/companies should adhere to when writing asset data that should be tracked.
+    - `customData`: Here you can dump any data you want, a kind of scratch space, so you don't need to add you own schema. If you catch yourself misusing it too much, you should probably generate your own schema.
 
 
 ~~~admonish tip

@@ -77,7 +77,7 @@ We can also encode variants into the path via the {variantSetName=variantName} s
 
 ### Properties <a name="pathProperties"></a>
 Paths can also encode properties (more about what these are in the next section).
-Notice that attributes and relationships are both encoded with the "." prefix, hence the name "property" is used to describe them both.
+Notice that attributes and relationships are both encoded with the "." prefix, hence the name `property` is used to describe them both.
 
 ~~~admonish info title=""
 ```python

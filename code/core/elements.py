@@ -159,7 +159,7 @@ prim_rel_target_path = variant_path.StripAllVariantSelections() # Returns: Sdf.P
 ## Data Containers ##
 
 #// ANCHOR: dataContainerPrimOverview
-# High Level (Notice how we still use elements of the low level API)
+# High Level
 from pxr import Sdf, Usd
 stage = Usd.Stage.CreateInMemory()
 prim_path = Sdf.Path("/bicycle")
@@ -176,6 +176,115 @@ prim_spec.typeName = "Xform"
 attr_spec = Sdf.AttributeSpec(prim_spec, "tire:size", Sdf.ValueTypeNames.Float)
 attr_spec.default = 10
 #// ANCHOR_END: dataContainerPrimOverview
+
+#// ANCHOR: dataContainerPrimBasicsSpecifierDef
+# High Level
+from pxr import Sdf, Usd
+stage = Usd.Stage.CreateInMemory()
+prim_path = Sdf.Path("/bicycle")
+# The .DefinePrim method uses a Sdf.SpecifierDef specifier by default
+prim = stage.DefinePrim(prim_path, "Xform")
+prim.SetSpecifier(Sdf.SpecifierDef)
+# Low Level
+from pxr import Sdf
+layer = Sdf.Layer.CreateAnonymous()
+prim_path = Sdf.Path("/bicycle")
+# The .CreatePrimInLayer method uses a Sdf.SpecifierOver specifier by default
+prim_spec = Sdf.CreatePrimInLayer(layer, prim_path)
+prim_spec.specifier = Sdf.SpecifierDef
+#// ANCHOR_END: dataContainerPrimBasicsSpecifierDef
+
+#// ANCHOR: dataContainerPrimBasicsSpecifierOver
+# High Level
+from pxr import Sdf, Usd
+stage = Usd.Stage.CreateInMemory()
+prim_path = Sdf.Path("/bicycle")
+# The .DefinePrim method uses a Sdf.SpecifierDef specifier by default
+prim = stage.DefinePrim(prim_path, "Xform")
+prim.SetSpecifier(Sdf.SpecifierOver)
+# The prim class' IsDefined method checks if a prim (and all its parents) have the "def" specifier.
+print(prim.GetSpecifier() == Sdf.SpecifierSdf, prim.IsDefined())
+# Low Level
+from pxr import Sdf
+layer = Sdf.Layer.CreateAnonymous()
+prim_path = Sdf.Path("/bicycle")
+# The .CreatePrimInLayer method uses a Sdf.SpecifierOver specifier by default
+prim_spec = Sdf.CreatePrimInLayer(layer, prim_path)
+prim_spec.specifier = Sdf.SpecifierOver
+#// ANCHOR_END: dataContainerPrimBasicsSpecifierOver
+
+#// ANCHOR: dataContainerPrimBasicsSpecifierClass
+# High Level
+from pxr import Sdf, Usd
+stage = Usd.Stage.CreateInMemory()
+prim_path = Sdf.Path("/bicycle")
+# The .DefinePrim method uses a Sdf.SpecifierDef specifier by default
+prim = stage.DefinePrim(prim_path, "Xform")
+prim.SetSpecifier(Sdf.SpecifierOver)
+# The prim class' IsAbstract method checks if a prim (and all its parents) have the "Class" specifier.
+print(prim.GetSpecifier() == Sdf.SpecifierClass, prim.IsAbstract())
+# Low Level
+from pxr import Sdf
+layer = Sdf.Layer.CreateAnonymous()
+prim_path = Sdf.Path("/bicycle")
+# The .CreatePrimInLayer method uses a Sdf.SpecifierOver specifier by default
+prim_spec = Sdf.CreatePrimInLayer(layer, prim_path)
+prim_spec.specifier = Sdf.SpecifierOver
+#// ANCHOR_END: dataContainerPrimBasicsSpecifierClass
+
+#// ANCHOR: dataContainerPrimBasicsTypeName
+# High Level
+from pxr import Sdf, Usd
+stage = Usd.Stage.CreateInMemory()
+prim_path = Sdf.Path("/bicycle")
+prim = stage.DefinePrim(prim_path, "Xform")
+prim.SetTypeName("Xform")
+# Low Level
+from pxr import Sdf
+layer = Sdf.Layer.CreateAnonymous()
+prim_path = Sdf.Path("/bicycle")
+prim_spec = Sdf.CreatePrimInLayer(layer, prim_path)
+prim_spec.typeName = "Xform"
+
+# Default type without any fancy bells and whistles:
+prim.SetTypeName("Scope")
+prim_spec.typeName = "Scope"
+#// ANCHOR_END: dataContainerPrimBasicsTypeName
+
+
+
+#// ANCHOR: dataContainerPrimBasicsKinds
+from pxr import Kind, Sdf, Usd
+stage = Usd.Stage.CreateInMemory()
+prim_path = Sdf.Path("/cube")
+prim = stage.DefinePrim(prim_path, "Xform")
+prim.SetSpecifier(Sdf.SpecifierOver)
+prim.SetTypeName("Cube")
+model_API = Usd.ModelAPI(prim)
+model_API.SetKind(component)
+# Here are the API counterparts
+kind = model_API.GetKind()
+print(prim.GetSpecifier() == Sdf.SpecifierClass, prim.IsAbstract()) # IsAbstract also checks parents to be of "Class" specifier type. 
+print(prim.GetSpecifier() == Sdf.SpecifierSdf, prim.IsDefined()) # IsAbstract also checks parents to be of "Defined" specifier type. 
+print((pxr.Kind.Registry.GetBaseKind(kind) or kind)_ == Kind.Token.model, prim.IsModel())
+print((pxr.Kind.Registry.GetBaseKind(kind) or kind ) == Kind.Token.group, prim.IsGroup())
+# High Level
+from pxr import Sdf, Usd
+stage = Usd.Stage.CreateInMemory()
+prim_path = Sdf.Path("/bicycle")
+prim = stage.DefinePrim(prim_path, "Xform")
+prim.SetTypeName("Xform")
+# Low Level
+from pxr import Sdf
+layer = Sdf.Layer.CreateAnonymous()
+prim_path = Sdf.Path("/bicycle")
+prim_spec = Sdf.CreatePrimInLayer(layer, prim_path)
+prim_spec.typeName = "Xform"
+
+# Default type without any fancy bells and whistles:
+prim.SetTypeName("Scope")
+prim_spec.typeName = "Scope"
+#// ANCHOR_END: dataContainerPrimBasicsKinds
 
 
 #// ANCHOR: metadataSummary
