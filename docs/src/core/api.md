@@ -42,7 +42,6 @@ The high level API is often used with read ops, the low level with write ops or 
 Check out a API overview here: [API Overview](./resources.md)
 
 ## When should I use what?
-
 As a rule of thumb, you use the high level API when:
 
 ~~~admonish info title=""
@@ -58,7 +57,6 @@ And the low level API when:
 ~~~
 
 ## High Level API
-
 The Usd Core API docs page is a great place to get an overview over the high level API:
 
 - [Usd Core API](https://openusd.org/release/api/usd_page_front.html)
@@ -73,7 +71,6 @@ This level always operates on the composed state of the stage. This means as soo
 
 
 ## Low Level API
-
 Great entry points for the lower level API:
 
 - [Sdf - Scene Description Foundations](https://openusd.org/release/api/sdf_page_front.html)
@@ -83,7 +80,6 @@ Great entry points for the lower level API:
 This level always operates individual layers. You won't have access to the stage aka composed view of layers.
 
 ## Workflows
-
 The typical workflow is to do all read/query operations in the high level API by creating/accessing a stage and then to do all the write operations in the low level API.
 
 In DCCs, the data creation is done by the software, after that it is your job to massage the data to its final form based on what your pipeline needs:

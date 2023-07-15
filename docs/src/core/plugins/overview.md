@@ -1,35 +1,44 @@
 # Plugin System
+
+Usd has a plugin system over which individual components are loaded.
+
+Typical plugins are:
+- Asset Resolver
+- Kinds
+- Hydra Delegates (Render Delegates)
+- File Format Plugins (.abc/.vdb)
+
+You can inspect if whats plugins werwe registered by setting the `TF_DEBUG` variable as mentioned in the [debugging](../profiling/debug.md) section:
+```bash
+export TF_DEBUG=PLUG_REGISTRATION
+```
+
+If you want to check via Python, you have to know under what registry the plugin is installed. There are several (info shamelessly copied from the below linked USD-CookBook page ;)):
+- KindRegistry
+- PlugRegistry
+- Sdf_FileFormatRegistry
+- ShaderResourceRegistry
+- UsdImagingAdapterRegistry
+
+Colin Kennedy's USD-Cookbook has an excellent overview on this topic:
+[USD Cook-Book Plugins](ttps://github.com/ColinKennedy/USD-Cookbook/blob/33eac067a0a62578934105b19a2b9d8e4ea0646c/references/working_with_plugins.md)
+
+
+Plugins are detected by looking at the `PXR_PLUGINPATH_NAME` environment variable for folders containing a`plugInfo.json` file.
+
+To set for temporarily, you can run the following in a shell:
+```
+// Linux
+export PXR_PLUGINPATH_NAME=/my/cool/plugin/resources:${PXR_PLUGINPATH_NAME}
+// Windows
+set PXR_PLUGINPATH_NAME=/my/cool/plugin/resources:${PXR_PLUGINPATH_NAME}
+```
+
+If you search you Usd installation, you'll find a few of these for different components of Usd. They are usually placed in a <Plugin Root>/resources folder as a common directory convention.
+
+
 from pxr import Tf
 root_type = Tf.Type.GetRoot()
 for tf_type in root_type.GetAllDerivedTypes():
     print(tf_type.typeName, tf_type.pythonClass)
 
-
-node = hou.pwd()
-stage = node.editableStage()
-
-# Add code to modify the stage.
-# Use drop down menu to select examples.
-from pxr import Tf
-# Create notice callback
-def callback(notice, sender):
-    print(notice, sender)
-# Create a new notice type
-class CustomNotice(Tf.Notice):
-    '''My custom notice'''
-CustomNotice_FQN = "{}.{}".format(CustomNotice.__module__, CustomNotice.__name__)
-# Register notice
-custom_notice_type = Tf.Type.FindByName(CustomNotice_FQN)
-if not custom_notice_type:
-    custom_notice_type = Tf.Type.Define(CustomNotice)
-# Register notice listeners
-# Globally
-listener = Tf.Notice.RegisterGlobally(CustomNotice, callback)
-# For a specific stage
-sender = stage
-listener = Tf.Notice.Register(CustomNotice, callback, sender)
-# Send notice
-CustomNotice().SendGlobally()
-CustomNotice().Send(sender)
-# Remove listener
-listener.Revoke()

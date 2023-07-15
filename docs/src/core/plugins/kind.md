@@ -1,5 +1,5 @@
 # Kinds
-The [kind](https://openusd.org/release/glossary.html#usdglossary-kind) metadata is a special metadata entry on prims that can be written  to mark prims with data what hierarchy level type it is. This way we can quickly traverse and select parts of the hierarchy that are of interest to us, without traversing into every child prim. The most common types are `component` and `group`. We use these (or sub-kinds) of these to make our stage more easily browse-able, so that we can visually/programmatically easily detect where assets start.
+The [kind](https://openusd.org/release/glossary.html#usdglossary-kind) metadata is a special metadata entry on prims that can be written  to mark prims with data what "hierarchy level type" it is. This way we can quickly traverse and select parts of the hierarchy that are of interest to us, without traversing into every child prim. The most common types are `component` and `group`. We use these (or sub-kinds) of these to make our stage more easily browse-able, so that we can visually/programmatically easily detect where assets start.
 
 # Table of contents
 1. [Kinds In-A-Nutshell](#summary)
@@ -7,9 +7,8 @@ The [kind](https://openusd.org/release/glossary.html#usdglossary-kind) metadata 
 3. [Resources](#resources)
 4. [Overview](#overview)
     1. [Reading and Writing Kinds](#kindAuthoring)
-    2. [Special Paths: emptyPath & absoluteRootPath](#pathSpecialPaths)
-    3. [Variants ](#pathVariants)
-    4. [Properties](#pathProperties)
+    2. [Kind Registry](#kindRegistry)
+    3. [Kind IsA Checks/Travesal](#kindTraversal)
 
 ## TL;DR - Kinds In-A-Nutshell <a name="summary"></a>
 ~~~admonish tip
@@ -35,10 +34,11 @@ So this means you should have at least `group` kind metadata set for all parent 
 ## Overview <a name="overview"></a>
 Usd ships with these kinds by default, to register your own kinds, see the below examples for more details:
 - `model`: The base kind for all model kinds, don't use it directly.
+    - `group`: A group of model prims.
+        -`assembly`: A collection of model prims, typically used for sets/a assembled collection of models or environments.
     - `component`: A sub-kind of 'model' that has no other child prims of type 'model'
-        - `subcomponent`: An important subhierarchy of an component.
-- `assembly`: A collection of model prims, typically used for sets/a assembled collection of models or environments.
-- `group`: A group of model prims.
+- `subcomponent`: An important subhierarchy of an component.
+
 
 ~~~admonish important
 You should always tag all prims with kinds at least to the asset level in the hierarchy. Some DCCs will otherwise not traverse into the hierarchy if they come across a prim without a hierarchy.
@@ -50,5 +50,105 @@ Kinds can be easily set via the high and low level APIs:
 ~~~admonish info title=""
 ```python
 {{#include ../../../../code/core/elements.py:dataContainerPrimBasicsKinds}}
+```
+~~~
+
+An example Usd file could look likes this
+```python
+def Xform "set" (
+    kind = "set"
+)
+{
+    def Xform "garage" (
+        kind = "group"
+    )
+    {
+        def Xform "bicycle" (
+            kind = "prop"
+        )
+        {
+        }
+    }
+
+    def Xform "yard" (
+        kind = "group"
+    )
+    {
+        def Xform "explosion" (
+            kind = "fx"
+        )
+        {
+        }
+    }
+}
+```
+
+
+### Creating own kinds <a name="kindPlugin"></a>
+We can register kinds via the [plugin system](./overview.md) 
+
+```python
+{
+   "Plugins":[
+      {
+      	"Type": "python",
+      	"Name": "usdSurvivalGuideKinds", 
+        "Info":{
+            "Kinds":{
+               "character":{
+                  "baseKind":"component",
+                  "description":"A (hero) character"
+               },
+               "prop":{
+                  "baseKind":"component",
+                  "description":"A generic prop asset"
+               },
+               "fx":{
+                  "baseKind":"component",
+                  "description":"A FX asset"
+               },
+               "environment":{
+                  "baseKind":"assembly",
+                  "description":"A large scale environment like a city."
+               },
+               "set":{
+                  "baseKind":"assembly",
+                  "description":"A individual section of an environment, typically a movie set placed in an environment."
+               }
+            }
+         }
+      }
+   ]
+}
+
+```
+
+To register the above kinds, copy the contents into a file called `plugInfo.json`. Then set your `PXR_PLUGINPATH_NAME` environment variable to the folder containing the `plugInfo.json` file.
+
+For Linux this can be done for the active shell as follows:
+```bash
+export PXR_PLUGINPATH_NAME=/my/cool/plugin/resources:${PXR_PLUGINPATH_NAME}
+```
+
+### Kind Registry <a name="kindRegistry"></a>
+We can also check if a plugin with kind data was registered via Python.
+~~~admonish info title=""
+```python
+{{#include ../../../../code/core/elements.py:kindRegistry}}
+```
+~~~
+
+### Kind IsA Checks & Traversal <a name="kindTraversal"></a>
+We can then also use our custom kinds for traversal checks.
+Usd offers the `prim.IsModel` and `prim.IsGroup` checks as convenience methods to check if a kind is a sub-kind of the base kinds.
+
+~~~admonish important
+Make sure that your whole hierarchy has kinds defined (to the prim you want to search for), otherwise your `prim.IsModel` and `prim.IsGroup` checks will fail. This also affects how DCCs implement traversal: For example when using Houdini's LOPs selection rules with the `%kind:component` syntax, the selection rule will not traverse into the prim children and will stop at the parent prim without a kind. Manually checking via `registry.IsA(prim.GetKind(), "component")` still works though, as this does not include the parents in the check. (See examples below)
+#ToDo Add icon
+~~~
+
+~~~admonish info title=""
+```python
+{{#include ../../../../code/core/elements.py:kindTraversal}}
 ```
 ~~~

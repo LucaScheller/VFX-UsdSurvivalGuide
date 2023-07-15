@@ -1202,3 +1202,111 @@ listener.Revoke()
 #// ANCHOR_END: noticeCustom
 
 
+#// ANCHOR: kindRegistry
+from pxr import Kind
+registry = Kind.Registry()
+for kind in registry.GetAllKinds():
+    base_kind = Kind.Registry.GetBaseKind(kind)
+    print(f"{kind:<15} - Base Kind - {base_kind}")
+# Returns:
+"""
+set             - Base Kind - assembly
+assembly        - Base Kind - group
+fx              - Base Kind - component
+environment     - Base Kind - assembly
+character       - Base Kind - component
+group           - Base Kind - model
+component       - Base Kind - model
+model           - Base Kind 
+subcomponent    - Base Kind 
+"""    
+print(registry.HasKind("fx")) # Returns: True
+print(registry.IsA("fx", "model")) # Returns: True
+#// ANCHOR_END: kindRegistry
+
+#// ANCHOR: kindTraversal
+from pxr import Kind, Sdf, Usd
+stage = Usd.Stage.CreateInMemory()
+prim = stage.DefinePrim(Sdf.Path("/set"), "Xform")
+Usd.ModelAPI(prim).SetKind("set")
+prim = stage.DefinePrim(Sdf.Path("/set/garage"), "Xform")
+Usd.ModelAPI(prim).SetKind("group")
+prim = stage.DefinePrim(Sdf.Path("/set/garage/bicycle"), "Xform")
+Usd.ModelAPI(prim).SetKind("prop")
+prim = stage.DefinePrim(Sdf.Path("/set/yard"), "Xform")
+Usd.ModelAPI(prim).SetKind("group")
+prim = stage.DefinePrim(Sdf.Path("/set/yard/explosion"), "Xform")
+Usd.ModelAPI(prim).SetKind("fx")
+# Result:
+print(stage.ExportToString())
+"""
+def Xform "set" (
+    kind = "set"
+)
+{
+    def Xform "garage" (
+        kind = "group"
+    )
+    {
+        def Xform "bicycle" (
+            kind = "prop"
+        )
+        {
+        }
+    }
+
+    def Xform "yard" (
+        kind = "group"
+    )
+    {
+        def Xform "explosion" (
+            kind = "fx"
+        )
+        {
+        }
+    }
+}
+"""
+for prim in stage.Traverse():
+    print("{:<20} - IsModel: {} - IsGroup: {}".format(prim.GetPath().pathString, prim.IsModel(), prim.IsGroup()))
+# Returns:
+"""
+/set                 - IsModel: True - IsGroup: True
+/set/garage          - IsModel: True - IsGroup: True
+/set/garage/bicycle  - IsModel: True - IsGroup: False
+/set/yard            - IsModel: True - IsGroup: True
+/set/yard/explosion  - IsModel: True - IsGroup: False
+"""
+registry = Kind.Registry()
+for prim in stage.Traverse():
+    kind = Usd.ModelAPI(prim).GetKind()
+    print("{:<25} - {:<5} - {}".format(prim.GetPath().pathString, kind, registry.IsA("fx", "component")))
+
+# Failed traversal because of missing kinds
+stage = Usd.Stage.CreateInMemory()
+prim = stage.DefinePrim(Sdf.Path("/set"), "Xform")
+Usd.ModelAPI(prim).SetKind("set")
+prim = stage.DefinePrim(Sdf.Path("/set/garage"), "Xform")
+prim = stage.DefinePrim(Sdf.Path("/set/garage/bicycle"), "Xform")
+Usd.ModelAPI(prim).SetKind("prop")
+prim = stage.DefinePrim(Sdf.Path("/set/yard"), "Xform")
+prim = stage.DefinePrim(Sdf.Path("/set/yard/explosion"), "Xform")
+Usd.ModelAPI(prim).SetKind("fx")
+registry = Kind.Registry()
+for prim in stage.Traverse():
+    kind = Usd.ModelAPI(prim).GetKind()
+    print("{:<20} - Kind: {:10} - IsA('component') {}".format(prim.GetPath().pathString, kind, registry.IsA(kind, "component")))
+    print("{:<20} - IsModel: {} - IsGroup: {}".format(prim.GetPath().pathString, prim.IsModel(), prim.IsGroup()))
+"""
+/set                 - Kind: set        - IsA('component') False
+/set                 - IsModel: True - IsGroup: True
+/set/garage          - Kind:            - IsA('component') False
+/set/garage          - IsModel: False - IsGroup: False
+/set/garage/bicycle  - Kind: prop       - IsA('component') True
+/set/garage/bicycle  - IsModel: False - IsGroup: False
+/set/yard            - Kind:            - IsA('component') False
+/set/yard            - IsModel: False - IsGroup: False
+/set/yard/explosion  - Kind: fx         - IsA('component') True
+/set/yard/explosion  - IsModel: False - IsGroup: False
+"""
+#// ANCHOR_END: kindTraversal
