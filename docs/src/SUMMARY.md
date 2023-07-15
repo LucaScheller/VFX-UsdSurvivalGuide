@@ -19,6 +19,7 @@
         - [Metadata](./core/elements/metadata.md)
         - [Layers & Stages (Containers of actual data)](./core/elements/layer.md)
         - [Loading Data (Purpose/Visibility/Activation/Population)](./core/elements/loading_mechanisms.md)
+        - [Animation/Time Varying Data](./core/elements/animation.md)
         - [Transforms](./core/elements/transform.md)
         - [Notices/Event Listeners](./core/elements/notice.md)
         - [Standalone Utilities](./core/elements/standalone_utilities.md)

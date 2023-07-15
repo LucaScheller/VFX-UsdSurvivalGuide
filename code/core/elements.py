@@ -9,14 +9,15 @@ def example():
 """api.md"""
 
 #// ANCHOR: apiHighVsLowLevel
-# High Level (Notice how we still use elements of the low level API)
+### High Level ### (Notice how we still use elements of the low level API)
 from pxr import Sdf, Usd
 stage = Usd.Stage.CreateInMemory()
 prim_path = Sdf.Path("/bicycle")
 prim = stage.DefinePrim(prim_path, "Xform")
-attr = prim.CreateAttribute("tire:size", pxr.Sdf.ValueTypeNames.Float)
+attr = prim.CreateAttribute("tire:size", Sdf.ValueTypeNames.Float)
 attr.Set(10)
-# Low Level
+
+### Low Level ###
 from pxr import Sdf
 layer = Sdf.Layer.CreateAnonymous()
 prim_path = Sdf.Path("/bicycle")
@@ -38,8 +39,8 @@ prim_path_str = Sdf.Path("/set/bicycle").pathString # Returns the Python str "/s
 property_path = Sdf.Path("/set/bicycle.size")
 property_with_namespace_path = Sdf.Path("/set/bicycle.tire:size")
 # Relationship targets
-prim_rel_target_path = pxr.Sdf.Path("/set.bikes[/set/bicycles]")           # Prim to prim linking (E.g. path collections)
-attribute_rel_target_path = pxr.Sdf.Path("/set.bikes[/set/bicycles].size") # Attribute to attribute linking (E.g. serializing node graph connections to Usd)
+prim_rel_target_path = Sdf.Path("/set.bikes[/set/bicycles]")           # Prim to prim linking (E.g. path collections)
+attribute_rel_target_path = Sdf.Path("/set.bikes[/set/bicycles].size") # Attribute to attribute linking (E.g. serializing node graph connections to Usd)
 # Variants
 variant_path = prim_path.AppendVariantSelection("style", "blue") # Returns: Sdf.Path('/set/bicycle{style=blue}')
 variant_path = Sdf.Path('/set/bicycle{style=blue}frame/screws')
@@ -130,7 +131,7 @@ prim_rel_target_path = Sdf.Path("/set.bikes[/set/bicycle]")
 prim_rel_target_path.IsTargetPath() # Returns: True
 prim_rel_target_path = Sdf.Path("/set.bikes").AppendTarget("/set/bicycle")
 # We can also encode attribute relation targets (For example shader node graph connections):
-attribute_rel_target_path = pxr.Sdf.Path("/set.bikes[/set/bicycles].size")
+attribute_rel_target_path = Sdf.Path("/set.bikes[/set/bicycles].size")
 attribute_rel_target_path.IsRelationalAttributePath()  # Returns: True
 #// ANCHOR_END: pathProperties
 
@@ -159,14 +160,15 @@ prim_rel_target_path = variant_path.StripAllVariantSelections() # Returns: Sdf.P
 ## Data Containers ##
 
 #// ANCHOR: dataContainerPrimOverview
-# High Level
+### High Level ###
 from pxr import Sdf, Usd
 stage = Usd.Stage.CreateInMemory()
 prim_path = Sdf.Path("/bicycle")
 prim = stage.DefinePrim(prim_path, "Xform")
-attr = prim.CreateAttribute("tire:size", pxr.Sdf.ValueTypeNames.Float)
+attr = prim.CreateAttribute("tire:size", Sdf.ValueTypeNames.Float)
 attr.Set(10)
-# Low Level
+
+### Low Level ###
 from pxr import Sdf
 layer = Sdf.Layer.CreateAnonymous()
 prim_path = Sdf.Path("/bicycle")
@@ -230,14 +232,15 @@ prim_spec.SetInfo(prim_spec.HiddenKey, False)
 
 
 #// ANCHOR: dataContainerPrimBasicsSpecifierDef
-# High Level
+### High Level ###
 from pxr import Sdf, Usd
 stage = Usd.Stage.CreateInMemory()
 prim_path = Sdf.Path("/bicycle")
 # The .DefinePrim method uses a Sdf.SpecifierDef specifier by default
 prim = stage.DefinePrim(prim_path, "Xform")
 prim.SetSpecifier(Sdf.SpecifierDef)
-# Low Level
+
+### Low Level ###
 from pxr import Sdf
 layer = Sdf.Layer.CreateAnonymous()
 prim_path = Sdf.Path("/bicycle")
@@ -247,7 +250,7 @@ prim_spec.specifier = Sdf.SpecifierDef
 #// ANCHOR_END: dataContainerPrimBasicsSpecifierDef
 
 #// ANCHOR: dataContainerPrimBasicsSpecifierOver
-# High Level
+### High Level ###
 from pxr import Sdf, Usd
 stage = Usd.Stage.CreateInMemory()
 prim_path = Sdf.Path("/bicycle")
@@ -256,7 +259,8 @@ prim = stage.DefinePrim(prim_path, "Xform")
 prim.SetSpecifier(Sdf.SpecifierOver)
 # The prim class' IsDefined method checks if a prim (and all its parents) have the "def" specifier.
 print(prim.GetSpecifier() == Sdf.SpecifierSdf, prim.IsDefined())
-# Low Level
+
+### Low Level ###
 from pxr import Sdf
 layer = Sdf.Layer.CreateAnonymous()
 prim_path = Sdf.Path("/bicycle")
@@ -266,7 +270,7 @@ prim_spec.specifier = Sdf.SpecifierOver
 #// ANCHOR_END: dataContainerPrimBasicsSpecifierOver
 
 #// ANCHOR: dataContainerPrimBasicsSpecifierClass
-# High Level
+### High Level ###
 from pxr import Sdf, Usd
 stage = Usd.Stage.CreateInMemory()
 prim_path = Sdf.Path("/bicycle")
@@ -275,7 +279,8 @@ prim = stage.DefinePrim(prim_path, "Xform")
 prim.SetSpecifier(Sdf.SpecifierOver)
 # The prim class' IsAbstract method checks if a prim (and all its parents) have the "Class" specifier.
 print(prim.GetSpecifier() == Sdf.SpecifierClass, prim.IsAbstract())
-# Low Level
+
+### Low Level ###
 from pxr import Sdf
 layer = Sdf.Layer.CreateAnonymous()
 prim_path = Sdf.Path("/bicycle")
@@ -285,13 +290,14 @@ prim_spec.specifier = Sdf.SpecifierClass
 #// ANCHOR_END: dataContainerPrimBasicsSpecifierClass
 
 #// ANCHOR: dataContainerPrimBasicsTypeName
-# High Level
+### High Level ###
 from pxr import Sdf, Usd
 stage = Usd.Stage.CreateInMemory()
 prim_path = Sdf.Path("/bicycle")
 prim = stage.DefinePrim(prim_path, "Xform")
 prim.SetTypeName("Xform")
-# Low Level
+
+### Low Level ###
 from pxr import Sdf
 layer = Sdf.Layer.CreateAnonymous()
 prim_path = Sdf.Path("/bicycle")
@@ -305,26 +311,27 @@ prim_spec.typeName = "Scope"
 
 
 #// ANCHOR: dataContainerPrimBasicsKinds
-# High Level
+### High Level ###
 from pxr import Kind, Sdf, Usd
 stage = Usd.Stage.CreateInMemory()
 prim_path = Sdf.Path("/bicycle")
 prim = stage.DefinePrim(prim_path, "Xform")
 model_API = Usd.ModelAPI(prim)
-model_API.SetKind(Kind.Token.component)
+model_API.SetKind(Kind.Tokens.component)
 # The prim class' IsModel/IsGroup method checks if a prim (and all its parents) are (sub-) kinds of model/group.
-model_API.SetKind(Kind.Token.model)
+model_API.SetKind(Kind.Tokens.model)
 kind = model_API.GetKind()
-print(kind, (pxr.Kind.Registry.GetBaseKind(kind) or kind) == Kind.Token.model, prim.IsModel())
-model_API.SetKind(Kind.Token.group)
+print(kind, (Kind.Registry.GetBaseKind(kind) or kind) == Kind.Tokens.model, prim.IsModel())
+model_API.SetKind(Kind.Tokens.group)
 kind = model_API.GetKind()
-print(kind, (pxr.Kind.Registry.GetBaseKind(kind) or kind) == Kind.Token.group, prim.IsGroup())
-# Low Level
+print(kind, (Kind.Registry.GetBaseKind(kind) or kind) == Kind.Tokens.group, prim.IsGroup())
+
+### Low Level ###
 from pxr import Kind, Sdf
 layer = Sdf.Layer.CreateAnonymous()
 prim_path = Sdf.Path("/bicycle")
 prim_spec = Sdf.CreatePrimInLayer(layer, prim_path)
-prim_spec.SetInfo("kind", Kind.Token.component)
+prim_spec.SetInfo("kind", Kind.Tokens.component)
 #// ANCHOR_END: dataContainerPrimBasicsKinds
 
 #// ANCHOR: dataContainerPrimBasicsTokens
@@ -359,7 +366,7 @@ def "cube" (
 
 
 #// ANCHOR: dataContainerPrimHierarchy
-# High Level
+### High Level ###
 # Has: 'IsPseudoRoot' 
 # Get: 'GetParent', 'GetPath', 'GetName', 'GetStage',
 #      'GetChild', 'GetChildren', 'GetAllChildren',   
@@ -375,7 +382,8 @@ print(prim.GetPath()) # Returns: Sdf.Path("/set/bicycle")
 print(prim.GetParent()) # Returns: Usd.Prim("/set")
 print(parent_prim.GetChildren()) # Returns: [Usd.Prim(</set/bicycle>)]
 print(parent_prim.GetChildrenNames()) # Returns: ['bicycle']
-# Low Level
+
+### Low Level ###
 from pxr import Sdf
 layer = Sdf.Layer.CreateAnonymous()
 prim_path = Sdf.Path("/set/bicycle")
@@ -392,7 +400,7 @@ print(prim_spec.layer) # Returns: The active layer object the spec is on.
 
 
 #// ANCHOR: dataContainerPrimSchemas
-# High Level
+### High Level ###
 # Has: 'IsA', 'HasAPI', 'CanApplyAPI'
 # Get: 'GetAppliedSchemas'
 # Set: 'AddAppliedSchema', 'ApplyAPI'
@@ -406,7 +414,8 @@ prim.AddAppliedSchema("SkelBindingAPI")
 # prim.RemoveAppliedSchema("SkelBindingAPI")
 # Single-Apply API Schemas
 prim.ApplyAPI("UsdGeomModelAPI")
-# Low Level
+
+### Low Level ###
 # To set applied API schemas via the low level API, we just 
 # need to set the `apiSchemas` key to a Token Listeditable Op.
 from pxr import Sdf
@@ -455,6 +464,133 @@ print(prim_type_info.GetAppliedAPISchemas()) # Returns: ['GeomModelAPI']
 print(prim_type_info.GetSchemaType()) # Returns: Tf.Type.FindByName('UsdGeomXform')
 print(prim_type_info.GetSchemaTypeName()) # Returns: Xform
 #// ANCHOR_END: dataContainerPrimTypeInfo
+
+#// ANCHOR: dataContainerPrimLoading
+### High Level ###
+from pxr import Sdf, Tf, Usd, UsdGeom
+# Has: 'HasAuthoredActive', 'HasAuthoredHidden'
+# Get: 'IsActive', 'IsLoaded', 'IsHidden'
+# Set: 'SetActive', 'SetHidden' 
+# Clear: 'ClearActive', 'ClearHidden'
+# Loading: 'Load', 'Unload'
+stage = Usd.Stage.CreateInMemory()
+prim_path = Sdf.Path("/bicycle")
+prim = stage.DefinePrim(prim_path, "Xform")
+## Activation: Controls subhierarchy loading of prim.
+prim.SetActive(False) # 
+# prim.ClearActive()
+## Visibility: Controls the visiblity for render delegates (subhierarchy will still be loaded)
+imageable_API = UsdGeom.Imageable(prim)
+visibility_attr = imageable_API.CreateVisibilityAttr()
+visibility_attr.Set(UsdGeom.Tokens.invisible)
+## Purpose: Controls if the prim is visible for what the renderer requested.
+imageable_API = UsdGeom.Imageable(prim)
+purpose_attr = imageable_API.CreatePurposeAttr()
+purpose_attr.Set(UsdGeom.Tokens.render)
+## Payload loading: Control payload loading (High Level only as it redirects the request to the stage).
+# In our example stage here, we have no payloads, so we don't see a difference.
+prim.Load()
+prim.UnLoad()
+# Calling this on the prim is the same thing.
+prim = stage.GetPrimAtPath(prim_path)
+prim.GetStage().Load(prim_path)
+prim.GetStage().Unload(prim_path)
+## Hidden: # Hint to hide for UIs
+prim.SetHidden(False)
+# prim.ClearHidden()
+
+### Low Level ###
+from pxr import Sdf, UsdGeom
+layer = Sdf.Layer.CreateAnonymous()
+prim_path = Sdf.Path("/set/bicycle")
+prim_spec = Sdf.CreatePrimInLayer(layer, prim_path)
+## Activation: Controls subhierarchy loading of prim.
+prim_spec.active = False
+# prim_spec.ClearActive()
+## Visibility: Controls the visiblity for render delegates (subhierarchy will still be loaded)
+visibility_attr_spec = Sdf.AttributeSpec(prim_spec, UsdGeom.Tokens.purpose, Sdf.ValueTypeNames.Token)
+visibility_attr_spec.default = UsdGeom.Tokens.invisible
+## Purpose: Controls if the prim is visible for what the renderer requested.
+purpose_attr_spec = Sdf.AttributeSpec(prim_spec, UsdGeom.Tokens.purpose, Sdf.ValueTypeNames.Token)
+purpose_attr_spec.default = UsdGeom.Tokens.render
+## Hidden: # Hint to hide for UIs
+prim_spec.hidden = True 
+# prim_spec.ClearHidden()
+#// ANCHOR_END: dataContainerPrimLoading
+
+
+#// ANCHOR: dataContainerPrimPropertiesHighLevel
+from pxr import Usd, Sdf
+# Has: 'HasProperty', 'HasAttribute', 'HasRelationship'
+# Get: 'GetProperties', 'GetAuthoredProperties', 'GetPropertyNames', 'GetPropertiesInNamespace', 'GetAuthoredPropertiesInNamespace'
+#      'GetAttribute', 'GetAttributes', 'GetAuthoredAttributes'
+#      'GetRelationship', 'GetRelationships', 'GetAuthoredRelationships'
+#      'FindAllAttributeConnectionPaths', 'FindAllRelationshipTargetPaths'
+# Set: 'CreateAttribute', 'CreateRelationship'
+# Clear: 'RemoveProperty', 
+stage = Usd.Stage.CreateInMemory()
+prim_path = Sdf.Path("/bicycle")
+prim = stage.DefinePrim(prim_path, "Cube")
+# As the cube schema ships with a "size" attribute, we don't have to create it first
+# Usd is smart enough to check the schema for the type and creates it for us.
+size_attr = prim.GetAttribute("size")
+size_attr.Set(10)
+## Looking up attributes
+print(prim.GetAttributes())
+# Returns: All the attributes that are provided by the schema
+"""
+[Usd.Prim(</bicycle>).GetAttribute('doubleSided'), Usd.Prim(</bicycle>).GetAttribute('extent'), Usd.
+Prim(</bicycle>).GetAttribute('orientation'), Usd.Prim(</bicycle>).GetAttribute('primvars:displayCol
+or'), Usd.Prim(</bicycle>).GetAttribute('primvars:displayOpacity'), Usd.Prim(</bicycle>).GetAttribut
+e('purpose'), Usd.Prim(</bicycle>).GetAttribute('size'), Usd.Prim(</bicycle>).GetAttribute('visibili
+ty'), Usd.Prim(</bicycle>).GetAttribute('xformOpOrder')]
+"""
+print(prim.GetAuthoredAttributes())
+# Returns: Only the attributes we have written to in the active stage.
+# [Usd.Prim(</bicycle>).GetAttribute('size')]
+## Looking up relationships:
+print(prim.GetRelationships())
+# Returns:
+# [Usd.Prim(</bicycle>).GetRelationship('proxyPrim')]
+box_prim = stage.DefinePrim("/box")
+prim.GetRelationship("proxyPrim").SetTargets([box_prim.GetPath()])
+# If we now check our properties, you can see both the size attribute
+# and proxyPrim relationship show up.
+print(prim.GetAuthoredProperties())
+# Returns:
+# [Usd.Prim(</bicycle>).GetRelationship('proxyPrim'),
+#  Usd.Prim(</bicycle>).GetAttribute('size')]
+## Creating attributes:
+# If we want to create non-schema attributes (or even schema attributes without using
+# the schema getter/setters), we can run:
+tire_size_attr = prim.CreateAttribute("tire:size", Sdf.ValueTypeNames.Float)
+tire_size_attr.Set(5)
+#// ANCHOR_END: dataContainerPrimPropertiesHighLevel
+
+#// ANCHOR: dataContainerPrimPropertiesLowLevel
+from pxr import Sdf
+layer = Sdf.Layer.CreateAnonymous()
+prim_path = Sdf.Path("/cube")
+prim_spec = Sdf.CreatePrimInLayer(layer, prim_path)
+prim_spec.specifier = Sdf.SpecifierDef
+attr_spec = Sdf.AttributeSpec(prim_spec, "size", Sdf.ValueTypeNames.Float)
+print(prim_spec.attributes) # Returns: {'size': Sdf.Find('anon:0x7f6efe199480:LOP:/stage/python', '/cube.size')}
+# To remove a property you can run:
+# prim_spec.RemoveProperty(attr_spec)
+# Let's re-create what we did in the high level API example.
+box_prim_path = Sdf.Path("/box")
+box_prim_spec = Sdf.CreatePrimInLayer(layer, box_prim_path)
+box_prim_spec.specifier = Sdf.SpecifierDef
+rel_spec = Sdf.RelationshipSpec(prim_spec, "proxyPrim")
+rel_spec.targetPathList.explicitItems = [prim_path]
+# Get all authored properties (in the active layer only)
+print(prim_spec.properties)
+# Returns:
+"""
+{'size': Sdf.Find('anon:0x7ff87c9c2000', '/cube.size'),
+ 'proxyPrim': Sdf.Find('anon:0x7ff87c9c2000', '/cube.proxyPrim')}
+"""
+#// ANCHOR_END: dataContainerPrimPropertiesLowLevel
 
 #// ANCHOR: metadataSummary
 from pxr import Sdf, Usd
@@ -707,13 +843,14 @@ xformOpOrder Encodes the sequence of transformation operations in the
 
 #// ANCHOR: metadataAssetInfo
 from pxr import Sdf, Usd
-# High level API
+### High Level ###
 stage = Usd.Stage.CreateInMemory()
 prim_path = Sdf.Path("/bicycle")
 prim = stage.DefinePrim(prim_path, "Xform")
 prim.SetMetadata("assetInfo", {"version": 1})
 prim.SetAssetInfoByKey("identifier", Sdf.AssetPath("bicycler.usd"))
-# Low level API
+
+### Low Level ###
 layer = Sdf.Layer.CreateAnonymous()
 prim_path = Sdf.Path("/cube")
 prim_spec = Sdf.CreatePrimInLayer(layer, prim_path)
@@ -722,13 +859,14 @@ prim_spec.assetInfo = {"identifier": Sdf.AssetPath("bicycle.usd")}
 
 #// ANCHOR: metadataCustomData
 from pxr import Sdf, Usd
-# High level API
+### High Level ###
 stage = Usd.Stage.CreateInMemory()
 prim_path = Sdf.Path("/bicycle")
 prim = stage.DefinePrim(prim_path, "Xform")
 prim.SetMetadata("customData", {"sizeUnit": "meter"})
 prim.SetCustomDataByKey("nested:shape", "round")
-# Low level API
+
+### Low Level ###
 layer = Sdf.Layer.CreateAnonymous()
 prim_path = Sdf.Path("/cube")
 prim_spec = Sdf.CreatePrimInLayer(layer, prim_path)
@@ -737,12 +875,13 @@ prim_spec.customData = {"myCoolData": "myCoolValue"}
 
 #// ANCHOR: metadataPayloadAssetDependencies
 from pxr import Sdf, Usd
-# High level API
+### High Level ###
 stage = Usd.Stage.CreateInMemory()
 prim_path = Sdf.Path("/bicycle")
 prim = stage.DefinePrim(prim_path, "Xform")
 prim.SetAssetInfoByKey("payloadAssetDependencies", Sdf.AssetPathArray(["@assetIndentifierA", "@assetIndentifierA"]))
-# Low level API
+
+### Low Level ###
 layer = Sdf.Layer.CreateAnonymous()
 prim_path = Sdf.Path("/cube")
 prim_spec = Sdf.CreatePrimInLayer(layer, prim_path)
@@ -751,12 +890,13 @@ prim_spec.assetInfo["payloadAssetDependencies"] = Sdf.AssetPathArray(["@assetInd
 
 #// ANCHOR: metadataComment
 from pxr import Sdf, Usd
-# High level API
+### High Level ###
 stage = Usd.Stage.CreateInMemory()
 prim_path = Sdf.Path("/bicycle")
 prim = stage.DefinePrim(prim_path, "Xform")
 prim.SetMetadata("comment", "This is a cool prim!")
-# Low level API
+
+### Low Level ###
 layer = Sdf.Layer.CreateAnonymous()
 prim_path = Sdf.Path("/cube")
 prim_spec = Sdf.CreatePrimInLayer(layer, prim_path)
@@ -766,7 +906,7 @@ prim_spec.SetInfo("comment", "This is a cool prim spec!")
 #// ANCHOR: debuggingTokens
 from pxr import Tf
 # To check if a symbol is active:
-pxr.Tf.Debug.IsDebugSymbolNameEnabled("MY_SYMBOL_NAME")
+Tf.Debug.IsDebugSymbolNameEnabled("MY_SYMBOL_NAME")
 # To print all symbols
 docs = Tf.Debug.GetDebugSymbolDescriptions()
 for name in Tf.Debug.GetDebugSymbolNames():
@@ -806,7 +946,7 @@ import os
 from pxr import Trace, Usd
 # The Trace.Collector() and Trace.Reporter.globalReporter return a singletons
 # The default traces all go to TraceCategory::Default, this is not configurable via python
-global_reporter = pxr.Trace.Reporter.globalReporter
+global_reporter = Trace.Reporter.globalReporter
 global_reporter.ClearTree()
 collector = Trace.Collector()
 collector.Clear()

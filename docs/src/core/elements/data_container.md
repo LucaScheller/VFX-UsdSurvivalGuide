@@ -43,6 +43,8 @@ This is in very simplified terms how the Usd API works in terms of data storage.
 2. [What should I use it for?](#usage)
 3. [Resources](#resources)
 4. [Overview](#overview)
+    1. [Prims](./prim.md)
+    2. [Properties](./property.md)
 
 ## TL;DR - Data Containers (Prims/Properties/Attributes/Relationships) In-A-Nutshell <a name="summary"></a>
 - In order to store data at our `Sdf.Path`s, we need data containers. Usd therefore has the concept of `Usd.Prim`s, which can hold `Usd.Property`ies
@@ -60,7 +62,16 @@ In production, these are the classes you'll have the most contact with. They han
 ~~~
 
 ## Resources <a name="resources"></a>
-- [Usd.Object](https://openusd.org/dev/api/class_usd_object.html)
-- [Sdf.Spec](https://openusd.org/dev/api/class_sdf_spec.html)
+- [Usd.Prim](https://openusd.org/dev/api/class_usd_prim.html)
+- [Usd.Property](https://openusd.org/dev/api/class_usd_property.html)
+- [Usd.Attribute](https://openusd.org/dev/api/class_usd_attribute.html)
+- [Usd.Relationship](https://openusd.org/dev/api/class_usd_relationship.html)
+- [Sdf.PrimSpec](https://openusd.org/dev/api/class_sdf_prim_spec.html)
+- [Sdf.PropertySpec](https://openusd.org/dev/api/class_sdf_property_spec.html)
+- [Sdf.AttributeSpec](https://openusd.org/dev/api/class_sdf_attribute_spec.html)
+- [Sdf.RelationshipSpec](https://openusd.org/dev/api/class_sdf_relationship_spec.html)
 
 ## Overview <a name="overview"></a>
+We cover the details for prims and properties in their own sections as they are big enough topics on their on:
+- [Prims](./prim.md)
+- [Properties](./property.md)

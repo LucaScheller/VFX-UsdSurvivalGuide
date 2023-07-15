@@ -15,7 +15,7 @@ Most tutorials focus primarily on the high level API, as it is a bit more conven
 We'd actually recommend starting out with the lower level API as soon as you can, as it will force you to write performant code from the start.
 ~~~
 
-## TL;DR - Paths In-A-Nutshell
+## TL;DR - API Overview In-A-Nutshell
 Here is the TL;DR version. Usd is made up of two main APIs:
 - High level API:
     - [Usd Core API](https://openusd.org/release/api/usd_page_front.html)
