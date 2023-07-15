@@ -213,7 +213,6 @@ prim_spec.kind = "group"    # There is also a prim_spec.ClearKind() shortcut for
 prim_spec.instanceable = False # There is also a prim_spec.ClearInstanceable() shortcut for removing instanceable metadata.
 prim_spec.hidden = False # A hint for UI apps to hide the spec for viewers
 
-
 # You can also set them via the standard metadata commands:
 from pxr import Sdf
 layer = Sdf.Layer.CreateAnonymous()
@@ -229,6 +228,41 @@ prim_spec.SetInfo("instanceable", False)
 prim_spec.SetInfo(prim_spec.HiddenKey, False)
 #// ANCHOR_END: dataContainerPrimCoreLowLevel
 
+
+#// ANCHOR: dataContainerPrimBasicsSpecifierTraversal
+### High Level ###
+from pxr import Sdf, Usd
+stage = Usd.Stage.CreateInMemory()
+# Replicate the Usd file example above:
+stage.DefinePrim("/definedCube", "Cube").SetSpecifier(Sdf.SpecifierDef)
+stage.DefinePrim("/overCube", "Cube").SetSpecifier(Sdf.SpecifierOver)
+stage.DefinePrim("/classCube", "Cube").SetSpecifier(Sdf.SpecifierClass)
+## Traverse with default filter (USD calls filter 'predicate')
+# UsdPrimIsActive & UsdPrimIsDefined & UsdPrimIsLoaded & ~UsdPrimIsAbstract
+for prim in stage.Traverse():
+    print(prim)
+# Returns:
+# Usd.Prim(</definedCube>)
+## Traverse with 'all' filter (USD calls filter 'predicate')
+for prim in stage.TraverseAll():
+    print(prim)
+# Returns:
+# Usd.Prim(</definedCube>)
+# Usd.Prim(</overCube>)
+# Usd.Prim(</classCube>)
+## Traverse with IsAbstract (== IsClass) filter (USD calls filter 'predicate')
+predicate = Usd.PrimIsAbstract
+for prim in stage.Traverse(predicate):
+    print(prim)
+# Returns:
+# Usd.Prim(</classCube>)
+## Traverse with ~PrimIsDefined filter (==IsNotDefined) (USD calls filter 'predicate')
+predicate = ~Usd.PrimIsDefined
+for prim in stage.Traverse(predicate):
+    print(prim)
+# Returns:
+# Usd.Prim(</overCube>)
+#// ANCHOR_END: dataContainerPrimBasicsSpecifierTraversal
 
 
 #// ANCHOR: dataContainerPrimBasicsSpecifierDef
@@ -984,6 +1018,15 @@ sw.AddFrom(other_sw)
 print(sw.GetMilliseconds(), sw.sampleCount)
 #// ANCHOR_END: profilingStopWatch
 
+#// ANCHOR: pluginsRegistry
+from pxr import Plug
+registry = Plug.Registry()
+for plugin in registry.GetAllPlugins():
+    print(plugin.name, plugin.path, plugin.isLoaded)
+    # To print the plugInfo.json content run:
+    # print(plugin.metadata)
+#// ANCHOR_END: pluginsRegistry
+
 #// ANCHOR: assetResolverBound
 from pxr import Ar
 from usdAssetResolver import FileResolver
@@ -1310,3 +1353,67 @@ for prim in stage.Traverse():
 /set/yard/explosion  - IsModel: False - IsGroup: False
 """
 #// ANCHOR_END: kindTraversal
+
+
+#// ANCHOR: animationTimeCode
+from pxr import Sdf, Usd
+stage = Usd.Stage.CreateInMemory()
+prim_path = Sdf.Path("/bicycle")
+prim = stage.DefinePrim(prim_path, "Cube")
+size_attr = prim.GetAttribute("size")
+## Set default value
+time_code = Usd.TimeCode.Default()
+size_attr.Set(10, time_code)
+# Or:
+size_attr.Set(10) # The default is to set `default` (non-per-frame) data.
+## Set per frame value
+for frame in range(1001, 1005):
+    time_code = Usd.TimeCode(frame)
+    size_attr.Set(frame, time_code)
+# Or
+# As with Sdf.Path implicit casting from strings in a lot of places in the USD API,
+# the time code is implicitly casted from a Python float. 
+# It is recommended to do the above, to be more future proof of 
+# potentially encoding time unit based samples.
+for frame in range(1001, 1005):
+    size_attr.Set(frame, frame)
+## Other than that the TimeCode class only has a via Is/Get methods of interest:
+size_attr.IsDefault() # Returns: True if no time value was given.
+size_attr.IsNumeric() # Returns: True if not IsDefault()
+size_attr.GetValue() # Returns: The time value is not default.
+#// ANCHOR_END: animationTimeCode
+
+#// ANCHOR: animationLayerOffset
+from pxr import Sdf, Usd
+# The Sdf.LayerOffset(<offset>, <scale>) class has 
+# no attributes/methods other than LayerOffset.offset & LayerOffset.scale.
+stage = Usd.Stage.CreateInMemory()
+prim_path = Sdf.Path("/animal")
+root_layer = stage.GetRootLayer()
+## For sublayering via Python, we first need to sublayer, then edit offset.
+# In Houdini we can't due this directly due to Houdini's stage handling system.
+file_path = "/opt/hfs19.5/houdini/usd/assets/pig/pig.usd"
+root_layer.subLayerPaths.append(file_path)
+print(root_layer.subLayerPaths)
+print(root_layer.subLayerOffsets)
+# Since layer offsets are read only, we need to assign it to a new one in-place.
+# !DANGER! Due to how it is exposed to Python, we can't assign a whole array with the
+# new offsets, instead we can only swap individual elements in the array, so that the
+# array pointer is kept intact.
+root_layer.subLayerOffsets[-1] = Sdf.LayerOffset(25, 1) 
+## For references
+ref = Sdf.Reference(file_path, "/pig", Sdf.LayerOffset(25, 1))
+prim = stage.DefinePrim(prim_path)
+ref_API = prim.GetReferences()
+ref_API.AddReference(ref)
+ref = Sdf.Reference("", "/animal", Sdf.LayerOffset(50, 1))
+internal_prim = stage.DefinePrim(prim_path.ReplaceName("internal"))
+ref_API = internal_prim.GetReferences()
+ref_API.AddReference(ref)
+## For payloads
+payload = Sdf.Payload(file_path, "/pig", Sdf.LayerOffset(25, 1))
+prim = stage.DefinePrim(prim_path)
+payload_API = prim.GetPayloads()
+payload_API.AddPayload(payload)
+#// ANCHOR_END: animationLayerOffset
+

@@ -26,7 +26,7 @@ Colin Kennedy's USD-Cookbook has an excellent overview on this topic:
 
 Plugins are detected by looking at the `PXR_PLUGINPATH_NAME` environment variable for folders containing a`plugInfo.json` file.
 
-To set for temporarily, you can run the following in a shell:
+To set it temporarily, you can run the following in a shell and then run your Usd application:
 ```
 // Linux
 export PXR_PLUGINPATH_NAME=/my/cool/plugin/resources:${PXR_PLUGINPATH_NAME}
@@ -36,9 +36,10 @@ set PXR_PLUGINPATH_NAME=/my/cool/plugin/resources:${PXR_PLUGINPATH_NAME}
 
 If you search you Usd installation, you'll find a few of these for different components of Usd. They are usually placed in a <Plugin Root>/resources folder as a common directory convention.
 
+Via Python you can also partially search for plugins (depending on what registry they are in) and also print their plugInfo.json file content via the `.metadata` attribute.
 
-from pxr import Tf
-root_type = Tf.Type.GetRoot()
-for tf_type in root_type.GetAllDerivedTypes():
-    print(tf_type.typeName, tf_type.pythonClass)
-
+~~~admonish info title=""
+```python
+{{#include ../../../../code/core/elements.py:pluginsRegistry}}
+```
+~~~

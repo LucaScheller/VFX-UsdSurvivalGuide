@@ -69,7 +69,7 @@ def Cube "definedCube" ()
     double size = 2
 }
 
-over Cube "overedCube" ()
+over Cube "overCube" ()
 {
     double size = 2
 }
@@ -79,6 +79,14 @@ class Cube "classCube" ()
     double size = 2
 }
 ```
+
+This is how it affects traversal:
+~~~admonish info title=""
+```python
+{{#include ../../../../code/core/elements.py:dataContainerPrimBasicsSpecifierTraversal}}
+```
+~~~
+
 
 ##### Sdf.SpecifierDef: `def`(define)
 This specifier is used to specify a prim in a hierarchy, so that is it always visible to traversals.

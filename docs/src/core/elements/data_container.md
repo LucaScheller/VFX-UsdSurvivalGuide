@@ -51,7 +51,7 @@ This is in very simplified terms how the Usd API works in terms of data storage.
 - To distinguish between data and data relations, `Usd.Property`ies are separated in:
     - `Usd.Attribute`s: These store data of different types (float/ints/arrays/etc.)
         - `UsdGeom.Primvar`s: These are the same as attributes with extra features:
-            - They are created the same way as attributes, except they use the `primvars.\<myAttributeName\>` namespace.
+            - They are created the same way as attributes, except they use the `primvars.<myAttributeName>` namespace.
             - They get inherited down the hierarchy if they are of constant interpolation (They don't vary per point/vertex/prim).
             - They are exported to Hydra (Usd's render scene description abstraction API), so you can use them for materials/render settings/etc.
     - `Usd.Relationship`s: These store mapping from prim to prim(s) or attribute to attribute.

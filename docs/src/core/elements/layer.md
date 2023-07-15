@@ -1,7 +1,7 @@
 # Layers
 ```mermaid
 flowchart LR
-    layerSingleton([Layer Singleton/Registry]) --> layer1([Layer])
+    layerSingleton(Layer Singleton/Registry) --> layer1([Layer])
     layer1([Layer]) --> prim1([Property])
     prim1([Prim]) --> property([Property])
     property --> attribute([Attribute])
