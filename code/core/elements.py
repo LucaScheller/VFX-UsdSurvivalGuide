@@ -604,6 +604,7 @@ prim_spec = Sdf.CreatePrimInLayer(layer, prim_path)
 prim_spec.specifier = Sdf.SpecifierDef
 attr_spec = Sdf.AttributeSpec(prim_spec, "size", Sdf.ValueTypeNames.Float)
 print(prim_spec.attributes) # Returns: {'size': Sdf.Find('anon:0x7f6efe199480:LOP:/stage/python', '/cube.size')}
+attr_spec.default = 10
 # To remove a property you can run:
 # prim_spec.RemoveProperty(attr_spec)
 # Let's re-create what we did in the high level API example.
@@ -1360,7 +1361,9 @@ prim = stage.DefinePrim(prim_path, "Cube")
 size_attr = prim.GetAttribute("size")
 for frame in range(1001, 1005):
     time_code = Usd.TimeCode(float(frame - 1001))
+    # .Set() takes args in the .Set(<value>, <frame>) format
     size_attr.Set(frame, time_code)
+print(size_attr.Get(1005)) # Returns: 4
 
 ### Low Level ###
 from pxr import Sdf
@@ -1372,7 +1375,9 @@ prim_spec.typeName = "Cube"
 attr_spec = Sdf.AttributeSpec(prim_spec, "size", Sdf.ValueTypeNames.Double)
 for frame in range(1001, 1005):
     value = float(frame - 1001)
+    # .SetTimeSample() takes args in the .SetTimeSample(<path>, <frame>, <value>) format
     layer.SetTimeSample(attr_spec.path, frame, value)
+print(layer.QueryTimeSample(attr_spec.path, 1005)) # Returns: 4
 #// ANCHOR_END: animationOverview
 
 #// ANCHOR: animationTimeCode
@@ -1398,9 +1403,9 @@ for frame in range(1001, 1005):
 for frame in range(1001, 1005):
     size_attr.Set(frame, frame)
 ## Other than that the TimeCode class only has a via Is/Get methods of interest:
-size_attr.IsDefault() # Returns: True if no time value was given.
+size_attr.IsDefault() # Returns: True if no time value was given
 size_attr.IsNumeric() # Returns: True if not IsDefault()
-size_attr.GetValue() # Returns: The time value is not default.
+size_attr.GetValue() # Returns: The time value (if not IsDefault()
 #// ANCHOR_END: animationTimeCode
 
 #// ANCHOR: animationLayerOffset
@@ -1620,3 +1625,197 @@ layer.startTimeCode = time_samples[0]
 layer.endTimeCode = time_samples[-1]
 #// ANCHOR_END: animationFPS
 
+
+#// ANCHOR: animationStitchCmdlineTool
+...
+openedFiles = [Sdf.Layer.FindOrOpen(fname) for fname in results.usdFiles]
+... 
+# the extra computation and fail more gracefully
+try:
+    for usdFile in openedFiles:
+        UsdUtils.StitchLayers(outLayer, usdFile)
+        outLayer.Save()
+# if something in the authoring fails, remove the output file
+except Exception as e:
+    print('Failed to complete stitching, removing output file %s' % results.out)
+    print(e)
+    os.remove(results.out) 
+...
+#// ANCHOR_END: animationStitchCmdlineTool
+
+#// ANCHOR: animationStitchClipsUtils
+from pxr import Sdf, UsdUtils
+
+clip_time_code_start = 1001
+clip_time_code_end = 1003
+clip_set_name = "cacheClip"
+clip_prim_path = "/prim"
+clip_interpolate_missing = False
+time_sample_files = ["/cache/value_clips/time_sample.1001.usd",
+                     "/cache/value_clips/time_sample.1002.usd",
+                     "/cache/value_clips/time_sample.1003.usd"]
+topology_file_path = "/cache/value_clips/topology.usd"
+manifest_file_path = "/cache/value_clips/manifest.usd"
+cache_file_path = "/cache/cache.usd"
+
+# We can also use:
+# topology_file_path = UsdUtils.GenerateClipTopologyName(cache_file_path)
+# Returns: "/cache/cache.topology.usd"
+# manifest_file_path = UsdUtils.GenerateClipManifestName(cache_file_path)
+# Returns: "/cache/cache.manifest.usd"
+
+topology_layer = Sdf.Layer.CreateNew(topology_file_path)
+manifest_layer = Sdf.Layer.CreateNew(manifest_file_path)
+cache_layer = Sdf.Layer.CreateNew(cache_file_path)
+
+UsdUtils.StitchClipsTopology(topology_layer, time_sample_files)
+UsdUtils.StitchClipsManifest(manifest_layer, topology_layer, 
+                             time_sample_files, clip_prim_path)
+
+UsdUtils.StitchClips(cache_layer,
+                     time_sample_files,
+                     clip_prim_path, 
+                     clip_time_code_start,
+                     clip_time_code_end,
+                     clip_interpolate_missing,
+                     clip_set_name)
+cache_layer.Save()
+
+# Result in "/cache/cache.usd"
+"""
+(
+    framesPerSecond = 24
+    metersPerUnit = 1
+    subLayers = [
+        @./value_clips/topology.usd@
+    ]
+    timeCodesPerSecond = 24
+)
+
+def "prim" (
+    clips = {
+        dictionary cacheClip = {
+            double2[] active = [(1001, 0), (1002, 1), (1003, 2)] 
+            asset[] assetPaths = [@./value_clips/time_sample.1001.usd@, @./value_clips/time_sample.1002.usd@, @./value_clips/time_sample.1003.usd@]
+            asset manifestAssetPath = @./value_clips/manifest.usd@
+            string primPath = "/prim"
+            double2[] times = [(1001, 1001), (1002, 1002), (1003, 1003)]
+        }
+    }
+    clipSets = ["cacheClip"]
+)
+{
+}
+"""
+
+## API Overview
+UsdUtils
+# Generate topology and manifest files based USD preferred naming convention.
+UsdUtils.GenerateClipTopologyName("/cache_file.usd") # Returns: "/cache_file.topology.usd"
+UsdUtils.GenerateClipManifestName("/cache_file.usd") # Returns: "/cache_file.manifest.usd"
+# Open layers
+topology_layer = Sdf.Layer.CreateNew(topology_file_path)
+manifest_layer = Sdf.Layer.CreateNew(manifest_file_path)
+cache_layer = Sdf.Layer.CreateNew(cache_file_path)
+## Create topology and manifest. This is the heavy part of creating value clips
+## as it has to open all layers.
+# Generate topology layer, this opens all the time sample layers and copies all
+# attributes that don't have time samples and relationships into the topology_layer.
+UsdUtils.StitchClipsTopology(topology_layer, time_sample_files)
+# Generate manifest layer, this opens all the time sample layers and creates a 
+# hierarchy without values of all attributes that have time samples. This is the inverse
+# of the topology layer except it doesn't create values. The hierarchy is then used to
+# determine what a clip should load as animation. 
+UsdUtils.StitchClipsManifest(manifest_layer, topology_layer, 
+                             time_sample_files, clip_prim_path)
+# Generate cache layer, this creates the metadata that links to the above created files.
+UsdUtils.StitchClips(cache_layer,
+                     time_sample_files,
+                     clip_prim_path, 
+                     clip_time_code_start,
+                     clip_time_code_end,
+                     clip_interpolate_missing,
+                     clip_set_name)
+#// ANCHOR_END: animationStitchClipsUtils
+
+
+#// ANCHOR: animationStitchClipsAPI
+from pxr import Sdf, Usd, UsdUtils
+
+time_sample_files = ["/cache/value_clips/time_sample.1001.usd",
+                     "/cache/value_clips/time_sample.1002.usd",
+                     "/cache/value_clips/time_sample.1003.usd"]
+time_sample_asset_paths = Sdf.AssetPathArray(time_sample_files)
+topology_file_path = "/cache/value_clips/topology.usd"
+manifest_file_path = "/cache/value_clips/manifest.usd"
+cache_file_path = "/cache/cache.usd"
+
+topology_layer = Sdf.Layer.CreateNew(topology_file_path)
+manifest_layer = Sdf.Layer.CreateNew(manifest_file_path)
+cache_layer = Sdf.Layer.CreateNew(cache_file_path)
+
+UsdUtils.StitchClipsTopology(topology_layer, time_sample_files)
+UsdUtils.StitchClipsManifest(manifest_layer, topology_layer, 
+                             time_sample_files, clip_prim_path)
+
+clip_set_name = "cacheClip"
+clip_prim_path = "/prim"
+clip_interpolate_missing = False
+
+# For simplicity in this example we already know where the asset roots are.
+# If you need to check where they are, you can traverse the topology layer,
+# as it contains the full hierarchy of the per frame files.
+prim = stage.DefinePrim("/valueClippedPrim", "Xform")
+# The clips API is a small wrapper around setting metadata fields. 
+clips_API = Usd.ClipsAPI(prim)
+# Most function signatures work via the following args:
+# clips_API.<method>(<methodArg>, <clipSetName>)
+# We'll only be looking at non-template value clips related methods here.
+## We have Get<MethodName>/Set<MethodName> for all metadata keys:
+# clips_API.Get/SetClipPrimPath 
+# clips_API.Get/SetClipAssetPaths
+# clips_API.Get/SetClipManifestAssetPath
+# clips_API.Get/SetClipActive
+# clips_API.Get/SetClipTimes 
+# clips_API.Get/SetInterpolateMissingClipValues
+## To get/set the whole clips metadata dict, we can run:
+# clips_API.Get/SetClips()
+## To get/set what clips are active:
+# clips_API.Get/SetClipSets
+
+## Convenience methods for generating a manifest based on the
+# clips set by clips_API.SetClipAssetPaths
+# clips_API.GenerateClipManifest
+## Or from a user specified list. This is similar to UsdUtils.StitchClipsManifest()
+# clips_API.GenerateClipManifestFromLayers
+
+## Get the resolved asset paths in 'assetPaths' metadata.
+# clips_API.ComputeClipAssetPaths
+
+prim = stage.DefinePrim("/valueClippedPrim", "Xform")
+clips_API = Usd.ClipsAPI(prim)
+clips_API.SetClipPrimPath(clip_prim_path, clip_set_name)
+clips_API.SetClipAssetPaths(time_sample_asset_paths, clip_set_name)
+clips_API.SetClipActive([(1001, 0), (1002, 1), (1003, 2)], clip_set_name)
+clips_API.SetClipTimes([(1001, 1001), (1002, 1001), (1003, 1001)], clip_set_name)
+clips_API.SetInterpolateMissingClipValues(clip_interpolate_missing, clip_set_name)
+# We can also print all clip metadata
+print(clips_API.GetClips())
+# Enable the clip
+clip_sets_active = Sdf.StringListOp.CreateExplicit([clip_set_name])
+clips_API.SetClipSets(clip_sets_active)
+#Returns:
+"""
+{'cacheClip': 
+    {
+        'primPath': '/prim',
+        'interpolateMissingClipValues': False, 
+        'active': Vt.Vec2dArray(3, (Gf.Vec2d(1001.0, 0.0), Gf.Vec2d(1002.0, 1.0), Gf.Vec2d(1003.0, 2.0))),
+        'assetPaths': Sdf.AssetPathArray(3, (Sdf.AssetPath('/cache/value_clips/time_sample.1001.usd'),
+                                            Sdf.AssetPath('/cache/value_clips/time_sample.1002.usd'),
+                                            Sdf.AssetPath('/cache/value_clips/time_sample.1003.usd'))),
+        'times': Vt.Vec2dArray(3, (Gf.Vec2d(1001.0, 1001.0), Gf.Vec2d(1002.0, 1001.0), Gf.Vec2d(1003.0, 1001.0)))
+    }
+}
+"""
+#// ANCHOR_END: animationStitchClipsAPI

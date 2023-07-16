@@ -85,7 +85,7 @@ def Xform "set" (
 
 
 ### Creating own kinds <a name="kindPlugin"></a>
-We can register kinds via the [plugin system](./overview.md) 
+We can register kinds via the [plugin system](./overview.md).
 
 ```python
 {

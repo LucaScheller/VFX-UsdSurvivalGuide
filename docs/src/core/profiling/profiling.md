@@ -25,7 +25,7 @@ The trace module is made up of two parts:
 
 Via the C++ API, you can customize the behavior further, for Python 'only' the global collector is exposed.
 
-#### Marking what to trace
+### Marking what to trace
 First you mark what to trace. You can also mark nothing, you'll still have access to all the default profiling:
 ~~~admonish info title=""
 ```python
@@ -33,7 +33,7 @@ First you mark what to trace. You can also mark nothing, you'll still have acces
 ```
 ~~~
 
-#### Trace collector & reporter
+### Trace collector & reporter
 Then you enable the collector during the runtime of what you want to trace and write the result to the disk.
 ~~~admonish info title=""
 ```python
@@ -66,10 +66,35 @@ Here is an example of a report to a Google Chrome trace .json file opened at [`c
 ![](./GoogleChromePythonScopeTraceProfiling.jpg#center)
 
 
-#### Measuring time deltas
+### Measuring time deltas
 Usd ships with a simpel stop watch class that offers high precision time deltas.
 ~~~admonish info title=""
 ```python
 {{#include ../../../../code/core/elements.py:profilingStopWatch}}
+```
+~~~
+
+### Stage Stats
+You can also gather stage stats, this is mainly used to expose statistics for UIs.
+~~~admonish info title=""
+```python
+from pxr import UsdUtils
+print(UsdUtils.ComputeUsdStageStats(stage))
+# Returns (On stage with a single cube):
+{
+ 'assetCount': 0, 
+ 'instancedModelCount': 0,
+ 'modelCount': 0,
+ 'primary': {'primCounts': {'activePrimCount': 2,
+                            'inactivePrimCount': 0,
+                            'instanceCount': 0, 
+                            'pureOverCount': 0,
+                            'totalPrimCount': 2},
+ 'primCountsByType': {'Cube': 1}}, 
+ 'prototypeCount': 0,
+ 'totalInstanceCount': 0,
+ 'totalPrimCount': 2,
+ 'usedLayerCount': 10
+}
 ```
 ~~~

@@ -3,6 +3,8 @@ Push Vs Pull / FullPin Opt-In pipelines
 
 
 
+#### Local
+#### Local Value Clips
 
 #### Inherits:
 - 'inheritPathList' 

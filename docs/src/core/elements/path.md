@@ -79,6 +79,10 @@ We can also encode variants into the path via the {variantSetName=variantName} s
 Paths can also encode properties (more about what these are in the next section).
 Notice that attributes and relationships are both encoded with the "." prefix, hence the name `property` is used to describe them both.
 
+~~~admonish tip
+When using Usd, we'll rarely run into the relationship `[]` encoded targets paths. Instead we use the `Usd.Relationship`/`Sdf.RelationshipSpec` methods to set the path connections. Therefore it is just good to know they exist.
+~~~
+
 ~~~admonish info title=""
 ```python
 {{#include ../../../../code/core/elements.py:pathProperties}}
