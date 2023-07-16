@@ -1,0 +1,32 @@
+{
+    "Plugins":[
+       {
+           "Type": "python",
+           "Name": "usdSurvivalGuideKinds", 
+         "Info":{
+             "Kinds":{
+                "character":{
+                   "baseKind":"component",
+                   "description":"A (hero) character"
+                },
+                "prop":{
+                   "baseKind":"component",
+                   "description":"A generic prop asset"
+                },
+                "fx":{
+                   "baseKind":"component",
+                   "description":"A FX asset"
+                },
+                "environment":{
+                   "baseKind":"assembly",
+                   "description":"A large scale environment like a city."
+                },
+                "set":{
+                   "baseKind":"assembly",
+                   "description":"A individual section of an environment, typically a movie set placed in an environment."
+                }
+             }
+          }
+       }
+    ]
+ }

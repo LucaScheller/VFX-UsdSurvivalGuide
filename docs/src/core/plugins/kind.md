@@ -120,7 +120,6 @@ We can register kinds via the [plugin system](./overview.md).
       }
    ]
 }
-
 ```
 
 To register the above kinds, copy the contents into a file called `plugInfo.json`. Then set your `PXR_PLUGINPATH_NAME` environment variable to the folder containing the `plugInfo.json` file.
