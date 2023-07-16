@@ -181,11 +181,6 @@ attr_spec.default = 10
 
 
 #// ANCHOR: dataContainerPrimCoreHighLevel
-# Available prim methods for core metadata:
-# Has: 'HasDefiningSpecifier', 'HasAuthoredTypeName', 'HasAuthoredDocumentation'
-# Get: 'GetSpecifier', 'GetTypeName', 'GetDocumentation', 'GetDescription'
-# Set: 'SetSpecifier', 'SetTypeName', 'SetDocumentation', 'SetDescription'
-# Clear: 'ClearTypeName', 'ClearDocumentation'
 from pxr import Sdf, Usd
 stage = Usd.Stage.CreateInMemory()
 prim_path = Sdf.Path("/cube")
@@ -1355,6 +1350,31 @@ for prim in stage.Traverse():
 #// ANCHOR_END: kindTraversal
 
 
+
+#// ANCHOR: animationOverview
+from pxr import Sdf, Usd
+### High Level ###
+stage = Usd.Stage.CreateInMemory()
+prim_path = Sdf.Path("/bicycle")
+prim = stage.DefinePrim(prim_path, "Cube")
+size_attr = prim.GetAttribute("size")
+for frame in range(1001, 1005):
+    time_code = Usd.TimeCode(float(frame - 1001))
+    size_attr.Set(frame, time_code)
+
+### Low Level ###
+from pxr import Sdf
+layer = Sdf.Layer.CreateAnonymous()
+prim_path = Sdf.Path("/bicycle")
+prim_spec = Sdf.CreatePrimInLayer(layer, prim_path)
+prim_spec.specifier = Sdf.SpecifierDef
+prim_spec.typeName = "Cube"
+attr_spec = Sdf.AttributeSpec(prim_spec, "size", Sdf.ValueTypeNames.Double)
+for frame in range(1001, 1005):
+    value = float(frame - 1001)
+    layer.SetTimeSample(attr_spec.path, frame, value)
+#// ANCHOR_END: animationOverview
+
 #// ANCHOR: animationTimeCode
 from pxr import Sdf, Usd
 stage = Usd.Stage.CreateInMemory()
@@ -1400,7 +1420,7 @@ print(root_layer.subLayerOffsets)
 # !DANGER! Due to how it is exposed to Python, we can't assign a whole array with the
 # new offsets, instead we can only swap individual elements in the array, so that the
 # array pointer is kept intact.
-root_layer.subLayerOffsets[-1] = Sdf.LayerOffset(25, 1) 
+root_layer.subLayerOffsets[0] = Sdf.LayerOffset(25, 1) 
 ## For references
 ref = Sdf.Reference(file_path, "/pig", Sdf.LayerOffset(25, 1))
 prim = stage.DefinePrim(prim_path)
@@ -1417,3 +1437,150 @@ payload_API = prim.GetPayloads()
 payload_API.AddPayload(payload)
 #// ANCHOR_END: animationLayerOffset
 
+
+#// ANCHOR: animationWrite
+from pxr import Sdf, Usd
+### High Level ###
+stage = Usd.Stage.CreateInMemory()
+prim_path = Sdf.Path("/bicycle")
+prim = stage.DefinePrim(prim_path, "Cube")
+size_attr = prim.GetAttribute("size")
+## Set default value
+time_code = Usd.TimeCode.Default()
+size_attr.Set(10, time_code)
+# Or:
+size_attr.Set(10) # The default is to set `default` (non-per-frame) data.
+## Set per frame value
+for frame in range(1001, 1005):
+    value = float(frame - 1001)
+    time_code = Usd.TimeCode(frame)
+    size_attr.Set(value, time_code)
+# Clear default value
+size_attr.ClearDefault(1001)
+# Remove a time sample
+size_attr.ClearAtTime(1001)
+
+### Low Level ###
+from pxr import Sdf
+layer = Sdf.Layer.CreateAnonymous()
+prim_path = Sdf.Path("/bicycle")
+prim_spec = Sdf.CreatePrimInLayer(layer, prim_path)
+prim_spec.specifier = Sdf.SpecifierDef
+prim_spec.typeName = "Cube"
+attr_spec = Sdf.AttributeSpec(prim_spec, "size", Sdf.ValueTypeNames.Double)
+## Set default value
+attr_spec.default = 10
+## Set per frame value
+for frame in range(1001, 1005):
+    value = float(frame - 1001)
+    layer.SetTimeSample(attr_spec.path, frame, value)
+# Clear default value
+attr_spec.ClearDefaultValue()
+# Remove a time sample
+layer.EraseTimeSample(attr_spec.path, 1001)
+#// ANCHOR_END: animationWrite
+
+#// ANCHOR: animationRead
+from pxr import Gf, Sdf, Usd
+### High Level ###
+stage = Usd.Stage.CreateInMemory()
+prim_path = Sdf.Path("/bicycle")
+prim = stage.DefinePrim(prim_path, "Cube")
+size_attr = prim.GetAttribute("size")
+size_attr.Set(10) 
+for frame in range(1001, 1005):
+    time_code = Usd.TimeCode(frame)
+    size_attr.Set(frame-1001, time_code)
+# Query the default value (must be same value source aka layer as the time samples).
+print(size_attr.Get()) # Returns: 10
+# Query the animation time samples
+for time_sample in size_attr.GetTimeSamples():
+    print(size_attr.Get(time_sample))
+# Returns:
+"""
+0.0, 1.0, 2.0, 3.0
+"""
+# Other important time sample methods:
+# !Danger! For value clipped (per frame loaded layers),
+# this will look into all layers, which is quite expensive.
+print(size_attr.GetNumTimeSamples()) # Returns: 4
+# You should rather use:
+# This does a check for time sample found > 2.
+# So it stops looking for more samples after the second sample.
+print(size_attr.ValueMightBeTimeVarying()) # Returns: True
+## We can also query what the closest time sample to a frame:
+print(size_attr.GetBracketingTimeSamples(1003.3)) 
+# Returns: (<Found sample>, <lower closest sample>, <upper closest sample>)
+(True, 1003.0, 1004.0)
+## We can also query time samples in a range. This is useful if we only want to lookup and copy
+# a certain range, for example in a pre-render script.
+print(size_attr.GetTimeSamplesInInterval(Gf.Interval(1001, 1003))) 
+# Returns: [1001.0, 1002.0, 1003.0]
+
+
+### Low Level ###
+from pxr import Sdf
+layer = Sdf.Layer.CreateAnonymous()
+prim_path = Sdf.Path("/bicycle")
+prim_spec = Sdf.CreatePrimInLayer(layer, prim_path)
+prim_spec.specifier = Sdf.SpecifierDef
+prim_spec.typeName = "Cube"
+attr_spec = Sdf.AttributeSpec(prim_spec, "size", Sdf.ValueTypeNames.Double)
+attr_spec.default = 10
+for frame in range(1001, 1005):
+    value = float(frame - 1001)
+    layer.SetTimeSample(attr_spec.path, frame, value)
+# Query the default value
+print(attr_spec.default) # Returns: 10
+# Query the animation time samples
+time_sample_count = layer.GetNumTimeSamplesForPath(attr_spec.path)
+for time_sample in layer.ListTimeSamplesForPath(attr_spec.path):
+    print(layer.QueryTimeSample(attr_spec.path, time_sample))
+# Returns:
+"""
+0.0, 1.0, 2.0, 3.0
+"""
+## We can also query what the closest time sample is to a frame:
+print(layer.GetBracketingTimeSamplesForPath(attr_spec.path, 1003.3)) 
+# Returns: (<Found sample>, <lower closest sample>, <upper closest sample>)
+(True, 1003.0, 1004.0)
+#// ANCHOR_END: animationRead
+
+#// ANCHOR: animationTimeVarying
+# !Danger! For value clipped (per frame loaded layers),
+# this will look into all layers, which is quite expensive.
+print(size_attr.GetNumTimeSamples())
+# You should rather use:
+# This does a check for time sample found > 2.
+# So it stops looking for more samples after the second sample.
+print(size_attr.ValueMightBeTimeVarying())
+#// ANCHOR_END: animationTimeVarying
+
+#// ANCHOR: animationSpecialValues
+from pxr import Sdf, Usd
+### High Level ###
+stage = Usd.Stage.CreateInMemory()
+prim_path = Sdf.Path("/bicycle")
+prim = stage.DefinePrim(prim_path, "Cube")
+size_attr = prim.GetAttribute("size")
+for frame in range(1001, 1005):
+    time_code = Usd.TimeCode(float(frame - 1001))
+    size_attr.Set(frame, time_code)
+## Value Blocking
+size_attr.Set(1001, Sdf.ValueBlock())
+
+### Low Level ###
+from pxr import Sdf
+layer = Sdf.Layer.CreateAnonymous()
+prim_path = Sdf.Path("/bicycle")
+prim_spec = Sdf.CreatePrimInLayer(layer, prim_path)
+prim_spec.specifier = Sdf.SpecifierDef
+prim_spec.typeName = "Cube"
+attr_spec = Sdf.AttributeSpec(prim_spec, "size", Sdf.ValueTypeNames.Double)
+for frame in range(1001, 1005):
+    value = float(frame - 1001)
+    layer.SetTimeSample(attr_spec.path, frame, value)
+
+## Value Blocking
+layer.SetTimeSample(attr_spec.path, 1001, Sdf.ValueBlock())
+#// ANCHOR_END: animationSpecialValues

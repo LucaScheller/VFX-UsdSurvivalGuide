@@ -14,7 +14,7 @@ Usd encodes time related data in a very simple format:
     1. [Time Code](#animationTimeCode)
     2. [Layer Offset](#animationLayerOffset)
     3. [Reading & Writing time samples](#animationReadWrite)
-    4. [Stage/Layer Metadata](#animationMetadata)
+    4. [Frames Per Second](#animationMetadata)
     5. [Stitching/Combining time samples](#animationStitch)
     6. [Value Clips](#animationValueClips)
 
@@ -24,6 +24,12 @@ Usd encodes time related data in a very simple format:
 - Time samples are encoded in a simple {\<time(frame)\>: \<value\>} dict.
 - If a frame is requested where no time samples exist, it will be interpolated if the data type and non changing array lengths in neighbour time samples exist. Value queries before/after the first/last time sample will be clamped to these time samples.
 - Time samples are encoded unitless/per frame and not in time units. This means they have to be shifted depending on the current frames per second.
+- Only attributes can carry time sample data. (So composition arcs can not be time animated, only offset/scaled (see the LayerOffset section on this page)).
+
+Reading and writing is quite straight forward:
+```python
+{{#include ../../../../code/core/elements.py:animationOverview}}
+```
 ~~~
 
 ## What should I use it for? <a name="usage"></a>
@@ -134,9 +140,61 @@ Instead you have to create new ones and re-write the arc/assign the new layer of
 ```
 ~~~
 
+If you are interested on how to author composition in the low level API, checkout our [composition](../composition/overview.md) section.
+
 ### Reading & Writing time samples <a name="animationReadWrite"></a>
 
-### Stage/Layer Metadata <a name="animationMetadata"></a>
+#### Writing data
+
+Here are the high and low level API to write data.
+~~~admonish tip
+When writing a large amount of samples, you should use the low level API as it is a lot faster.
+~~~
+
+~~~admonish info title=""
+```python
+{{#include ../../../../code/core/elements.py:animationWrite}}
+```
+~~~
+
+If you are not sure if a schema attribute can have time samples, you can get the variability hint.
+This is only a hint, it is up to you to not write time samples. In some parts of Usd things will fail or not work as exepcted if you write time samples for a non varying attribute.
+~~~admonish info title=""
+```python
+attr.GetMetadata("variability") == Sdf.VariabilityVarying
+attr.GetMetadata("variability") == Sdf.VariabilityUniform 
+```
+~~~
+
+#### Reading data
+
+To read data we recommend using the high level API. That way you can also request data from value clipped (per frame loaded Usd) files. The only case where reading directly in the low level API make sense is when you need to open a on disk layer and need to tweak the time samples. Check out our [FX Houdini](../../dcc/houdini/fx/pointinstancers.md) section for a practical example.
+
+~~~admonish tip
+If you need to check if an attribute is time sampled, run the following:
+```python
+{{#include ../../../../code/core/elements.py:animationTimeVarying}}
+```
+If you know the whole layer is in memory, then running GetNumTimeSamples()
+is fine, as it doesn't have t open any files.
+~~~
+
+~~~admonish info title=""
+```python
+{{#include ../../../../code/core/elements.py:animationRead}}
+```
+~~~
+
+#### Special Values
+You can also tell a time sample to block a value. Blocking means that the attribute at that frame will act as if it doesn't have any value written ("Not authored" in USD speak) to scene/render delegates.
+
+~~~admonish info title=""
+```python
+{{#include ../../../../code/core/elements.py:animationSpecialValues}}
+```
+~~~
+
+### Frames Per Second <a name="animationMetadata"></a>
 
 ### Stitching/Combining time samples<a name="animationStitch"></a>
 

@@ -57,7 +57,7 @@
             - [Copying Data & Traversal of Hierarchies](./dcc/houdini/hda/data_modify.md)
         - [FX](./dcc/houdini/fx/overview.md)
             - [Frustum Culling](./dcc/houdini/fx/frustum_culling.md)
-            - [Point Instancers ('Copy To Points')](./dcc/houdini/fx/frustum_culling.md)
+            - [Point Instancers ('Copy To Points')](./dcc/houdini/fx/pointinstancers.md)
             - [Particles](./dcc/houdini/fx/particles.md)
             - [Deforming Meshes](./dcc/houdini/fx/deforming_meshes.md)
             - [RBD (RigidBodyDynamics)](./dcc/houdini/fx/rbd.md)
