@@ -1564,8 +1564,8 @@ prim_path = Sdf.Path("/bicycle")
 prim = stage.DefinePrim(prim_path, "Cube")
 size_attr = prim.GetAttribute("size")
 for frame in range(1001, 1005):
-    time_code = Usd.TimeCode(float(frame - 1001))
-    size_attr.Set(frame, time_code)
+    time_code = Usd.TimeCode(frame)
+    size_attr.Set(frame - 1001, time_code)
 ## Value Blocking
 size_attr.Set(1001, Sdf.ValueBlock())
 
@@ -1584,3 +1584,39 @@ for frame in range(1001, 1005):
 ## Value Blocking
 layer.SetTimeSample(attr_spec.path, 1001, Sdf.ValueBlock())
 #// ANCHOR_END: animationSpecialValues
+
+#// ANCHOR: animationFPS
+from pxr import Sdf, Usd
+### High Level ###
+stage = Usd.Stage.CreateInMemory()
+prim_path = Sdf.Path("/bicycle")
+prim = stage.DefinePrim(prim_path, "Cube")
+size_attr = prim.GetAttribute("size")
+for frame in range(1001, 1005):
+    time_code = Usd.TimeCode(frame)
+    size_attr.Set(frame - 1001, time_code)
+# FPS Metadata
+stage.SetTimeCodesPerSecond(25)
+stage.SetFramesPerSecond(25)
+stage.SetStartTimeCode(1001)
+stage.SetEndTimeCode(1005)
+
+### Low Level ###
+from pxr import Sdf
+layer = Sdf.Layer.CreateAnonymous()
+prim_path = Sdf.Path("/bicycle")
+prim_spec = Sdf.CreatePrimInLayer(layer, prim_path)
+prim_spec.specifier = Sdf.SpecifierDef
+prim_spec.typeName = "Cube"
+attr_spec = Sdf.AttributeSpec(prim_spec, "size", Sdf.ValueTypeNames.Double)
+for frame in range(1001, 1005):
+    value = float(frame - 1001)
+    layer.SetTimeSample(attr_spec.path, frame, value)
+# FPS Metadata
+time_samples = Sdf.Layer.ListAllTimeSamples()
+layer.timeCodesPerSecond = 25
+layer.framesPerSecond = 25
+layer.startTimeCode = time_samples[0]
+layer.endTimeCode = time_samples[-1]
+#// ANCHOR_END: animationFPS
+

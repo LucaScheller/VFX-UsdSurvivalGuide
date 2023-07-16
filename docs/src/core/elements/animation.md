@@ -195,6 +195,38 @@ You can also tell a time sample to block a value. Blocking means that the attrib
 ~~~
 
 ### Frames Per Second <a name="animationMetadata"></a>
+With what FPS the samples are interpreted is defined by the `timeCodesPerSecond`/`framesPerSecond` metadata.
+
+The [loading order of FPS](https://openusd.org/dev/api/class_usd_stage.html#a85092d7455ae894d50224e761dc6e840) is:
+1. timeCodesPerSecond from session layer
+2. timeCodesPerSecond from root layer
+3. framesPerSecond from session layer
+4. framesPerSecond from root layer
+5. fallback value of 24
+
+When writing layers, we should always write these layer metrics, so that we know what
+the original intended FPS were. 
+
+~~~admonish warning
+If we want to load a let's say 25 FPS cache in a 24 FPS setup, we will have to apply a layer offset (as seen above) when loading in the layer. This way we can move back the sample to the "correct" frame based times. It will of course still have the FPS scaling issue (that 25 frames need to happen in 24 frames), so your samples will end up being at fractional frames to match the same image. If we have data that can't interpolate, we'll have to re-cache. In Houdini this can be easily done in SOPs.
+~~~
+
+```python
+(
+    endTimeCode = 1010
+    framesPerSecond = 24
+    metersPerUnit = 1
+    startTimeCode = 1001
+    timeCodesPerSecond = 24
+)
+```
+
+~~~admonish info title=""
+```python
+{{#include ../../../../code/core/elements.py:animationFPS}}
+```
+~~~
+
 
 ### Stitching/Combining time samples<a name="animationStitch"></a>
 
