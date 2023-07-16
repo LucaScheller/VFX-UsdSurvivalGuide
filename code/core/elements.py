@@ -38,9 +38,10 @@ prim_path_str = Sdf.Path("/set/bicycle").pathString # Returns the Python str "/s
 # Properties (Attribute/Relationship)
 property_path = Sdf.Path("/set/bicycle.size")
 property_with_namespace_path = Sdf.Path("/set/bicycle.tire:size")
+# Attribute targets (connections)
+attribute_rel_target_path = Sdf.Path("/set.bikes[/set/bicycles].size") # Attribute to attribute linking (E.g. serializing node graph connections to Usd)
 # Relationship targets
 prim_rel_target_path = Sdf.Path("/set.bikes[/set/bicycles]")           # Prim to prim linking (E.g. path collections)
-attribute_rel_target_path = Sdf.Path("/set.bikes[/set/bicycles].size") # Attribute to attribute linking (E.g. serializing node graph connections to Usd)
 # Variants
 variant_path = prim_path.AppendVariantSelection("style", "blue") # Returns: Sdf.Path('/set/bicycle{style=blue}')
 variant_path = Sdf.Path('/set/bicycle{style=blue}frame/screws')
@@ -130,7 +131,7 @@ prim_path = path.GetPrimPath(path) # Returns: Sdf.Path('/set/bicycle')
 prim_rel_target_path = Sdf.Path("/set.bikes[/set/bicycle]")
 prim_rel_target_path.IsTargetPath() # Returns: True
 prim_rel_target_path = Sdf.Path("/set.bikes").AppendTarget("/set/bicycle")
-# We can also encode attribute relation targets (For example shader node graph connections):
+# We can also encode attribute connection targets (For example shader node graph connections):
 attribute_rel_target_path = Sdf.Path("/set.bikes[/set/bicycles].size")
 attribute_rel_target_path.IsRelationalAttributePath()  # Returns: True
 #// ANCHOR_END: pathProperties
@@ -877,14 +878,21 @@ from pxr import Sdf, Usd
 stage = Usd.Stage.CreateInMemory()
 prim_path = Sdf.Path("/bicycle")
 prim = stage.DefinePrim(prim_path, "Xform")
-prim.SetMetadata("assetInfo", {"version": 1})
-prim.SetAssetInfoByKey("identifier", Sdf.AssetPath("bicycler.usd"))
+prim.SetMetadata("assetInfo", {"identifier": Sdf.AssetPath("bicycler.usd")})
+prim.SetAssetInfoByKey("name", "bicycle")
+prim.SetAssetInfoByKey("version", "v001")
+prim.SetAssetInfoByKey("payloadAssetDependencies", Sdf.AssetPathArray(["assetIndentifierA", "assetIndentifierA"]))
+# Sdf.AssetPathArray([]) auto-casts all elements to Sdf.AssetPath objects.
 
 ### Low Level ###
 layer = Sdf.Layer.CreateAnonymous()
 prim_path = Sdf.Path("/cube")
 prim_spec = Sdf.CreatePrimInLayer(layer, prim_path)
 prim_spec.assetInfo = {"identifier": Sdf.AssetPath("bicycle.usd")}
+prim_spec.assetInfo["name"] = "bicycle"
+prim_spec.assetInfo["version"] = "v001"
+prim_spec.assetInfo["payloadAssetDependencies"] = Sdf.AssetPathArray(["assetIndentifierA", "assetIndentifierA"])
+# Sdf.AssetPathArray([]) auto-casts all elements to Sdf.AssetPath objects.
 #// ANCHOR_END: metadataAssetInfo
 
 #// ANCHOR: metadataCustomData
@@ -903,20 +911,6 @@ prim_spec = Sdf.CreatePrimInLayer(layer, prim_path)
 prim_spec.customData = {"myCoolData": "myCoolValue"}
 #// ANCHOR_END: metadataCustomData
 
-#// ANCHOR: metadataPayloadAssetDependencies
-from pxr import Sdf, Usd
-### High Level ###
-stage = Usd.Stage.CreateInMemory()
-prim_path = Sdf.Path("/bicycle")
-prim = stage.DefinePrim(prim_path, "Xform")
-prim.SetAssetInfoByKey("payloadAssetDependencies", Sdf.AssetPathArray(["@assetIndentifierA", "@assetIndentifierA"]))
-
-### Low Level ###
-layer = Sdf.Layer.CreateAnonymous()
-prim_path = Sdf.Path("/cube")
-prim_spec = Sdf.CreatePrimInLayer(layer, prim_path)
-prim_spec.assetInfo["payloadAssetDependencies"] = Sdf.AssetPathArray(["@assetIndentifierA", "@assetIndentifierA"])
-#// ANCHOR_END: metadataPayloadAssetDependencies
 
 #// ANCHOR: metadataComment
 from pxr import Sdf, Usd

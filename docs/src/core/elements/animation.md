@@ -12,7 +12,7 @@ Usd encodes time related data in a very simple format:
 3. [Resources](#resources)
 4. [Overview](#overview)
     1. [Time Code](#animationTimeCode)
-    2. [Layer Offset](#animationLayerOffset)
+    2. [Layer Offset (A Non-Animateable Time Offset/Scale for Composition Arcs)](#animationLayerOffset)
     3. [Reading & Writing time samples](#animationReadWrite)
     4. [Frames Per Second](#animationMetadata)
     5. [Stitching/Combining time samples](#animationStitch)
@@ -123,7 +123,7 @@ The `Usd.TimeCode` class is a small wrapper class for handling time encoding. Cu
 ```
 ~~~
 
-### Layer Offsets <a name="animationLayerOffset"></a>
+### Layer Offset (A Non-Animateable Time Offset/Scale for Composition Arcs) <a name="animationLayerOffset"></a>
 The `Sdf.LayerOffset` is used for encoding a time offset and scale for composition arcs. 
 
 ~~~admonish warning

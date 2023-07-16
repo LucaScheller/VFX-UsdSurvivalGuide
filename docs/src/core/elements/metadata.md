@@ -128,6 +128,14 @@ The `ByKey`/`ByDictKey` take a root key and a key path (with `:` if nested), e.g
 
 #### Asset Info <a name="metadataAssetInfo"></a>
 The `assetInfo` metadata carries asset related data. This is just a predefined standardized location all vendors/companies should adhere to when writing asset data that should be tracked.
+
+There are currently four standardized keys:
+- `identifier` (Sdf.AssetPath): The asset identifier (that the [asset resolver](../plugins/assetresolver.md) can resolve)
+- `name` (str): The name of the asset.
+- `version` (str): The version of the asset.
+- `payloadAssetDependencies` (Sdf.AssetPathArray()): This is typically attached to the prim where you attach payloads to that when you unloaded payloads, you can still see what is in the file without traversing the actual layer content. It is up to you
+to manage the content of this list to be synced with the actual payload(s) content.
+
 ~~~admonish info title=""
 ```python
 {{#include ../../../../code/core/elements.py:metadataAssetInfo}}
@@ -147,17 +155,6 @@ There is also a special key to track user comments:
 ~~~admonish info title=""
 ```python
 {{#include ../../../../code/core/elements.py:metadataComment}}
-```
-~~~
-
-#### Payload Asset Dependencies <a name="metadataPayloadAssetDependencies"></a>
-There is also a special key to track asset dependencies.
-This is typically attached to the prim where you attach payloads to that when you unloaded payloads,
-you can still see what is in the file without traversing the actual layer content. It is up to you
-to manage the content of this list to be synced with the actual payload(s) content.
-~~~admonish info title=""
-```python
-{{#include ../../../../code/core/elements.py:metadataPayloadAssetDependencies}}
 ```
 ~~~
 
