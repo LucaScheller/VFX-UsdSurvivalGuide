@@ -22,7 +22,7 @@ The kind metadata is mainly used to for two things:
 In production, you'll use kinds as a way to filter prims when looking for data. As kind data is written in prim metadata, it is very fast to access and suited for high performance queries/traversals. For more info on traversals, take a look at the [traversal]() section.
 ~~~
 ~~~admonish important
-You should always tag all prims in the hierarchy with kinds at least to the asset level. Some DCCs will otherwise not traverse into the hierarchy if they come across a prim without a kind being set.
+You should always tag all prims in the hierarchy with kinds at least to the asset level. Some Usd methods as well as DCCs will otherwise not traverse into the child hierarchy of a prim if they come across a prim without a kind being set.
 So this means you should have at least `group` kind metadata set for all parent prims of `model` sub-kind prims.
 ~~~
 
@@ -35,7 +35,7 @@ So this means you should have at least `group` kind metadata set for all parent 
 Usd ships with these kinds by default, to register your own kinds, see the below examples for more details:
 - `model`: The base kind for all model kinds, don't use it directly.
     - `group`: A group of model prims.
-        -`assembly`: A collection of model prims, typically used for sets/a assembled collection of models or environments.
+        - `assembly`: A collection of model prims, typically used for sets/a assembled collection of models or environments.
     - `component`: A sub-kind of 'model' that has no other child prims of type 'model'
 - `subcomponent`: An important subhierarchy of an component.
 

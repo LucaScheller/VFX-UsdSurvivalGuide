@@ -1,16 +1,12 @@
 # Plugin System
-
 Usd has a plugin system over which individual components are loaded.
 
 ~~~admonish info title=""
-In this guide we will cover how to create custom:
-- `schema`,
-- `kind` 
-- `asset resolvers`:
-
-These are the minimal plugins you will be using when you want to setup a Usd pipeline.
+In this guide we will cover how to create these minimal set of plugins needed to setup a production ready Usd pipeline:
+- Kinds Plugin: For this plugin all you need is a simple .json file that adds custom kinds. Head over to our [kind](./kind.md) section to get started.
+- Asset Resolver Plugin: Head over to our [asset resolver](./assetresolver.md) section to get started. The actual [code](https://github.com/LucaScheller/VFX-UsdAssetResolver) and [guide](https://lucascheller.github.io/VFX-UsdAssetResolver/) is hosted here as it is a big enough topic of its own.
+- Schema Plugin (Optional): A schema plugin allows you to create own prim types/API schemas. This is useful when you need to often create a standardized set of attributes on prims that are relevant for your pipeline. Head over to our [schemas](./schemas.md) section to get going or to our [schemas overview](../elements/schemas.md) section to get an overview of what schemas are.
 ~~~
-
 
 Typical plugins are:
 - Schemas

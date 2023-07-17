@@ -443,6 +443,8 @@ prim = stage.DefinePrim(prim_path, "Xform")
 prim.SetTypeName("Xform")
 # Applied schemas
 prim.AddAppliedSchema("SkelBindingAPI")
+# AddAppliedSchema does not check if the schema actually exists, 
+# you have to use this for codeless schemas.
 # prim.RemoveAppliedSchema("SkelBindingAPI")
 # Single-Apply API Schemas
 prim.ApplyAPI("UsdGeomModelAPI")
@@ -1898,10 +1900,12 @@ prim_path = Sdf.Path("/bicycleA")
 prim = stage.DefinePrim(prim_path, "Cube")
 # Check if it can be applied
 print(UsdGeom.MotionAPI.CanApply(prim)) # Returns True
-# Add applied schema (in active layer),
-# both methods to the same thing.
-prim.AddAppliedSchema("SkelBindingAPI") # Returns: True
+# Apply API schema (in active layer),
 prim.ApplyAPI("UsdGeomModelAPI") # Returns: True
+# Add applied schema
+# This does not check if the schema actually exists, 
+# you have to use this for codeless schemas.
+prim.AddAppliedSchema("SkelBindingAPI") # Returns: True #
 # Apply and get the schema class (preferred usage)
 applied_api_schema = UsdGeom.MotionAPI.Apply(prim)
 # Remove applied schema (in active layer)
@@ -2026,3 +2030,24 @@ print(registry.GetSchemaKind("Cube")) # Returns: pxr.Usd.SchemaKind.ConcreteType
 print(registry.GetSchemaKind("Imageable")) # Returns: pxr.Usd.SchemaKind.AbstractTyped
 #// ANCHOR_END: schemasKind
 
+
+#// ANCHOR: schemasPluginCodelessTest
+from pxr import Usd, Sdf
+### High Level ###
+stage = Usd.Stage.CreateInMemory()
+prim_path = Sdf.Path("/myCoolCustomPrim")
+prim = stage.DefinePrim(prim_path, "ComplexPrim")
+prim.AddAppliedSchema("ParamsAPI") # Returns: True
+# AddAppliedSchema does not check if the schema actually exists, 
+# you have to use this for codeless schemas.
+### Low Level ###
+from pxr import Sdf
+layer = Sdf.Layer.CreateAnonymous()
+prim_path = Sdf.Path("/myCoolCustomPrim")
+prim_spec = Sdf.CreatePrimInLayer(layer, prim_path)
+prim_spec.typeName = "ComplexPrim"
+schemas = Sdf.TokenListOp.Create(
+    prependedItems=["ParamsAPI"]
+)
+prim_spec.SetInfo("apiSchemas", schemas)
+#// ANCHOR_END: schemasPluginCodelessTest
