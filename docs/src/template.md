@@ -21,7 +21,6 @@ Summarize actual production relevance.
 ## Resources <a name="resources"></a>
 - [API Docs]()
 
-
 ## Overview <a name="overview"></a>
 Chart example
 ```mermaid
