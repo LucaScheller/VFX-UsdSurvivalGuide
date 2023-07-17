@@ -432,13 +432,15 @@ print(prim_spec.layer) # Returns: The active layer object the spec is on.
 #// ANCHOR: dataContainerPrimSchemas
 ### High Level ###
 # Has: 'IsA', 'HasAPI', 'CanApplyAPI'
-# Get: 'GetAppliedSchemas'
-# Set: 'AddAppliedSchema', 'ApplyAPI'
-# Clear: 'RemoveAppliedSchema', 'RemoveAPI'
+# Get: 'GetTypeName', 'GetAppliedSchemas'
+# Set: 'SetTypeName', 'AddAppliedSchema', 'ApplyAPI'
+# Clear: 'ClearTypeName', 'RemoveAppliedSchema', 'RemoveAPI'
 from pxr import Sdf, Usd
 stage = Usd.Stage.CreateInMemory()
 prim_path = Sdf.Path("/bicycle")
 prim = stage.DefinePrim(prim_path, "Xform")
+# Typed Schemas
+prim.SetTypeName("Xform")
 # Applied schemas
 prim.AddAppliedSchema("SkelBindingAPI")
 # prim.RemoveAppliedSchema("SkelBindingAPI")
@@ -452,6 +454,9 @@ from pxr import Sdf
 layer = Sdf.Layer.CreateAnonymous()
 prim_path = Sdf.Path("/bicycle")
 prim_spec = Sdf.CreatePrimInLayer(layer, prim_path)
+# Typed Schemas
+prim_spec.typeName = "Xform"
+# Applied Schemas
 schemas = Sdf.TokenListOp.Create(
     prependedItems=["SkelBindingAPI", "UsdGeomModelAPI"]
 )
@@ -1813,3 +1818,109 @@ clips_API.SetClipSets(clip_sets_active)
 }
 """
 #// ANCHOR_END: animationStitchClipsAPI
+
+
+#// ANCHOR: schemasOverview
+### Typed Schemas ###
+# From type name
+prim_type_name = prim.GetTypeName()
+prim_typed_schema = Usd.SchemaRegistry.GetTypeFromName(prim_type_name).pythonClass(prim)
+# From prim type info
+prim_typed_schema = prim.GetPrimTypeInfo().GetSchemaType().pythonClass(prim)
+
+### API Schemas ###
+# Non-Applied API Schemas
+non_applied_api_schema = Usd.ModelAPI(prim)
+# Applied API Schemas
+applied_api_schema = UsdGeom.MotionAPI.Apply(prim)
+#// ANCHOR_END: schemasOverview
+
+#// ANCHOR: schemasTyped
+###### Typed Schemas ######
+### High Level ###
+# Has: 'IsA',
+# Get: 'GetTypeName'
+# Set: 'SetTypeName'
+# Clear: 'ClearTypeName'
+from pxr import Sdf, Usd, UsdGeom
+stage = Usd.Stage.CreateInMemory()
+
+# Define prim via stage
+prim_path = Sdf.Path("/bicycleA")
+prim = stage.DefinePrim(prim_path, "Cube")
+# Define prim via typed schema
+prim_path = Sdf.Path("/bicycleB")
+prim_typed_schema = UsdGeom.Cube.Define(stage, prim_path)
+# Returns the schema class object, so we have to get the prim
+prim = prim_typed_schema.GetPrim()
+# Since the "Cube" schema is a subclass of the
+# non.concrete typed UsdGeom.Boundable schema, we can check:
+print(prim.IsA(UsdGeom.Cube)) # Returns: True
+print(prim.IsA(UsdGeom.Boundable)) # Returns: True
+# To remove the type, we can call:
+# prim.ClearTypeName()
+# To access the schema class methods, we give our prim to the 
+# class constructor:
+prim_typed_schema = UsdGeom.Cube(prim)
+# The typed Cube schema for example has a Get/Set method for the schema's size attribute.
+prim_typed_schema.GetSizeAttr().Set(5)
+# Or we let Usd gives us the Python class
+prim_typed_schema = prim.GetPrimTypeInfo().GetSchemaType().pythonClass(prim)
+prim_typed_schema.GetSizeAttr().Set(10)
+# Or we get it from the type name
+prim_typed_schema = Usd.SchemaRegistry.GetTypeFromName(prim.GetTypeName()).pythonClass(prim)
+
+### Low Level ###
+# To set typed schemas via the low level API, we just 
+# need to set the PrimSpec.typeName = "<SchemaName>"
+from pxr import Sdf
+layer = Sdf.Layer.CreateAnonymous()
+prim_path = Sdf.Path("/bicycle")
+prim_spec = Sdf.CreatePrimInLayer(layer, prim_path)
+prim_spec.typeName = "Cube"
+#// ANCHOR_END: schemasTyped
+
+
+#// ANCHOR: schemasAPI
+###### API Schemas ######
+### High Level ###
+# Has: 'HasAPI', 'CanApplyAPI'
+# Get: 'GetAppliedSchemas'
+# Set: 'AddAppliedSchema', 'ApplyAPI'
+# Clear: 'RemoveAppliedSchema', 'RemoveAPI'
+from pxr import Sdf, Usd, UsdGeom
+stage = Usd.Stage.CreateInMemory()
+
+### Applied Schemas ###
+# Define prim via stage
+prim_path = Sdf.Path("/bicycleA")
+prim = stage.DefinePrim(prim_path, "Cube")
+# Check if it can be applied
+print(UsdGeom.MotionAPI.CanApply(prim)) # Returns True
+# Add applied schema (in active layer),
+# both methods to the same thing.
+prim.AddAppliedSchema("SkelBindingAPI") # Returns: True
+prim.ApplyAPI("UsdGeomModelAPI") # Returns: True
+# Apply and get the schema class (preferred usage)
+applied_api_schema = UsdGeom.MotionAPI.Apply(prim)
+# Remove applied schema (in active layer)
+# prim.RemoveAppliedSchema("SkelBindingAPI")
+# prim.RemoveAPI("UsdGeomModelAPI")
+### Non-Applied Schemas ###
+# Non-Applied schemas do not have an `Apply` method
+# (who would have guessed that?)
+non_applied_api_schema = Usd.ModelAPI(prim)
+
+### Low Level ###
+# To set applied API schemas via the low level API, we just 
+# need to set the `apiSchemas` key to a Token Listeditable Op.
+from pxr import Sdf
+layer = Sdf.Layer.CreateAnonymous()
+prim_path = Sdf.Path("/bicycle")
+prim_spec = Sdf.CreatePrimInLayer(layer, prim_path)
+schemas = Sdf.TokenListOp.Create(
+    prependedItems=["SkelBindingAPI", "UsdGeomModelAPI"]
+)
+prim_spec.SetInfo("apiSchemas", schemas)
+# We don't have nice access the the schema class as in the high level API
+#// ANCHOR_END: schemasAPI

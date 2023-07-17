@@ -14,9 +14,10 @@ Schemas are to USD what classes are to object orient programming. Let's explain 
 8. [Schema Registry](#schemasRegistry)
 
 ## TL;DR - Metadata In-A-Nutshell <a name="summary"></a>
+- Schemas are like classes in OOP that each prim in your hierarchy then instances. They provide properties (with fallback values) and metadata as well as methods (`Get<PropertName>`/`Set<PropertName>`/Utility functions) to manipulate your prim data.
 - There are two different base schema types (See the [overview](#overview) section for more info):
     - Typed Schemas:
-        - Define prim type name (OOP: The main class of your prim)
+        - Define prim type name (OOP: The main class of your prim), like `Cube`/`Mesh`/`Xform`
         - Provide metadata/properties and methods to edit these
         - Checkable via `prim.IsA(<SchemaClassName>)`
     - API Schemas (Class Naming Convention `<SchemaClassName>API`):
@@ -28,10 +29,19 @@ Schemas are to USD what classes are to object orient programming. Let's explain 
                 - Supplement typed schemas by adding additional metadata/properties and methods to edit these
                 - Checkable via `prim.HasAPI(<SchemaClassName>)`
 - A prims composed schema definition can be accessed via `prim.GetPrimDefinition()`. This defines a prim's full type signature, similar to how you can inherit from multiple classes in OOP `class (<TypedSchemaClass>, <AppliedAPISchemaA>, <AppliedAPISchemaA>)`.
+- You can generate your own as described in our [plugin schemas](../plugins/schemas.md) section.
 
 ## What should I use it for? <a name="usage"></a>
 ~~~admonish tip
-Summarize actual production relevance.
+We'll be using schema classes a lot in production, so we recommend familiarizing yourself with the below examples.
+
+They are the main interface for your prims in the high level API that gives you getters/setters for all the standard properties that ship with Usd.
+
+```python
+{{#include ../../../../code/core/elements.py:schemasOverview}}
+```
+
+The schema classes then give you access to all of the schemas Get/Set methods and utility functions.
 ~~~
 
 ## Resources <a name="resources"></a>
@@ -76,7 +86,7 @@ All the blue colored endpoints are the ones you'll set/apply/use via code.
     - The base class for all schemas that define prim types, hence the name `Typed Schemas`
     - Defines properties and metadata that is attached to prims that have this type.
     - We can check if it is applied to a prim via `prim.IsA(<className>)`
-    - Applied via `SchemaClass(prim)` e.g. `UsdGeom.Imageable(prim)` (Non-concrete), `UsdGeom.Xform(prim)`(concrete)
+    - Accessible via `SchemaClass(prim)` e.g. `UsdGeom.Imageable(prim)` (Non-concrete), `UsdGeom.Xform(prim)`(concrete), to get access to the methods. To actually apply the schema, we have to set the type name as described below. Accessing a typed schema on a prim with a different type name will result in errors once you try to get/set data. To actually not guess what the typed Python class is we can run `prim.GetPrimTypeInfo().GetSchemaType().pythonClass(prim)`.
 - `Typed Schemas (Usd.Typed)` -> `Non-Concrete Schemas`:
     - The non-concrete schemas are like abstract classes in OOP. They are schemas that concrete schemas can inherit from. The purpose of these is to define common properties/metadata that a certain type of typed schemas need. (For example lights all share a non-concrete schema for the essential properties.) 
     - Do not define a type name (hence non-concrete).
@@ -112,22 +122,49 @@ If you want to see a list of off the schema classes that ship with USD by defaul
 https://openusd.org/dev/api/class_usd_schema_base.html) page, it has a full inheritance diagram.
 
 ~~~admonish tip
-As covered in our [prim](./prim.md#schemas) section, Usd has a PrimDefinition class we can use to inspect all properties and metadata given through applied and typed schemas on a given prim. This prim definition is full type signature of a given prim.
+As covered in our [prim](./prim.md#schemas) section, Usd has a PrimDefinition/PrimTypeInfo classes we can use to inspect all properties and metadata given through applied and typed schemas on a given prim. This prim definition/type info carry the full type signature of a given prim.
 ~~~
 
 
 ## Creating/Using schemas in production <a name="schemasPracticalGuide"></a>
 
- 
- code has vs define vs cast
+Let's first look at typed schemas:
 
-~~~admonish important
-The 'IsA' check is a very valueable check to see if something is an instance of a (base) class. It is similar to Python's isinstance method.
+~~~admonish tip title="Pro Tip | Find class from type name"
+To get the class from the prim, we can run:
+```python
+# From type name
+prim_type_name = prim.GetTypeName()
+prim_typed_schema = Usd.SchemaRegistry.GetTypeFromName(prim_type_name).pythonClass(prim)
+# From prim type info
+prim_typed_schema = prim.GetPrimTypeInfo().GetSchemaType().pythonClass(prim)
+```
+This way we don't have to find and import the right class ourselves.
+~~~
+
+To summarize the below code:
+
+~~~admonish tip title="Pro Tip | Best practices how to apply schemas"
+```python
+{{#include ../../../../code/core/elements.py:schemasOverview}}
+```
 ~~~
 
 ~~~admonish info title=""
 ```python
-{{#include ../../../../code/core/elements.py:dataContainerPrimSchemas}}
+{{#include ../../../../code/core/elements.py:schemasTyped}}
+```
+~~~
+
+~~~admonish important
+The 'IsA' check is a very valuable check to see if something is an instance of a (base) class. It is similar to Python's isinstance method.
+~~~
+
+And the API schemas:
+
+~~~admonish info title=""
+```python
+{{#include ../../../../code/core/elements.py:schemasAPI}}
 ```
 ~~~
 
