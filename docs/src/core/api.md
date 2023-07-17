@@ -46,7 +46,7 @@ As a rule of thumb, you use the high level API when:
 
 ~~~admonish info title=""
 - Reading data of a stage
-- Using Usd Schema API Classes (E.g. [UsdClipsAPI](https://openusd.org/release/api/class_usd_clips_a_p_i.html), [UsdGeomPrimvarsAPI](https://openusd.org/release/api/class_usd_geom_primvars_a_p_i.html)) 
+- Using Usd Schema Classes (E.g.  [UsdGeomMesh](https://openusd.org/dev/api/class_usd_geom_mesh.html), [UsdClipsAPI](https://openusd.org/release/api/class_usd_clips_a_p_i.html), [UsdGeomPrimvarsAPI](https://openusd.org/release/api/class_usd_geom_primvars_a_p_i.html)) 
 ~~~
 
 And the low level API when:

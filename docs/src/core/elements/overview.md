@@ -23,4 +23,6 @@ This will introduce you to the core classes you'll be using the most and then in
 We try to stay terminology agnostic as much as we can, but some vocab you just have to learn to use USd. We compiled a small [cheat sheet](../glossary.md) here, that can assist you with all those weird Usd words.
 ~~~
 
+Getting down the basic building blocks down is crucial, so take your time! In the current state the examples are a bit "dry", we'll try to make it more entertaining in the future.
+
 Get yourself comfortable and let's get ready to roll! You'll master the principles of Usd in no time!

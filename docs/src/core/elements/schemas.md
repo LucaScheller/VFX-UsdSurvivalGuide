@@ -4,6 +4,11 @@ Schemas are to USD what classes are to object orient programming. Let's explain 
 - Schemas are templates that define default properties and methods. You can think of each prim in your hierarchy being an instance of a class. 
 - Each prim must (or rather should, technically it is not enforced) have a type name set (see our [prim](./prim.md) section). The type name defines the primary class your prim is an instance of. To dynamically subclass your primary classes with additional classes, USD has the concept of API schemas. These then provide extra metadata/properties or methods that can manipulate your prim data.
 
+~~~admonish warning title=""
+The examples on this page only talk about how to apply/remove schemas and how to inspect them. In our [production](../../production/overview.md) and [Houdini](../../dcc/houdini/overview.md) section we'll look into the most used ones and run through some production examples.
+~~~
+
+
 # Table of contents
 1. [API Overview In-A-Nutshell](#summary)
 2. [What should I use it for?](#usage)

@@ -2,9 +2,20 @@
 
 Usd has a plugin system over which individual components are loaded.
 
+~~~admonish info title=""
+In this guide we will cover how to create custom:
+- `schema`,
+- `kind` 
+- `asset resolvers`:
+
+These are the minimal plugins you will be using when you want to setup a Usd pipeline.
+~~~
+
+
 Typical plugins are:
-- Asset Resolver
+- Schemas
 - Kinds
+- Asset Resolver
 - Hydra Delegates (Render Delegates)
 - File Format Plugins (.abc/.vdb)
 
@@ -22,7 +33,6 @@ If you want to check via Python, you have to know under what registry the plugin
 
 Colin Kennedy's USD-Cookbook has an excellent overview on this topic:
 [USD Cook-Book Plugins](ttps://github.com/ColinKennedy/USD-Cookbook/blob/33eac067a0a62578934105b19a2b9d8e4ea0646c/references/working_with_plugins.md)
-
 
 Plugins are detected by looking at the `PXR_PLUGINPATH_NAME` environment variable for folders containing a`plugInfo.json` file.
 
