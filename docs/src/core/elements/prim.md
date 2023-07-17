@@ -126,7 +126,7 @@ The `class` specifier gets used to define "template" hierarchies that can then g
 
 #### Type Name <a name="primTypeName"></a>
 The type name specifies what concrete schema the prim adheres to.
-In plain english: Usd has the concept of schemas, which are like OOP classes. Each prim can be an instance of a class, so that it receives the default attributes of that class. More about schemas in our [schemas]() section. You can also have prims without a type name, but in practice you shouldn't do this. For that case USD has an "empty" class that just has all the base attributes called "Scope".
+In plain english: Usd has the concept of schemas, which are like OOP classes. Each prim can be an instance of a class, so that it receives the default attributes of that class. More about schemas in our [schemas](./schemas.md) section. You can also have prims without a type name, but in practice you shouldn't do this. For that case USD has an "empty" class that just has all the base attributes called "Scope".
 
 ~~~admonish info title=""
 ```python
@@ -154,7 +154,7 @@ As you can see on this page, most of the prim functionality is actually done via
 ~~~
 
 #### Tokens (Low Level API) <a name="primTokens"></a>
-Prim(property, attribute and relationship specs) also have the tokens they can set as their metadata as class attributes ending with 'Key'.
+Prim (as well as property, attribute and relationship) specs also have the tokens they can set as their metadata as class attributes ending with 'Key'.
 These 'Key' attributes are the token names that can be set on the spec via `SetInfo`, for example prim_spec.SetInfo(prim_spec.KindKey, "group")
 ~~~admonish info title=""
 ```python
