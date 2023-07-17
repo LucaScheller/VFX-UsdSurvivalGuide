@@ -1,9 +1,9 @@
 # Schemas
-~~~admonish tip
-This page only covers how to create custom schemas, as we cover what schemas are in our [schemas](../elements/schemas.md) basic building blocks of USD section.
+~~~admonish important
+This page only covers how to compile/install custom schemas, as we cover what schemas are in our [schemas](../elements/schemas.md) basic building blocks of USD section.
 ~~~
 
-As there is a very well written documentation in the [official docs](https://openusd.org/release/api/_usd__page__generating_schemas.html), we only cover compilation(less) schema creation and installation here as a hands-on example and won't go into any customization details.
+As there is a very well written documentation in the [official docs](https://openusd.org/release/api/_usd__page__generating_schemas.html), we only cover compilation(less) schema creation and installation here as a hands-on example and won't go into any customization details. You can also check out Colin's excellent [Usd-Cook-Book](https://github.com/ColinKennedy/USD-Cookbook/tree/master/plugins/custom_schemas_with_python_bindings) example.
 
 # Table of contents
 1. [API Overview In-A-Nutshell](#summary)
@@ -11,7 +11,7 @@ As there is a very well written documentation in the [official docs](https://ope
 3. [Resources](#resources)
 4. [Overview](#overview)
     1. [Generate Codeless Schema](#usdGenSchemaCodelessSchema)
-        1. [Edit GLOBAL prim 'customData' dict](#usdGenSchemaCodelessSchemaStep1)
+        1. [Edit 'GLOBAL' prim 'customData' dict](#usdGenSchemaCodelessSchemaStep1)
         2. [Run usdGenSchema](#usdGenSchemaCodelessSchemaStep2)
         3. [Add the generated pluginInfo.json director to 'PXR_PLUGINPATH_NAME' env var.](#usdGenSchemaCodelessSchemaStep3)
         4. [Run your Usd (capable) application.](#usdGenSchemaCodelessSchemaStep4)
@@ -20,10 +20,10 @@ As there is a very well written documentation in the [official docs](https://ope
 
 
 ## TL;DR - Schema Creation In-A-Nutshell <a name="summary"></a>
-- Generating schemas in Usd is as easy as supplying a customized `schema.usd` file to the `usdGenSchema` commandline tool that ships with Usd. (That's right, you don't need to code!)
+- Generating schemas in Usd is as easy as supplying a customized `schema.usda` file to the `usdGenSchema` commandline tool that ships with Usd. That's right, you don't need to code!
 - Custom schemas allow us to create custom prim types/properties/metadata (with fallback values) so that we don't have to repeatedly re-create it ourselves.
 - In OOP speak: It allows you to create your own subclasses that nicely fit into Usd and automatically generates all the `Get<PropertyName>`/`Set<PropertyName>` methods, so that it feels like you're using native USD classes.
-- We can also create `codeless` schemas, these don't need to be compiled, but we won't get our nice automatically generated getters and setters and schema C++/Python a classes.
+- We can also create `codeless` schemas, these don't need to be compiled, but we won't get our nice automatically generated getters and setters and schema C++/Python classes.
 
 ~~~admonish tip
 Codeless schemas are ideal for smaller studios or when you need to prototype a schema. The result only consists of a `plugInfo.json` and `generatedSchema.usda` file and is instantly created without any need for compiling.
@@ -38,7 +38,7 @@ We'll usually want to generate custom schemas, when we want to have a set of pro
 - [API Docs](https://openusd.org/release/api/_usd__page__generating_schemas.html)
 
 ## Overview <a name="overview"></a>
-For both examples will start of with the example schema that USD ships with in its official repo.
+For both examples we'll start of with the example schema that USD ships with in its official repo.
 
 You can copy and paste the [content](https://github.com/PixarAnimationStudios/OpenUSD/blob/release/extras/usd/examples/usdSchemaExamples/schema.usda) into a file and then follow along or take the prepared files from [here](https://github.com/LucaScheller/VFX-UsdSurvivalGuide/tree/main/files/plugins/schemas) that ship with this repo.
 
@@ -58,7 +58,7 @@ You'll first need to `cd` to the root repo dir and then run `./setup.sh`. Make s
 Then follow along the steps as mentioned below.
 
 ### Codeless TypedSchema <a name="usdGenSchemaCodelessSchema"></a>
-Codeless schemas allow us to generate schemas without any C++/Python bindings. This means your won't get fancy `Schema.Get<PropertyName>`/`Schema.Set<PropertyName>` getters and setters, on the upside you don't need to compile anything. 
+Codeless schemas allow us to generate schemas without any C++/Python bindings. This means your won't get fancy `Schema.Get<PropertyName>`/`Schema.Set<PropertyName>` getters and setters. On the upside you don't need to compile anything. 
 
 ~~~admonish tip
 Codeless schemas are ideal for smaller studios or when you need to prototype a schema. The result only consists of a `plugInfo.json` and `generatedSchema.usda` file.
@@ -78,7 +78,7 @@ over "GLOBAL" (
 
 Let's do this step by step for our example schema.
 
-#### Step 1: Edit GLOBAl prim 'customData' dict <a name="usdGenSchemaCodelessSchemaStep1"></a>
+#### Step 1: Edit 'GLOBAL' prim 'customData' dict <a name="usdGenSchemaCodelessSchemaStep1"></a>
 Update the global prim custom data dict from:
 ~~~admonish tip title=""
 ```python
@@ -111,7 +111,11 @@ over "GLOBAL" (
 #### Step 2: Run usdGenSchema <a name="usdGenSchemaCodelessSchemaStep2"></a>
 Next we need to generate the schema. 
 
-Make sure that you first sourced you Houdini environment by running `$HFS/houdini_setup` so that it find all the correct libraries and python interpreter. On Windows you can als run `hython usdGenSchema schema.usda dst` to avoid having to source the env yourself.
+Make sure that you first sourced you Houdini environment by running `$HFS/houdini_setup` so that it find all the correct libraries and python interpreter.
+
+~~~admonish tip title="usdGenSchema on Windows"
+On Windows you can also run `hython usdGenSchema schema.usda dst` to avoid having to source the env yourself.
+~~~
 
 Then run the following
 ~~~admonish tip title=""
