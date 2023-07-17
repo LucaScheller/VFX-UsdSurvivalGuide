@@ -1,8 +1,46 @@
 # Schemas
 Schemas are to USD what classes are to object orient programming. Let's explain schemas with that analogy in mind:
 
-- Schemas are templates that define default attributes and methods. You can think of each prim in your hierarchy being an instance of a class. 
+- Schemas are templates that define default properties and methods. You can think of each prim in your hierarchy being an instance of a class. 
 - Each prim must (or rather should, technically it is not enforced) have a type name set (see our [prim](./prim.md) section). The type name defines the primary class your prim is an instance of. To dynamically subclass your primary classes with additional classes, USD has the concept of API schemas. These then provide extra metadata/properties or methods that can manipulate your prim data.
+
+# Table of contents
+1. [API Overview In-A-Nutshell](#summary)
+2. [What should I use it for?](#usage)
+3. [Resources](#resources)
+4. [Overview](#overview)
+6. [Creating/Using schemas in your code](#schemasPracticalGuide)
+7. [Prim Definition](#schemasPrimDefinition)
+8. [Schema Registry](#schemasRegistry)
+
+## TL;DR - Metadata In-A-Nutshell <a name="summary"></a>
+- There are two different base schema types (See the [overview](#overview) section for more info):
+    - Typed Schemas:
+        - Define prim type name (OOP: The main class of your prim)
+        - Provide metadata/properties and methods to edit these
+        - Checkable via `prim.IsA(<SchemaClassName>)`
+    - API Schemas (Class Naming Convention `<SchemaClassName>API`):
+        - Do not define prim type name (OOP: A subclass that inherits to your main class)
+        - Is divided in:
+            - Non-Applied API schemas:
+                - Add convenience methods to manipulate common prim data like properties and core metadata (like `kind`/`clips`).
+            - Applied API schemas:
+                - Supplement typed schemas by adding additional metadata/properties and methods to edit these
+                - Checkable via `prim.HasAPI(<SchemaClassName>)`
+- A prims composed schema definition can be accessed via `prim.GetPrimDefinition()`. This defines a prim's full type signature, similar to how you can inherit from multiple classes in OOP `class (<TypedSchemaClass>, <AppliedAPISchemaA>, <AppliedAPISchemaA>)`.
+
+## What should I use it for? <a name="usage"></a>
+~~~admonish tip
+Summarize actual production relevance.
+~~~
+
+## Resources <a name="resources"></a>
+- [API Docs](https://openusd.org/release/api/_usd__page__generating_schemas.html)
+- [Schema Registry](https://openusd.org/dev/api/class_usd_schema_registry.html)
+- [Generating a schema](https://openusd.org/release/tut_generating_new_schema.html)
+
+
+## Overview <a name="overview"></a>
 
 Here is a flow chart of how the schema inheritance is setup:
 
@@ -33,18 +71,19 @@ flowchart TD
 ```
 
 All the blue colored endpoints are the ones you'll set/apply/use via code.
+
 - `Typed Schemas (Usd.Typed)`:
     - The base class for all schemas that define prim types, hence the name `Typed Schemas`
-    - We can check if it is applied to a prim via `prim.IsA(<className>)`
     - Defines properties and metadata that is attached to prims that have this type.
-    - Code: Applied via `SchemaClass(prim)` e.g. `UsdGeom.Imageable(prim)` (Non-concrete), `UsdGeom.Xform(prim)`(concrete)
+    - We can check if it is applied to a prim via `prim.IsA(<className>)`
+    - Applied via `SchemaClass(prim)` e.g. `UsdGeom.Imageable(prim)` (Non-concrete), `UsdGeom.Xform(prim)`(concrete)
 - `Typed Schemas (Usd.Typed)` -> `Non-Concrete Schemas`:
     - The non-concrete schemas are like abstract classes in OOP. They are schemas that concrete schemas can inherit from. The purpose of these is to define common properties/metadata that a certain type of typed schemas need. (For example lights all share a non-concrete schema for the essential properties.) 
     - Do not define a type name (hence non-concrete).
 - `Typed Schemas (Usd.Typed)` -> `Non-Concrete Schemas` -> `Concrete Schemas`:
     - Defines a type name
     - In OOP terms you can think of it as the primary base class that your prim is instancing.
-    - Code: Applied via `Prim.SetTypeName(<typeName>)`/`PrimSpec.typeName="<typeName>"`
+    - Applied via `Prim.SetTypeName(<typeName>)`/`PrimSpec.typeName="<typeName>"`/`SchemaClass.Define(stage, Sdf.Path("/path"))`
 
 Here is an example of the inheritance graph of the [Usd.GeomImageable](https://openusd.org/dev/api/class_usd_geom_imageable.html) typed non-concrete schema:
 ~~~admonish note title="Click to expand content" collapsible=true
@@ -53,17 +92,17 @@ Here is an example of the inheritance graph of the [Usd.GeomImageable](https://o
 
 - `API Schemas (Usd.APISchemaBase)`
     - The base class for all API Schemas, subclasses must end with `API`
-    - In OOP terms, API schemas are classes that your primary (typed) class can inherit from to gain access to convenience methods, but also additional properties.
+    - In OOP terms, API schemas are classes that your primary (typed) class can inherit from to gain access to convenience methods, but also additional metadata/properties.
 - `API Schemas (Usd.APISchemaBase)` -> `Non-Applied API Schemas`:
-    - Provide only methods to manipulate prim data like attribute connections or core metadata (like `kind`/`clips`)
-    - They do not define any properties. 
-    - The schema name is not written to the `apiSchemas` metadata.
-    - Code: Applied via `SchemaClassAPI(prim)` e.g. `Usd.ClipsAPI(prim)(prim)`
+    - Provide only methods to manipulate existing prim data like properties and core metadata (like `kind`/`clips`). Their common usage is to add convenience methods to manipulate common prim data.
+    - They do not define any metadata/properties. 
+    - The schema name is not written to the `apiSchemas` metadata, it therefore does not contribute to the prim definition.
+    - Code: Applied via `SchemaClassAPI(prim)` e.g. `Usd.ClipsAPI(prim)`
 - `API Schemas (Usd.APISchemaBase)` -> `Applied API Schemas`:
-    - Can additional properties to prim and provides methods to manipulate these.
-    - The schema name is added to the `apiSchemas` metadata
+    - Adds additional metadata/properties to prim and provides methods to manipulate these.
+    - The schema name is added to the `apiSchemas` metadata, it contributes to the prim definition.
     - We can check if it is applied to a prim via `prim.HasAPI(<APISchemaType>)`
-    - Code: Applied via `SchemaClassAPI.Apply(prim)` e.g. `UsdGeom.ModelAPI.Apply(prim)`/`prim_spec.SetInfo("apiSchemas", Sdf.TokenListOp.Create(prependedItems=["UsdGeomModelAPI"]))`
+    - Applied via `SchemaClassAPI.Apply(prim)` e.g. `UsdGeom.ModelAPI.Apply(prim)`/`prim_spec.SetInfo("apiSchemas", Sdf.TokenListOp.Create(prependedItems=["UsdGeomModelAPI"]))`
 - `API Schemas (Usd.APISchemaBase)` -> `Applied API Schemas` -> `Single Apply API Schemas`:
     - Can only be applied once per prim
 - `API Schemas (Usd.APISchemaBase)` -> `Applied API Schemas` -> `Multi Apply API Schemas`:
@@ -76,44 +115,26 @@ https://openusd.org/dev/api/class_usd_schema_base.html) page, it has a full inhe
 As covered in our [prim](./prim.md#schemas) section, Usd has a PrimDefinition class we can use to inspect all properties and metadata given through applied and typed schemas on a given prim. This prim definition is full type signature of a given prim.
 ~~~
 
-# Table of contents
-1. [API Overview In-A-Nutshell](#summary)
-2. [What should I use it for?](#usage)
-3. [Resources](#resources)
-4. [Overview](#overview)
-6. [Example A](#exampleA)
-    1. [Subexample A](#subexampleA)
-    2. [Subexample B](#subexampleB)
 
-## TL;DR - Metadata In-A-Nutshell <a name="summary"></a>
-- Main points to know
+## Creating/Using schemas in production <a name="schemasPracticalGuide"></a>
 
-## What should I use it for? <a name="usage"></a>
-~~~admonish tip
-Summarize actual production relevance.
+ 
+ code has vs define vs cast
+
+~~~admonish important
+The 'IsA' check is a very valueable check to see if something is an instance of a (base) class. It is similar to Python's isinstance method.
 ~~~
 
-## Resources <a name="resources"></a>
-- [API Docs](https://openusd.org/release/api/_usd__page__generating_schemas.html)
-- [Schema Registry](https://openusd.org/dev/api/class_usd_schema_registry.html)
-- [Generating a schema](https://openusd.org/release/tut_generating_new_schema.html)
-
-
-## Overview <a name="overview"></a>
-Chart example
-
-
-~~~admonish tip
-Example tip
+~~~admonish info title=""
+```python
+{{#include ../../../../code/core/elements.py:dataContainerPrimSchemas}}
+```
 ~~~
 
-## Example A <a name="exampleA"></a>
+## Prim Definition <a name="schemasPrimDefinition"></a>
 Example A
 
-### Subexample A <a name="subexampleA"></a>
-Example A
-
-### Subexample B <a name="subexampleB"></a>
+## Schema Registry <a name="schemasRegistry"></a>
 Example A
 
 

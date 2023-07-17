@@ -19,9 +19,9 @@ For an overview and summary please see the parent [Data Containers](./data_conta
 
 ## Overview
 The main purpose of a prim is to define and store properties. The prim class itself only stores very little data:
-- Path/Name, Specifier and type
+- Path/Name
 - A connection to its properties
-- Metadata related to composition, activation, schemas, kind and user defined custom sidecar data
+- Metadata related to composition and schemas as well as core metadata(specifier, typeName, kind,activation, assetInfo, customData) 
 
 This page covers the data on the prim itself, for properties check out this [section](./property.md).
 
