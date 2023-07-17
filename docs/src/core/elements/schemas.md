@@ -11,7 +11,10 @@ Schemas are to USD what classes are to object orient programming. Let's explain 
 4. [Overview](#overview)
 6. [Creating/Using schemas in your code](#schemasPracticalGuide)
 7. [Prim Definition](#schemasPrimDefinition)
-8. [Schema Registry](#schemasRegistry)
+8. [Prim Type Info](#schemasPrimDefinition)
+9. [Schema Classes](#schemasClasses)
+    1. [Schema Registry](#schemasRegistry)
+    2. [Schema Kind](#schemasKind) 
 
 ## TL;DR - Metadata In-A-Nutshell <a name="summary"></a>
 - Schemas are like classes in OOP that each prim in your hierarchy then instances. They provide properties (with fallback values) and metadata as well as methods (`Get<PropertName>`/`Set<PropertName>`/Utility functions) to manipulate your prim data.
@@ -48,7 +51,8 @@ The schema classes then give you access to all of the schemas Get/Set methods an
 - [API Docs](https://openusd.org/release/api/_usd__page__generating_schemas.html)
 - [Schema Registry](https://openusd.org/dev/api/class_usd_schema_registry.html)
 - [Generating a schema](https://openusd.org/release/tut_generating_new_schema.html)
-
+- [Prim Definition](https://openusd.org/dev/api/class_usd_prim_definition.html)
+- [Prim Type Info](https://openusd.org/dev/api/class_usd_prim_type_info.html)
 
 ## Overview <a name="overview"></a>
 
@@ -65,6 +69,7 @@ flowchart TD
     schemaAPIApplied(["Applied | Checkable via prim.HasAPI()"])
     schemaAPIAppliedSingle([Single Applied])
     schemaAPIAppliedMulti([Multi Applied])
+    style schemaTypedNonConcrete fill:#57ff5f
     style schemaTypedConcrete fill:#63beff
     style schemaAPINonApplied fill:#63beff
     style schemaAPIAppliedSingle fill:#63beff
@@ -80,7 +85,7 @@ flowchart TD
     schemaAPIApplied --> schemaAPIAppliedMulti
 ```
 
-All the blue colored endpoints are the ones you'll set/apply/use via code.
+All the blue colored endpoints are the ones you'll set/apply/use via code, the green one you won't instantiate directly, but you can use it to check for inheritance.
 
 - `Typed Schemas (Usd.Typed)`:
     - The base class for all schemas that define prim types, hence the name `Typed Schemas`
@@ -169,10 +174,82 @@ And the API schemas:
 ~~~
 
 ## Prim Definition <a name="schemasPrimDefinition"></a>
-Example A
+With the [prim definition](https://openusd.org/dev/api/class_usd_prim_definition.html) we can inspect what the schemas provide. Basically you are inspecting the class (as to the prim being the instance, if we compare it to OOP paradigms).
+In production, you won't be using this a lot, it is good to be aware of it though. If you change things here, you are actually on run-time modifying the base class, which might cause some weird issues.
 
-## Schema Registry <a name="schemasRegistry"></a>
-Example A
+~~~admonish info title=""
+```python
+{{#include ../../../../code/core/elements.py:dataContainerPrimTypeDefinition}}
+```
+~~~
 
+## Prim Type Info <a name="schemasPrimTypeInfo"></a>
+The [prim type info](https://openusd.org/dev/api/class_usd_prim_type_info.html) holds the composed type info of a prim. You can think of it as as the class that answers Python `type()` like queries for Usd. It caches the results of type name and applied API schema names, so that `prim.IsA(<typeName>)` checks can be used to see if the prim matches a given type.
 
+~~~admonish info title=""
+```python
+{{#include ../../../../code/core/elements.py:dataContainerPrimTypeInfo}}
+```
+~~~
 
+## Schema Classes <a name="schemasClasses"></a>
+We can lookup all registered schemas via the plugin registry as well as find out what plugin provided a schema.
+
+Before we do that let's clarify some terminology:
+- `Schema Type Name`: The name of the schema class, e.g. `Cube`, `Imageable`, `SkelBindingAPI`
+- `Tf.Type.typeName` registry name: The full registered type name `UsdGeomCube`, `UsdGeomImageable`, `UsdSkelBindingAPI`
+
+We can map from `schema type name` to `Tf.Type.typeName` via:
+```python
+registry = Usd.SchemaRegistry()
+registry.GetTypeFromName("Cube").typeName # Returns: "UsdGeomCube"
+```
+We can map from `Tf.Type.typeName` to `schema type name` via:
+```python
+registry = Usd.SchemaRegistry()
+registry.GetSchemaTypeName("UsdGeomCube") # Returns: "Cube"
+```
+
+### Schema Registry <a name="schemasRegistry"></a>
+
+Let's list all the schemas:
+~~~admonish info title=""
+```python
+{{#include ../../../../code/core/elements.py:schemasPluginRegistry}}
+```
+~~~
+
+This allows us to also look up the Tf.Type from schema (type) names, 
+which we can then use in `IsA()` checks.
+
+~~~admonish info title=""
+```python
+{{#include ../../../../code/core/elements.py:schemasRegistry}}
+```
+~~~
+
+A practical use case of looking thru the registry, is that we can grab the prim definitions. We can use these to inspect what properties a schema creates. We can use this to for example builds UIs that list all the schema attributes.
+
+~~~admonish info title=""
+```python
+{{#include ../../../../code/core/elements.py:schemasRegistryToPrimDefinition}}
+```
+~~~
+
+### Schema Kind <a name="schemasKind"></a>
+
+We can also inspect the schema kind. The kind defines (if we look at our inheritance tree in [overview](#overview)) what kind of schema it is.
+
+The kind can be one of:
+- Usd.SchemaKind.AbstractBase
+- Usd.SchemaKind.AbstractTyped
+- Usd.SchemaKind.ConcreteTyped
+- Usd.SchemaKind.NonAppliedAPI
+- Usd.SchemaKind.SingleApplyAPI
+- Usd.SchemaKind.MultipleApplyAPI
+
+~~~admonish info title=""
+```python
+{{#include ../../../../code/core/elements.py:schemasKind}}
+```
+~~~

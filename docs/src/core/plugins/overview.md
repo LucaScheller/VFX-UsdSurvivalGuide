@@ -43,3 +43,11 @@ Via Python you can also partially search for plugins (depending on what registry
 {{#include ../../../../code/core/elements.py:pluginsRegistry}}
 ```
 ~~~
+
+We can also use the plugin registry to lookup from what plugin a specific type/class (in this case a schema) is registered by:
+~~~admonish info title=""
+```python
+{{#include ../../../../code/core/elements.py:schemasPluginRegistry}}
+```
+~~~
+

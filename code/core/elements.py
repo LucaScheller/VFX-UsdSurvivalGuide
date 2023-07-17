@@ -483,7 +483,8 @@ r', 'purpose']
 dst_prim = stage.DefinePrim("/flattenedExample")
 dst_prim = prim_def.FlattenTo("/flattenedExample")
 # This will also flatten all metadata (docs etc.), this should only be used, if you need to export
-# a custom schema to an external vendor.
+# a custom schema to an external vendor. (Not sure if this the "official" way to do it, I'm sure
+# there are better ones.)
 #// ANCHOR_END: dataContainerPrimTypeDefinition
 
 #// ANCHOR: dataContainerPrimTypeInfo
@@ -1906,6 +1907,10 @@ applied_api_schema = UsdGeom.MotionAPI.Apply(prim)
 # Remove applied schema (in active layer)
 # prim.RemoveAppliedSchema("SkelBindingAPI")
 # prim.RemoveAPI("UsdGeomModelAPI")
+# For multi-apply schemas, we can feed in our custom name,
+# for example for collections it drives the collection name.
+prim.ApplyAPI("UsdCollectionAPI", "myCoolCollectionName")
+applied_multi_api_schema = Usd.CollectionAPI.Apply(prim, "myCoolCollectionName")
 ### Non-Applied Schemas ###
 # Non-Applied schemas do not have an `Apply` method
 # (who would have guessed that?)
@@ -1924,3 +1929,100 @@ schemas = Sdf.TokenListOp.Create(
 prim_spec.SetInfo("apiSchemas", schemas)
 # We don't have nice access the the schema class as in the high level API
 #// ANCHOR_END: schemasAPI
+
+
+#// ANCHOR: schemasPluginRegistry
+from pxr import Plug, Tf, Usd
+registry = Plug.Registry()
+print(">>>>>", "Typed Schemas")
+for type_name in registry.GetAllDerivedTypes(Usd.Typed):
+    print(type_name)
+print(">>>>>", "API Schemas")
+for type_name in registry.GetAllDerivedTypes(Usd.APISchemaBase):
+    print(type_name)
+
+# For example to lookup where the "Cube" type is registered from,
+# we can run:
+print(">>>>>", "Cube Schema Plugin Source")
+plugin = registry.GetPluginForType(Tf.Type.FindByName("UsdGeomCube"))
+print(plugin.name)
+print(plugin.path)
+print(plugin.resourcePath)
+print(plugin.metadata)
+#// ANCHOR_END: schemasPluginRegistry
+
+#// ANCHOR: schemasRegistry
+from pxr import Plug, Sdf, Tf, Usd
+registry = Usd.Schema.Registry()
+
+## Get Tf.Type registry entry (which allows us to get the Python class)
+## The result can also be used to run IsA checks for typed schemas.
+stage = Usd.Stage.CreateInMemory()
+prim_path = Sdf.Path("/bicycleA")
+prim = stage.DefinePrim(prim_path, "Cube")
+print(prim.IsA(registry.GetTypeFromName("UsdGeomImageable"))) # Returns: True
+print(prim.IsA(registry.GetTypeFromName("UsdGeomImageable").pythonClass)) # Returns: True
+
+
+# GetTypeFromName allows prim type names and the Tf.Type.typeName.
+print(registry.GetTypeFromName("UsdGeomCube"))      # Returns: Tf.Type("UsdGeomCube")
+print(registry.GetTypeFromName("Cube"))             # Returns: Tf.Type("UsdGeomCube")
+# For typed schemas we can also use:
+print(registry.GetTypeFromSchemaTypeName("Imageable")) # Returns: Tf.Type('UsdGeomImageable') -> Tf.Type.typeName gives us 'UsdGeomImageable'
+print(registry.GetTypeFromSchemaTypeName("Cube"))      # Returns: Tf.Type("UsdGeomCube") -> Tf.Type.typeName gives us 'UsdGeomCube'
+print(registry.GetSchemaTypeName("UsdGeomImageable"))  # Returns: "Imageable"
+print(registry.GetSchemaTypeName("UsdGeomCube"))       # Returns: "Cube"
+# For concrete typed schemas:
+print(registry.GetConcreteSchemaTypeName("UsdGeomCube"))  # Returns: "Cube"
+print(registry.GetConcreteTypeFromSchemaTypeName("Cube")) # Returns: Tf.Type("UsdGeomCube")
+# For API schemas:
+print(registry.GetAPISchemaTypeName("UsdSkelBindingAPI"))  # Returns: "SkelBindingAPI"
+print(registry.GetAPITypeFromSchemaTypeName("SkelBindingAPI")) # Returns: Tf.Type("UsdSkelBindingAPI")
+#// ANCHOR_END: schemasRegistry
+
+
+#// ANCHOR: schemasRegistryToPrimDefinition
+from pxr import Usd
+registry = Usd.Schema.Registry()
+## Useful inspection lookups ##
+# Find API schemas. This uses the `Schema Type Name` syntax:
+cube_def = registry.FindConcretePrimDefinition("Cube")
+print(cube_def.GetPropertyNames())
+# Returns:
+"""
+['doubleSided', 'extent', 'orientation', 'primvars:displayColor', 
+ 'primvars:displayOpacity', 'purpose', 'size', 'visibility',
+ 'xformOpOrder', 'proxyPrim']
+"""
+skel_bind_def = registry.FindAppliedAPIPrimDefinition("SkelBindingAPI")
+print(skel_bind_def.GetPropertyNames())
+# Returns:
+"""
+['primvars:skel:geomBindTransform', 'primvars:skel:jointIndices',
+ 'primvars:skel:jointWeights', 'skel:blendShapes', 'skel:joints', 
+ 'skel:animationSource', 'skel:blendShapeTargets', 'skel:skeleton']
+"""
+#// ANCHOR_END: schemasRegistryToPrimDefinition
+
+#// ANCHOR: schemasKind
+from pxr import Plug, Sdf, Tf, Usd
+### Check schema types ###
+registry = Usd.SchemaRegistry()
+## Typed Schemas ##
+print(registry.IsTyped(UsdGeom.Cube))         # Returns: True
+print(registry.IsTyped(UsdGeom.Imageable))    # Returns: True
+print(registry.IsAbstract(UsdGeom.Imageable)) # Returns: True
+print(registry.IsAbstract(UsdGeom.Cube))      # Returns: False
+print(registry.IsConcrete(UsdGeom.Imageable)) # Returns: False
+print(registry.IsConcrete(UsdGeom.Cube))      # Returns: True
+# Also works with type name strings
+print(registry.IsTyped("UsdGeomImageable"))   # Returns: True
+print(registry.IsTyped("UsdGeomCube"))        # Returns: True
+## API Schemas ##
+print(registry.IsAppliedAPISchema("SkelBindingAPI"))      # Returns: True
+print(registry.IsMultipleApplyAPISchema("CollectionAPI")) # Returns: True
+## We can also ask by schema type name
+print(registry.GetSchemaKind("Cube")) # Returns: pxr.Usd.SchemaKind.ConcreteTyped
+print(registry.GetSchemaKind("Imageable")) # Returns: pxr.Usd.SchemaKind.AbstractTyped
+#// ANCHOR_END: schemasKind
+
