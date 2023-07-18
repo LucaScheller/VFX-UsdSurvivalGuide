@@ -5,14 +5,14 @@ then
 fi
 # Clear existing build data
 rm -R src
-rm -R dist
 # Invoke usdGenSchema
 usdGenSchema schema.usda ./src
 # Copy auxiliary files
 cp -r auxiliary/* src
-# Build
+# Clear build & install dirs
 rm -R build
 rm -R dist
+# Build
 cmake . -B build
 cmake --build build --clean-first              # make clean all
 cmake --install build                          # make install

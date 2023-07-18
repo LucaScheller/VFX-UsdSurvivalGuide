@@ -1,7 +1,6 @@
 ### Configuration ###
 # Here we declare some custom variables that configure namings
 set(USDSG_PROJECT_NAME UsdExamplesSchemas)
-set(USDSG_RESOLVER_USD_PYTHON_MODULE_NAME usdExampleSchemas)
 
 set(USDSG_EXAMPLESCHEMAS_USD_PLUGIN_NAME usdExampleSchemas)
 set(USDSG_EXAMPLESCHEMAS_USD_CXX_CLASS_NAME UsdExampleSchemas)
@@ -29,7 +28,7 @@ set(USDSG_PYTHON_INCLUDE_DIR ${USDSG_HOUDINI_INCLUDE_DIR}/${USDSG_PYTHON_LIB})
 set(USDSG_BOOST_NAMESPACE hboost)
 set(USDSG_BOOST_INCLUDE_DIR "${USDSG_HOUDINI_INCLUDE_DIR}/${USDSG_BOOST_NAMESPACE}")
 set(USDSG_BOOST_PYTHON_LIB ${USDSG_BOOST_NAMESPACE}_${USDSG_PYTHON_LIB_NUMBER})
-# usdGenSchema
+# usdGenSchema plugInfo.json vars
 set(PLUG_INFO_ROOT ".")
 set(PLUG_INFO_LIBRARY_PATH "../lib/${USDSG_EXAMPLESCHEMAS_TARGET_LIB}.${USDSG_ARCH_LIB_SUFFIX}")
 set(PLUG_INFO_RESOURCE_PATH ".")
@@ -135,10 +134,10 @@ install(
 )
 
 # Status
-message(STATUS "--- Usd Resolver Instructions Start ---")
+message(STATUS "--- Usd Example Schemas Instructions Start ---")
 message(NOTICE "To use the compiled files, set the following environment variables:")
 message(NOTICE "export PYTHONPATH=${CMAKE_INSTALL_PREFIX}/lib/python:${USDSG_PYTHON_LIB_SITEPACKAGES}:$PYTHONPATH")
-message(NOTICE "export PXR_PLUGINPATH_NAME=${CMAKE_INSTALL_PREFIX}/resources:${PXR_PLUGINPATH_NAME}")
+message(NOTICE "export PXR_PLUGINPATH_NAME=${CMAKE_INSTALL_PREFIX}/resources:$PXR_PLUGINPATH_NAME")
 message(NOTICE "export LD_LIBRARY_PATH=${CMAKE_INSTALL_PREFIX}/lib:${HFS}/python/lib:${HFS}/dsolib:$LD_LIBRARY_PATH")
-message(STATUS "--- Usd Resolver Instructions End ---\n")
+message(STATUS "--- Usd Example Schemas Instructions End ---\n")
 

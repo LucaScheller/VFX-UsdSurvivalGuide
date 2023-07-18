@@ -2051,3 +2051,40 @@ schemas = Sdf.TokenListOp.Create(
 )
 prim_spec.SetInfo("apiSchemas", schemas)
 #// ANCHOR_END: schemasPluginCodelessTest
+
+
+#// ANCHOR: schemasPluginCompiledTest
+from pxr import Usd, Sdf
+### High Level ###
+stage = Usd.Stage.CreateInMemory()
+prim_path = Sdf.Path("/myCoolCustomPrim")
+prim = stage.DefinePrim(prim_path, "ComplexPrim")
+prim.AddAppliedSchema("ParamsAPI") # Returns: True
+# AddAppliedSchema does not check if the schema actually exists, 
+# you have to use this for codeless schemas.
+### Low Level ###
+from pxr import Sdf
+layer = Sdf.Layer.CreateAnonymous()
+prim_path = Sdf.Path("/myCoolCustomPrim")
+prim_spec = Sdf.CreatePrimInLayer(layer, prim_path)
+prim_spec.typeName = "ComplexPrim"
+schemas = Sdf.TokenListOp.Create(
+    prependedItems=["ParamsAPI"]
+)
+prim_spec.SetInfo("apiSchemas", schemas)
+
+### Python Classes ###
+stage = Usd.Stage.CreateInMemory()
+prim = stage.GetPrimAtPath("/prim")
+print(prim.GetTypeName())
+print(prim.GetPrimTypeInfo().GetSchemaType().pythonClass)
+
+# Schema Classes
+import UsdExampleSchemas as schemas
+print(schemas.Complex)
+print(schemas.ParamsAPI)
+print(schemas.Simple)
+print(schemas.Tokens)
+# Schema Get/Set/Create methods
+schemas.Complex.CreateIntAttrAttr()
+#// ANCHOR_END: schemasPluginCompiledTest
