@@ -9,4 +9,5 @@ geo
 *.code-workspace
 *.vscode
 *.usdnc
+*.so
 __pycache__
