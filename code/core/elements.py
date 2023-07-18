@@ -935,6 +935,22 @@ prim_spec = Sdf.CreatePrimInLayer(layer, prim_path)
 prim_spec.SetInfo("comment", "This is a cool prim spec!")
 #// ANCHOR_END: metadataComment
 
+#// ANCHOR: metadataIcon
+from pxr import Sdf, Usd
+### High Level ###
+stage = Usd.Stage.CreateInMemory()
+prim_path = Sdf.Path("/bicycle")
+prim = stage.DefinePrim(prim_path, "Xform")
+prim.SetMetadata("customData", {"icon": "/path/to/icon.png"})
+prim.SetCustomDataByKey("icon", "/path/to/icon.png")
+
+### Low Level ###
+layer = Sdf.Layer.CreateAnonymous()
+prim_path = Sdf.Path("/cube")
+prim_spec = Sdf.CreatePrimInLayer(layer, prim_path)
+prim_spec.customData = {"icon": "/path/to/icon.png"}
+#// ANCHOR_END: metadataIcon
+
 #// ANCHOR: debuggingTokens
 from pxr import Tf
 # To check if a symbol is active:

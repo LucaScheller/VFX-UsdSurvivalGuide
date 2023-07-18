@@ -15,7 +15,8 @@ Metadata is the smallest building block in Usd. It is part of the base class fro
         1. [Asset Info](#metadataAssetInfo)
         2. [Custom Data](#metadataCustomData) 
         3. [Payload Asset Dependencies](#metadataPayloadAssetDependencies)
-        4. [Adding comment metadata](#metadataComment)
+        4. [Comment](#metadataComment)
+        1. [Icon](#metadataIcon)
     1. [Authored vs fallback metadata values (High level API)](#metadataAuthored)
     1. [Reading metadata documentation strings (High level API)](#metadataDocs)
     1. [Reading/writing stage and layer metadata (Low level API)](#metadataLayer)
@@ -152,6 +153,14 @@ The `customData` field can be for any data you want, a kind of scratch space, so
 
 #### Comments <a name="metadataComment"></a>
 There is also a special key to track user comments:
+~~~admonish info title=""
+```python
+{{#include ../../../../code/core/elements.py:metadataComment}}
+```
+~~~
+
+#### Icon <a name="metadataIcon"></a>
+You can also write an `icon` key into the `customData` dict, which UI applications can then optionally use to draw the prim icon with.
 ~~~admonish info title=""
 ```python
 {{#include ../../../../code/core/elements.py:metadataComment}}

@@ -16,6 +16,9 @@ The kind metadata is mainly used to for two things:
 - Traversal: You can quickly detect (and stop traversal to children) where the assets are in your hierarchy by marking them as a a `model` subtype like `component`. A typical use case would be "find me all `fx` assets": In your pipeline you would define a 'fx' model kind subtype and then you can traverse for all prims that have the 'fx' kind set.
 - DCCs use this to drive user selection in UIs. This way we can quickly select non-leaf prims that are of interest. For example to transform an asset in the hierarchy, we only want to select the asset root prim and not its children, so we can tell our DCC to select only `model` kind prims. This will limit the selection to all sub-kinds of `model`.
 ~~~
+~~~admonish tip title="Pro Tip | Houdini Kind Icons"
+If you have created custom kinds, you can place icons (png/svg) in your `$HOUDINI_PATH/config/Icons/SCENEGRAPH_kind_<name>.<ext>` folder and they will be shown in your scene graph tree panel.
+~~~
 
 ## What should I use it for? <a name="usage"></a>
 ~~~admonish tip

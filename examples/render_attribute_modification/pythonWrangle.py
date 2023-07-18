@@ -133,12 +133,15 @@ def run_kernel(stage, frame):
                     continue
                 if not attr.GetTypeName().isArray:
                     continue
-                if len(attr.Get(frame)) != output_point_count:
+                if len(attr.Get(frame)) == output_point_count:
                     continue
                 attr.Set(pxr.Sdf.ValueBlock())
         # Write data
         for binding in bindings:
             attr = prim.GetAttribute(binding.property_name)
+            if len(output_data[binding.property_name]) != output_point_count:
+                attr.Set(pxr.Sdf.ValueBlock())
+                continue
             attr_class = attr.GetTypeName().type.pythonClass
             attr.Set(attr_class.FromNumpy(output_data[binding.property_name]), frame)
         # Re-Compute extent hints
