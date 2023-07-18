@@ -79,6 +79,10 @@ Currently the asset resolvers only ship with instructions for compiling against 
 
 All the implementation details and examples can be found in the below resources links. We separated it from these docs, as it is a big enough topic on its own.
 
+~~~admonish important title="Compiling against USD"
+Most DCCs ship with a customized USD build, where most vendors adhere to the [VFX Reference Platform](https://vfxplatform.com/) and only change USD with major version software releases. They do backport important production patches though from time to time. That's why we recommend using the USD build from the DCC instead of trying to self compile and link it to the DCC, as this guarantees the most stability. This does mean though, that you have to compile all plugins against each (major version) releases of each individual DCC.
+~~~
+
 ## Resources
 - [Asset Resolver API Docs](https://openusd.org/dev/api/class_ar_resolver.html)
 - [Asset Resolver Context API Docs](https://openusd.org/dev/api/class_ar_resolver_context.html)

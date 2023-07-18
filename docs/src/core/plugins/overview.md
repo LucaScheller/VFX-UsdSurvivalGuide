@@ -8,6 +8,10 @@ In this guide we will cover how to create these minimal set of plugins needed to
 - **Schema Plugin** (Optional, compiling needed if you want Python C++/Bindings): A schema plugin allows you to create own prim types/API schemas. This is useful when you need to often create a standardized set of attributes on prims that are relevant for your pipeline. Head over to our [schemas](./schemas.md) section to get going or to our [schemas overview](../elements/schemas.md) section to get an overview of what schemas are.
 ~~~
 
+~~~admonish important title="Compiling against USD"
+As listed above, some plugins need to be compiled. Most DCCs ship with a customized USD build, where most vendors adhere to the [VFX Reference Platform](https://vfxplatform.com/) and only change USD with major version software releases. They do backport important production patches though from time to time. That's why we recommend using the USD build from the DCC instead of trying to self compile and link it to the DCC, as this guarantees the most stability. This does mean though, that you have to compile all plugins against each (major version) releases of each individual DCC.
+~~~
+
 Typical plugins are:
 - Schemas
 - Kinds

@@ -10,13 +10,15 @@ As there is a very well written documentation in the [official docs](https://ope
 2. [What should I use it for?](#usage)
 3. [Resources](#resources)
 4. [Overview](#overview)
-    1. [Generate Codeless Schema](#usdGenSchemaCodelessSchema)
-        1. [Edit 'GLOBAL' prim 'customData' dict](#usdGenSchemaCodelessSchemaStep1)
-        2. [Run usdGenSchema](#usdGenSchemaCodelessSchemaStep2)
-        3. [Add the generated pluginInfo.json director to 'PXR_PLUGINPATH_NAME' env var.](#usdGenSchemaCodelessSchemaStep3)
-        4. [Run your Usd (capable) application.](#usdGenSchemaCodelessSchemaStep4)
-    1. [Generate Schema](#usdGenSchemaSchema)
-
+5. [Generate Codeless Schema](#usdGenSchemaCodelessSchema)
+    1. [Edit 'GLOBAL' prim 'customData' dict](#usdGenSchemaCodelessSchemaStep1)
+    2. [Run usdGenSchema](#usdGenSchemaCodelessSchemaStep2)
+    3. [Add the generated pluginInfo.json director to 'PXR_PLUGINPATH_NAME' env var.](#usdGenSchemaCodelessSchemaStep3)
+    4. [Run your Usd (capable) application.](#usdGenSchemaCodelessSchemaStep4)
+6. [Generate Compiled Schema](#usdGenSchemaCompiledSchema)
+    1. [Run usdGenSchema](#usdGenSchemaCompiledSchemaStep1)
+    2. [Add the generated pluginInfo.json director to 'PXR_PLUGINPATH_NAME' env var.](#usdGenSchemaCompiledSchemaStep2)
+    3. [Run your Usd (capable) application.](#usdGenSchemaCompiledSchemaStep3)
 
 
 ## TL;DR - Schema Creation In-A-Nutshell <a name="summary"></a>
@@ -27,6 +29,10 @@ As there is a very well written documentation in the [official docs](https://ope
 
 ~~~admonish tip
 Codeless schemas are ideal for smaller studios or when you need to prototype a schema. The result only consists of a `plugInfo.json` and `generatedSchema.usda` file and is instantly created without any need for compiling.
+~~~
+
+~~~admonish important title="Compiling against USD"
+Most DCCs ship with a customized USD build, where most vendors adhere to the [VFX Reference Platform](https://vfxplatform.com/) and only change USD with major version software releases. They do backport important production patches though from time to time. That's why we recommend using the USD build from the DCC instead of trying to self compile and link it to the DCC, as this guarantees the most stability. This does mean though, that you have to compile all plugins against each (major version) releases of each individual DCC.
 ~~~
 
 ## What should I use it for? <a name="usage"></a>
@@ -53,11 +59,11 @@ $HFS/bin/usdGenSchema
 
 If you download/clone this repo, we ship with .bash scripts that automatically run all the below steps for you.
 
-You'll first need to `cd` to the root repo dir and then run `./setup.sh`. Make sure that you edit the `setup.sh` file to point to the Houdini version. By default it will be the latest Houdini major release symlink, currently `/opt/hfs19.5`, that Houdini creates on install.
+You'll first need to `cd` to the root repo dir and then run `./setup.sh`. Make sure that you edit the `setup.sh` file to point to your Houdini version. By default it will be the latest Houdini major release symlink, currently `/opt/hfs19.5`, that Houdini creates on install.
 
 Then follow along the steps as mentioned below.
 
-### Codeless TypedSchema <a name="usdGenSchemaCodelessSchema"></a>
+## Codeless Schema <a name="usdGenSchemaCodelessSchema"></a>
 Codeless schemas allow us to generate schemas without any C++/Python bindings. This means your won't get fancy `Schema.Get<PropertyName>`/`Schema.Set<PropertyName>` getters and setters. On the upside you don't need to compile anything. 
 
 ~~~admonish tip
@@ -87,7 +93,6 @@ over "GLOBAL" (
         string libraryName       = "usdSchemaExamples"
         string libraryPath       = "."
         string libraryPrefix     = "UsdSchemaExamples"
-        bool skipCodeGeneration = true
     }
 ) {
 }
@@ -108,6 +113,12 @@ over "GLOBAL" (
 ```
 ~~~
 
+~~~admonish info title="Result | Click to expand content" collapsible=true
+```python
+{{#include ../../../../files/plugins/schemas/codelessSchema/schema.usda}}
+```
+~~~
+
 #### Step 2: Run usdGenSchema <a name="usdGenSchemaCodelessSchemaStep2"></a>
 Next we need to generate the schema. 
 
@@ -120,7 +131,7 @@ On Windows you can also run `hython usdGenSchema schema.usda dst` to avoid havin
 Then run the following
 ~~~admonish tip title=""
 ```bash
-cd /path/to/your/schema # In our case: ../VFX-UsdSurvivalGuide/files/plugins/schemas/codelessTypedSchema
+cd /path/to/your/schema # In our case: ../VFX-UsdSurvivalGuide/files/plugins/schemas/codelessSchema
 usdGenSchema schema.usda dst
 ```
 ~~~
@@ -157,6 +168,101 @@ To:
 ...
 ```
 ~~~
+
+~~~admonish info title="Result | Click to expand content" collapsible=true
+```python
+{{#include ../../../../files/plugins/schemas/codelessSchema/dist/plugInfo.json}}
+```
+~~~
+
+
+#### Step 3: Add the generated pluginInfo.json director to 'PXR_PLUGINPATH_NAME' env var. <a name="usdGenSchemaCodelessSchemaStep3"></a>
+Next we need to add the pluginInfo.json directory to the `PXR_PLUGINPATH_NAME` environment variable.
+~~~admonish tip title=""
+```bash
+// Linux
+export PXR_PLUGINPATH_NAME=/Enter/Path/To/dist:${PXR_PLUGINPATH_NAME}
+// Windows
+set PXR_PLUGINPATH_NAME=/Enter/Path/To/dist:${PXR_PLUGINPATH_NAME}
+```
+~~~
+If you used the helper bash script, it is already done for us.
+
+#### Step 4: Run your Usd (capable) application. <a name="usdGenSchemaCodelessSchemaStep4"></a>
+Yes, that's right! It was that easy. (Puts on sunglass, ah yeeaah! 😎)
+
+If you run Houdini and then create a primitive, you can now choose the `ComplexPrim` as well as assign the `ParamAPI` API schema.
+
+!["test"](./schemaCodelessHoudini.jpg#center)
+
+Or if you want to test it in Python:
+~~~admonish info title=""
+```python
+{{#include ../../../../code/core/elements.py:schemasPluginCodelessTest}}
+```
+~~~
+
+## Compiled Schema <a name="usdGenSchemaCompiledSchema"></a>
+Compiled schemas allow us to generate schemas with any C++/Python bindings. This means we'll get `Schema.Get<PropertyName>`/`Schema.Set<PropertyName>` getters and setters automatically which gives our schema a very native Usd feeling. You can then also edit the C++ files to add custom features on top to manipulate the data generated by your schema. This is how many of the schemas that ship with USD do it.
+
+Let's get started step by step for our example schema.
+
+#### Step 1: Run usdGenSchema <a name="usdGenSchemaCodelessSchemaStep1"></a>
+First we need to generate the schema. 
+
+Make sure that you first sourced you Houdini environment by running `$HFS/houdini_setup` so that it find all the correct libraries and python interpreter.
+
+~~~admonish tip title="usdGenSchema on Windows"
+On Windows you can also run `hython usdGenSchema schema.usda dst` to avoid having to source the env yourself.
+~~~
+
+Then run the following
+~~~admonish tip title=""
+```bash
+cd /path/to/your/schema # In our case: ../VFX-UsdSurvivalGuide/files/plugins/schemas/compiledSchema
+usdGenSchema schema.usda dst
+```
+~~~
+Or if you use the helper bash scripts in this repo (after sourcing the `setup.sh` in the repo root):
+~~~admonish tip title=""
+```bash
+cd ./files/plugins/schemas/compiledSchema/
+chmod +x build.sh # Add execute rights
+source ./build.sh # Run usdGenSchema and source the env vars for the plugin path
+```
+~~~
+
+~~~admonish bug
+Not sure if this is a bug, but the `usdGenSchema` in codeless mode currently outputs a wrong `plugInfo.json` file. (It leaves in the cmake @...@ string replacements).
+
+The fix is simple, open the `plugInfo.json` file and replace:
+```python
+...
+    "LibraryPath": "@PLUG_INFO_LIBRARY_PATH@", 
+    "Name": "usdSchemaExamples", 
+    "ResourcePath": "@PLUG_INFO_RESOURCE_PATH@", 
+    "Root": "@PLUG_INFO_ROOT@", 
+    "Type": "resource"
+...
+```
+To:
+```python
+...
+    "LibraryPath": ".", 
+    "Name": "usdSchemaExamples", 
+    "ResourcePath": ".", 
+    "Root": ".", 
+    "Type": "resource"
+...
+```
+~~~
+
+~~~admonish info title="Result | Click to expand content" collapsible=true
+```python
+{{#include ../../../../files/plugins/schemas/codelessSchema/dist/plugInfo.json}}
+```
+~~~
+
 
 #### Step 3: Add the generated pluginInfo.json director to 'PXR_PLUGINPATH_NAME' env var. <a name="usdGenSchemaCodelessSchemaStep3"></a>
 Next we need to add the pluginInfo.json directory to the `PXR_PLUGINPATH_NAME` environment variable.

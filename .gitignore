@@ -2,7 +2,6 @@ workspace
 playground
 backup
 build
-dist
 tools
 docs/book
 examples
