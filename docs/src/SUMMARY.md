@@ -14,7 +14,7 @@
         - [Data Containers (Prims & Properties)](./core/elements/data_container.md)
             - [Prims](./core/elements/prim.md)
             - [Properties (Attributes/Relationships)](./core/elements/property.md)
-        - [Data Types](./core/elements/data_type.md)
+        - [Data Types/Roles](./core/elements/data_type.md)
         - [Schemas ('Classes' in OOP terminology)](./core/elements/schemas.md)
         - [Metadata](./core/elements/metadata.md)
         - [Layers & Stages (Containers of actual data)](./core/elements/layer.md)

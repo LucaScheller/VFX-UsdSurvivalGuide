@@ -7,9 +7,11 @@ You can do this via bash (after running `source setup.sh`):
 export MDBOOK_VERSION="0.4.28"
 export MDBOOK_ADMONISH_VERSION="1.9.0"
 export MDBOOK_MERMAID_VERSION="0.12.6"
+export MDBOOK_SITEMAP_VERSION="0.1.0"
 curl -L https://github.com/rust-lang/mdBook/releases/download/v$MDBOOK_VERSION/mdbook-v$MDBOOK_VERSION-x86_64-unknown-linux-gnu.tar.gz | tar xz -C ${REPO_ROOT}/tools
 curl -L https://github.com/tommilligan/mdbook-admonish/releases/download/v$MDBOOK_ADMONISH_VERSION/mdbook-admonish-v$MDBOOK_ADMONISH_VERSION-x86_64-unknown-linux-gnu.tar.gz | tar xz -C ${REPO_ROOT}/tools
 curl -L https://github.com/badboy/mdbook-mermaid/releases/download/v$MDBOOK_MERMAID_VERSION/mdbook-mermaid-v$MDBOOK_MERMAID_VERSION-x86_64-unknown-linux-gnu.tar.gz | tar xz -C ~/tools
+curl -L https://github.com/rxdn/mdbook-sitemap-generator/releases/download/v$MDBOOK_SITEMAP_VERSION/mdbook-sitemap-generator-x86_64-unknown-linux-gnu --output ~/tools/mdbook-sitemap
 export PATH=${REPO_ROOT}/tools:$PATH
 ```
 

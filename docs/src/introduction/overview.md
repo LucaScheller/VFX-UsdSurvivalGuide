@@ -1,4 +1,3 @@
-
 ![](../UsdSurvivalGuide.png#center)
 
 # Usd Survival Guide

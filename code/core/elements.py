@@ -2181,6 +2181,8 @@ if not attr:
 print(attr.IsAuthored()) # Returns: True
 attr.Set("debugString")
 # Flatten the attribute to another prim (with optionally a different name)
+# This is quite usefull when you need to copy a specific attribute only instead
+# of a certain prim.
 prim_path = Sdf.Path("/box")
 prim = stage.DefinePrim(prim_path, "Cube")
 attr.FlattenTo(prim, "someNewName")
@@ -2193,3 +2195,141 @@ print(prim.GetPropertyStack(time_code))
 # The low level API does not offer any "extras" worthy of noting.
 #// ANCHOR_END: propertyOverview
 
+#// ANCHOR: attributeInterpolation
+from pxr import Sdf, Usd, UsdGeom
+stage = Usd.Stage.CreateInMemory()
+prim_path = Sdf.Path("/bicycle")
+prim = stage.DefinePrim(prim_path, "Xform")
+attr = prim.CreateAttribute("tire:size", Sdf.ValueTypeNames.Float)
+attr.Set(10)
+attr.SetMetadata("interpolation", UsdGeom.Tokens.constant)
+
+### Low Level ###
+from pxr import Sdf, UsdGeom
+layer = Sdf.Layer.CreateAnonymous()
+prim_path = Sdf.Path("/bicycle")
+prim_spec = Sdf.CreatePrimInLayer(layer, prim_path)
+prim_spec.specifier = Sdf.SpecifierDef
+prim_spec.typeName = "Xform"
+attr_spec = Sdf.AttributeSpec(prim_spec, "tire:size", Sdf.ValueTypeNames.Double)
+attr_spec.default = 10
+attr_spec.interpolation = UsdGeom.Tokens.constant
+# Or
+attr_spec.SetInfo("interpolation", UsdGeom.Tokens.constant)
+#// ANCHOR_END: attributeInterpolation
+
+#// ANCHOR: attributeDataTypeRole
+from pxr import Gf, Sdf, Usd
+stage = Usd.Stage.CreateInMemory()
+prim_path = Sdf.Path("/bicycle")
+prim = stage.DefinePrim(prim_path, "Xform")
+# When we create attributes, we have to specify the data type/role via a Sdf.ValueTypeName
+attr = prim.CreateAttribute("tire:size", Sdf.ValueTypeNames.Float)
+# We can then set the attribute to a value of that type.
+# Python handles the casting to the correct precision automatically for base data types.
+attr.Set(10)
+# For attributes the `typeName` metadata specifies the data type/role.
+print(attr.GetTypeName())
+# Non-base data types
+attr = prim.CreateAttribute("someArray", Sdf.ValueTypeNames.Half3Array)
+attr.Set([Gf.Vec3h()]  *3)
+attr = prim.CreateAttribute("someAssetPathArray", Sdf.ValueTypeNames.AssetArray)
+attr.Set(Sdf.AssetPathArray(["testA.usd", "testB.usd"]))
+
+### Low Level ###
+from pxr import Gf, Sdf
+layer = Sdf.Layer.CreateAnonymous()
+prim_path = Sdf.Path("/bicycle")
+prim_spec = Sdf.CreatePrimInLayer(layer, prim_path)
+prim_spec.specifier = Sdf.SpecifierDef
+prim_spec.typeName = "Xform"
+attr_spec = Sdf.AttributeSpec(prim_spec, "tire:size", Sdf.ValueTypeNames.Double)
+# We can then set the attribute to a value of that type.
+# Python handles the casting to the correct precision automatically for base data types.
+attr_spec.default = 10
+# For attributes the `typeName` metadata specifies the data type/role.
+print(attr_spec.typeName)
+# Non-base data types
+attr_spec = Sdf.AttributeSpec(prim_spec, "someArray", Sdf.ValueTypeNames.Half3Array)
+attr_spec.default = ([Gf.Vec3h()] * 3)
+attr_spec = Sdf.AttributeSpec(prim_spec, "someAssetPathArray", Sdf.ValueTypeNames.AssetArray)
+attr_spec.default = Sdf.AssetPathArray(["testA.usd", "testB.usd"])
+#// ANCHOR_END: attributeDataTypeRole
+
+
+
+
+#// ANCHOR: animationDefaultTimeSampleBlock
+from pxr import Sdf, Usd
+stage = Usd.Stage.CreateInMemory()
+prim_path = Sdf.Path("/bicycle")
+prim = stage.DefinePrim(prim_path, "Cube")
+size_attr = prim.GetAttribute("size")
+## Set default value
+time_code = Usd.TimeCode.Default()
+size_attr.Set(10, time_code)
+# Or:
+size_attr.Set(10) # The default is to set `default` (non-per-frame) data.
+## Set per frame value
+for frame in range(1001, 1005):
+    time_code = Usd.TimeCode(frame)
+    size_attr.Set(frame, time_code)
+# Or
+# As with Sdf.Path implicit casting from strings in a lot of places in the USD API,
+# the time code is implicitly casted from a Python float. 
+# It is recommended to do the above, to be more future proof of 
+# potentially encoding time unit based samples.
+for frame in range(1001, 1005):
+    size_attr.Set(frame, frame)
+## Block the value. This makes the attribute look to USD as if no value was written.
+# For attributes from schemas with default values, this will make it fallback to the default value.
+height_attr = prim.CreateAttribute("height", Sdf.ValueTypeNames.Float)
+height_attr.Set(Sdf.ValueBlock())
+#// ANCHOR_END: animationDefaultTimeSampleBlock
+
+
+#// ANCHOR: attributeReauthor
+from pxr import Sdf, Usd
+# Spawn reference data
+layer = Sdf.Layer.CreateAnonymous()
+prim_path = Sdf.Path("/bicycle")
+prim_spec = Sdf.CreatePrimInLayer(layer, prim_path)
+prim_spec.specifier = Sdf.SpecifierDef
+prim_spec.typeName = "Cube"
+attr_spec = Sdf.AttributeSpec(prim_spec, "size", Sdf.ValueTypeNames.Double)
+for frame in range(1001, 1010):
+    value = float(frame - 1001)
+    layer.SetTimeSample(attr_spec.path, frame, value)
+# Reference data
+stage = Usd.Stage.CreateInMemory()
+ref = Sdf.Reference(layer.identifier, "/bicycle")
+prim_path = Sdf.Path("/bicycle")
+prim = stage.DefinePrim(prim_path)
+ref_api = prim.GetReferences()
+ref_api.AddReference(ref)
+
+# Now if we try to read and write the data at the same time,
+# we overwrite the (layer composition) value source. In non USD speak:
+# We change the layer the data is coming from. Therefore we won't see
+# the original data after setting the first time sample.
+size_attr = prim.GetAttribute("size")
+for time_sample in size_attr.GetTimeSamples():
+    size_attr_value = size_attr.Get(time_sample)
+    print(time_sample, size_attr_value)
+    size_attr.Set(size_attr_value, time_sample)
+# Let's undo the previous edit.
+prim.RemoveProperty("size") # Removes the local layer attribute spec
+# Collect data first ()
+data = {}
+size_attr = prim.GetAttribute("size")
+for time_sample in size_attr.GetTimeSamples():
+    size_attr_value = size_attr.Get(time_sample)
+    print(time_sample, size_attr_value)
+    data[time_sample] = size_attr_value
+# Then write it
+for time_sample, value in data.items():
+    size_attr_value = size_attr.Get(time_sample)
+    size_attr.Set(value + 10, time_sample)
+
+
+#// ANCHOR_END: attributeReauthor
