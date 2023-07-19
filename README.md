@@ -11,3 +11,7 @@ Please consider contributing back to the Usd project in the  official [Usd Repos
 
 Feel free to fork this repository and share improvements.
 If you run into issues, please flag them by [submitting a ticket](https://github.com/LucaScheller/VFX-UsdSurvivalGuide/issues/new).
+
+## Contributors:
+For a full list of who contributed to this guide visit:
+[Usd Survival Guide - Introduction](https://lucascheller.github.io/VFX-UsdSurvivalGuide/)

@@ -10,6 +10,9 @@ For more information what makes this guide unique, see the [motivation](../intro
 This guide is currently still under construction and will be properly introduced at [Siggraph 2023 - Houdini Hive](https://www.sidefx.com/houdini-hive/siggraph-2023/) on Wednesday, 9. of August 2023 at 11:00 AM PST.
 ```
 
+{{#include ../contributors.md}}
+
+
 ## Prerequisites
 Before starting our journey, make sure you are all packed:
 - It is expected to have a general notion of what Usd is. If this is your first contact with the topic, check out the links in [motivation](../introduction/motivation.md). The introduction resources there take 1-2 hours to consume for a basic understanding and will help with understanding this guide.
