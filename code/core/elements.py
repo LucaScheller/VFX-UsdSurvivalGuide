@@ -2257,8 +2257,6 @@ attr_spec.default = Sdf.AssetPathArray(["testA.usd", "testB.usd"])
 #// ANCHOR_END: attributeDataTypeRole
 
 
-
-
 #// ANCHOR: animationDefaultTimeSampleBlock
 from pxr import Sdf, Usd
 stage = Usd.Stage.CreateInMemory()
@@ -2317,6 +2315,19 @@ for time_sample in size_attr.GetTimeSamples():
     size_attr_value = size_attr.Get(time_sample)
     print(time_sample, size_attr_value)
     size_attr.Set(size_attr_value, time_sample)
+# Prints:
+"""
+1001.0 0.0
+1002.0 0.0
+1003.0 0.0
+1004.0 0.0
+1005.0 0.0
+1006.0 0.0
+1007.0 0.0
+1008.0 0.0
+1009.0 0.0
+"""
+
 # Let's undo the previous edit.
 prim.RemoveProperty("size") # Removes the local layer attribute spec
 # Collect data first ()
@@ -2326,10 +2337,245 @@ for time_sample in size_attr.GetTimeSamples():
     size_attr_value = size_attr.Get(time_sample)
     print(time_sample, size_attr_value)
     data[time_sample] = size_attr_value
+# Prints:
+"""
+1001.0 0.0
+1002.0 1.0
+1003.0 2.0
+1004.0 3.0
+1005.0 4.0
+1006.0 5.0
+1007.0 6.0
+1008.0 7.0
+1009.0 8.0
+"""
 # Then write it
 for time_sample, value in data.items():
     size_attr_value = size_attr.Get(time_sample)
     size_attr.Set(value + 10, time_sample)
-
-
 #// ANCHOR_END: attributeReauthor
+
+
+#// ANCHOR: attributeReauthorPerLayer
+from pxr import Sdf, Usd
+# Spawn example data, this would be a file on disk
+layer = Sdf.Layer.CreateAnonymous()
+prim_path = Sdf.Path("/bicycle")
+prim_spec = Sdf.CreatePrimInLayer(layer, prim_path)
+prim_spec.specifier = Sdf.SpecifierDef
+prim_spec.typeName = "Cube"
+attr_spec = Sdf.AttributeSpec(prim_spec, "size", Sdf.ValueTypeNames.Double)
+for frame in range(1001, 1010):
+    value = float(frame - 1001)
+    layer.SetTimeSample(attr_spec.path, frame, value)
+
+# Edit content
+layer_identifiers = [layer.identifier]
+for layer_identifier in layer_identifiers:
+    prim_path = Sdf.Path("/bicycle")
+    ### High Level ###
+    stage = Usd.Stage.Open(layer_identifier)
+    prim = stage.GetPrimAtPath(prim_path)
+    size_attr = prim.GetAttribute("size")
+    for frame in size_attr.GetTimeSamples():
+        size_attr_value = size_attr.Get(frame)
+        # .Set() takes args in the .Set(<value>, <frame>) format
+        size_attr.Set(size_attr_value + 125, frame)
+    ### Low Level ###
+    # Note that this edits the same layer as the stage above.
+    layer = Sdf.Layer.FindOrOpen(layer_identifier)
+    prim_spec = layer.GetPrimAtPath(prim_path)
+    attr_spec = prim_spec.attributes["size"]
+    for frame in layer.ListTimeSamplesForPath(attr_spec.path):
+        value = layer.QueryTimeSample(attr_spec.path, frame)
+        layer.SetTimeSample(attr_spec.path, frame, value + 125)
+#// ANCHOR_END: attributeReauthorPerLayer
+
+#// ANCHOR: attributePrimvarAPI
+## UsdGeom.PrimvarsAPI(prim)
+# Has: 'HasPrimvar',
+# Get: 'GetAuthoredPrimvars', 'GetPrimvar',
+#      'GetPrimvars', 'GetPrimvarsWithAuthoredValues', 'GetPrimvarsWithValues', 
+# Set: 'CreatePrimvar', 'CreateIndexedPrimvar', 'CreateNonIndexedPrimvar', 
+# Clear: 'RemovePrimvar', 'BlockPrimvar',
+## UsdGeom.Primvar(attribute)
+# This is the same as Usd.Attribute, but exposes extra
+# primvar related methods, mainly:
+# Has/Is: 'IsIndexed', 'IsPrimvar'
+# Get: 'GetPrimvarName', 'GetIndicesAttr', 'GetIndices'
+# Set: 'CreateIndicesAttr', 'ComputeFlattened'
+# Remove: 'BlockIndices'
+from pxr import Sdf, Usd, UsdGeom, Vt
+stage = Usd.Stage.CreateInMemory()
+prim_path = Sdf.Path("/bicycle")
+prim = stage.DefinePrim(prim_path, "Cube")
+size_attr = prim.GetAttribute("size")
+# Manually define primvar
+attr = prim.CreateAttribute("width", Sdf.ValueTypeNames.Float)
+print(UsdGeom.Primvar.IsPrimvar(attr)) # Returns: False
+attr = prim.CreateAttribute("primvars:depth", Sdf.ValueTypeNames.Float)
+print(UsdGeom.Primvar.IsPrimvar(attr)) # Returns: True
+# Use primvar API
+# This returns an instance of UsdGeom.Primvar
+primvar_api = UsdGeom.PrimvarsAPI(prim)
+primvar = primvar_api.CreatePrimvar("height", Sdf.ValueTypeNames.StringArray)
+print(UsdGeom.Primvar.IsPrimvar(primvar))  # Returns: False
+print(primvar.GetPrimvarName()) # Returns: "height"
+primvar.Set(["testA", "testB"])
+print(primvar.ComputeFlattened()) # Returns: ["testA", "testB"]
+# In this case flattening does nothing, because it is not indexed.
+# This will fail as it is expected to create indices on primvar creation.
+primvar_indices = primvar.CreateIndicesAttr()
+# So let's do that
+values = ["testA", "testB"]
+primvar = primvar_api.CreateIndexedPrimvar("height",
+                                           Sdf.ValueTypeNames.StringArray,
+                                           Vt.StringArray(values),
+                                           Vt.IntArray([0,0,0, 1,1, 0]),
+                                           UsdGeom.Tokens.constant, 
+                                           time=1001)
+print(primvar.GetName(), primvar.GetIndicesAttr().GetName(), primvar.IsIndexed())
+# Returns: primvars:height primvars:height:indices True
+print(primvar.ComputeFlattened())
+# Returns:
+# ["testA", "testA", "testA", "testB", "testB", "testA"]
+#// ANCHOR_END: attributePrimvarAPI
+
+
+#// ANCHOR: attributePrimvarInherited
+## UsdGeom.PrimvarsAPI(prim)
+# To detect inherited primvars, the primvars API offers helper methods:
+# 'HasPossiblyInheritedPrimvar', 
+# 'FindIncrementallyInheritablePrimvars', 
+# 'FindInheritablePrimvars', 
+# 'FindPrimvarWithInheritance', 
+# 'FindPrimvarsWithInheritance',
+
+from pxr import Sdf, Usd, UsdGeom
+stage = Usd.Stage.CreateInMemory()
+bicycle_prim = stage.DefinePrim(Sdf.Path("/set/garage/bicycle"), "Cube")
+car_prim = stage.DefinePrim(Sdf.Path("/set/garage/car"), "Cube")
+set_prim = stage.GetPrimAtPath("/set")
+garage_prim = stage.GetPrimAtPath("/set/garage")
+tractor_prim = stage.DefinePrim(Sdf.Path("/set/yard/tractor"), "Cube")
+
+# Setup hierarchy primvars
+primvar_api = UsdGeom.PrimvarsAPI(set_prim)
+size_primvar = primvar_api.CreatePrimvar("size", Sdf.ValueTypeNames.Float)
+size_primvar.Set(10)
+primvar_api = UsdGeom.PrimvarsAPI(garage_prim)
+size_primvar = primvar_api.CreatePrimvar("size", Sdf.ValueTypeNames.Float)
+size_primvar.Set(5)
+size_primvar = primvar_api.CreatePrimvar("point_scale", Sdf.ValueTypeNames.Float)
+size_primvar.Set(9000)
+primvar_api = UsdGeom.PrimvarsAPI(bicycle_prim)
+size_primvar = primvar_api.CreatePrimvar("size", Sdf.ValueTypeNames.Float)
+size_primvar.Set(2.5)
+
+# Get (non-inherited) primvars on prim
+primvar_api = UsdGeom.PrimvarsAPI(bicycle_prim)
+print([p.GetAttr().GetPath() for p in primvar_api.GetPrimvars()])
+# Returns:
+# [Sdf.Path('/set/garage/bicycle.primvars:displayColor'),
+#  Sdf.Path('/set/garage/bicycle.primvars:displayOpacity'),
+#  Sdf.Path('/set/garage/bicycle.primvars:size')]
+# Check for inherited primvar on prim
+primvar_api = UsdGeom.PrimvarsAPI(bicycle_prim)
+print(primvar_api.FindPrimvarWithInheritance("test").IsDefined())
+# Returns: False
+
+# Get inherited primvar
+# This is expensive to compute, as prim prim where you call this,
+# the ancestors have to be checked.
+primvar_api = UsdGeom.PrimvarsAPI(bicycle_prim)
+print([p.GetAttr().GetPath() for p in primvar_api.FindInheritablePrimvars()])
+# Returns: [Sdf.Path('/set/garage/bicycle.primvars:size'), Sdf.Path('/set/garage.primvars:point_scale')]
+
+# Instead we should populate our own stack:
+# This is fast to compute!
+print("----")
+primvars_current = []
+for prim in stage.Traverse():
+    primvar_api = UsdGeom.PrimvarsAPI(prim)
+    primvars_current = primvar_api.FindIncrementallyInheritablePrimvars(primvars_current)
+    print(prim.GetPath(), [p.GetAttr().GetPath().pathString for p in primvars_current])
+# Returns:
+"""
+/set ['/set.primvars:size']
+/set/garage ['/set/garage.primvars:size', '/set/garage.primvars:point_scale']
+/set/garage/bicycle ['/set/garage/bicycle.primvars:size', '/set/garage.primvars:point_scale']
+/set/garage/car []
+/set/yard []
+/set/yard/traktor []
+"""
+print("----")
+# This is wrong if you might have noticed!
+# We should be seeing our '/set.primvars:size' primvar on the yard prims to!
+# If we look at the docs, we see the intended use: 
+# FindIncrementallyInheritablePrimvars returns a new list if it gets re-populated.
+# So the solution is to track the lists with pre/post visits.
+primvar_stack = [[]]
+iterator = iter(Usd.PrimRange.PreAndPostVisit(stage.GetPseudoRoot()))
+for prim in iterator:
+    primvar_api = UsdGeom.PrimvarsAPI(prim)
+    if not iterator.IsPostVisit():
+        before = hex(id(primvar_stack[-1]))
+        primvars_iter = primvar_api.FindIncrementallyInheritablePrimvars(primvar_stack[-1])
+        primvar_stack.append(primvars_iter)
+        print(before, hex(id(primvars_iter)), prim.GetPath(), [p.GetAttr().GetPath().pathString for p in primvars_iter], len(primvar_stack))
+    else:
+        primvar_stack.pop(-1)
+# This also doesn't work as it seems to clear the memory address for some reason (Or do I have a logic error?)
+# Let's write it ourselves:
+primvar_stack = [{}]
+iterator = iter(Usd.PrimRange.PreAndPostVisit(stage.GetPseudoRoot()))
+for prim in iterator:
+    primvar_api = UsdGeom.PrimvarsAPI(prim)
+    if not iterator.IsPostVisit():
+        before_hash = hex(id(primvar_stack[-1]))
+        parent_primvars = primvar_stack[-1]
+        authored_primvars = {p.GetPrimvarName(): p for p in primvar_api.GetPrimvarsWithAuthoredValues()} 
+        if authored_primvars and parent_primvars:
+            combined_primvars = {name: p for name, p in parent_primvars.items()}
+            combined_primvars.update(authored_primvars)
+            primvar_stack.append(combined_primvars)
+        elif authored_primvars:
+            primvar_stack.append(authored_primvars)
+        else:
+            primvar_stack.append(parent_primvars)
+        after_hash = hex(id(primvar_stack[-1]))
+        print(before_hash, after_hash, prim.GetPath(), [p.GetAttr().GetPath().pathString for p in primvar_stack[-1].values()], len(primvar_stack))
+    else:
+        primvar_stack.pop(-1)
+# Returns:
+""" This works :)
+0x7fea12b349c0 0x7fea12b349c0 / [] 2
+0x7fea12b349c0 0x7fea12b349c0 /HoudiniLayerInfo [] 3
+0x7fea12b349c0 0x7fea12bfe980 /set ['/set.primvars:size'] 3
+0x7fea12bfe980 0x7fea12a89600 /set/garage ['/set/garage.primvars:size', '/set/garage.primvars:point_scale'] 4
+0x7fea12a89600 0x7fea367b87c0 /set/garage/bicycle ['/set/garage/bicycle.primvars:size', '/set/garage.primvars:point_scale'] 5
+0x7fea12a89600 0x7fea12a89600 /set/garage/car ['/set/garage.primvars:size', '/set/garage.primvars:point_scale'] 5
+0x7fea12bfe980 0x7fea12bfe980 /set/yard ['/set.primvars:size'] 4
+0x7fea12bfe980 0x7fea12bfe980 /set/yard/tractor ['/set.primvars:size'] 5
+"""
+#// ANCHOR_END: attributePrimvarInherited
+
+
+#// ANCHOR: attributePrimvarIndexed
+from pxr import Sdf, Usd, UsdGeom, Vt
+stage = Usd.Stage.CreateInMemory()
+prim_path = Sdf.Path("/bicycle")
+prim = stage.DefinePrim(prim_path, "Cube")
+# So let's do that
+value_set = ["testA", "testB"]
+value_indices = [0,0,0, 1,1, 0]
+primvar = primvar_api.CreateIndexedPrimvar("height",
+                                           Sdf.ValueTypeNames.StringArray,
+                                           Vt.StringArray(value_set),
+                                           Vt.IntArray(value_indices),
+                                           UsdGeom.Tokens.constant, 
+                                           time=1001)
+print(primvar.ComputeFlattened())
+# Returns:
+# ["testA", "testA", "testA", "testB", "testB", "testA"]
+#// ANCHOR_END: attributePrimvarIndexed
