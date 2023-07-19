@@ -18,3 +18,5 @@ pig_layer.TransferContent(rubbertoy_layer)
 - Performance of traversals (metadata vs attribute reads)
 - Expose properties to houdini
 - common schemas for productions tips and tricks
+- 
+- Purpose Swapping for preview, bake point color for preview

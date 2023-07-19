@@ -880,6 +880,24 @@ xformOpOrder Encodes the sequence of transformation operations in the
 """
 #// ANCHOR_END: metadataDocsResult
 
+#// ANCHOR: metadataActive
+from pxr import Sdf, Usd
+### High Level ###
+stage = Usd.Stage.CreateInMemory()
+prim_path = Sdf.Path("/bicycle")
+prim = stage.DefinePrim(prim_path, "Xform")
+prim.SetActive(False)
+
+### Low Level ###
+layer = Sdf.Layer.CreateAnonymous()
+prim_path = Sdf.Path("/cube")
+prim_spec = Sdf.CreatePrimInLayer(layer, prim_path)
+prim_spec.active = False
+# Or
+prim_spec.SetInfo(prim_spec.ActiveKey, True)
+#// ANCHOR_END: metadataActive
+
+
 #// ANCHOR: metadataAssetInfo
 from pxr import Sdf, Usd
 ### High Level ###
@@ -2625,3 +2643,105 @@ print(primvar.ComputeFlattened())
 # Returns:
 # ["testA", "testA", "testA", "testB", "testB", "testA"]
 #// ANCHOR_END: attributePrimvarIndexed
+
+
+#// ANCHOR: attributeConnections
+from pxr import Sdf, Usd
+### High Level ###
+# Has: 'HasAuthoredConnections', 
+# Get: 'GetConnections',
+# Set: 'AddConnection', 'SetConnections'
+# Clear:  'RemoveConnection', 'ClearConnections'
+stage = Usd.Stage.CreateInMemory()
+prim_path = Sdf.Path("/box")
+prim = stage.DefinePrim(prim_path, "Cube")
+width_attr = prim.CreateAttribute("width", Sdf.ValueTypeNames.Double)
+height_attr = prim.CreateAttribute("height", Sdf.ValueTypeNames.Double)
+depth_attr = prim.CreateAttribute("depth", Sdf.ValueTypeNames.Double)
+width_attr.AddConnection(height_attr.GetPath(), Usd.ListPositionBackOfAppendList)
+width_attr.AddConnection(depth_attr.GetPath(), Usd.ListPositionFrontOfAppendList)
+print(width_attr.GetConnections())
+# Returns: [Sdf.Path('/box.depth'), Sdf.Path('/box.height')]
+width_attr.RemoveConnection(depth_attr.GetPath())
+print(width_attr.GetConnections())
+# Returns: [Sdf.Path('/box.height')]
+### Low Level ###
+# Connections are managed via the `connectionPathList` AttributeSpec attribute.
+layer = Sdf.Layer.CreateAnonymous()
+prim_path = Sdf.Path("/box")
+prim_spec = Sdf.CreatePrimInLayer(layer, prim_path)
+prim_spec.typeName = "Cube"
+width_attr_spec = Sdf.AttributeSpec(prim_spec, "width", Sdf.ValueTypeNames.Double)
+height_attr_spec = Sdf.AttributeSpec(prim_spec, "height", Sdf.ValueTypeNames.Double)
+depth_attr_spec = Sdf.AttributeSpec(prim_spec, "depth", Sdf.ValueTypeNames.Double)
+width_attr_spec.connectionPathList.Append(height_attr_spec.path)
+width_attr_spec.connectionPathList.Append(depth_attr_spec.path)
+print(width_attr_spec.connectionPathList.GetAddedOrExplicitItems())
+# Returns: (Sdf.Path('/box.height'), Sdf.Path('/box.depth'))
+width_attr_spec.connectionPathList.Erase(depth_attr_spec.path)
+print(width_attr_spec.connectionPathList.GetAddedOrExplicitItems())
+# Returns: (Sdf.Path('/box.height'),)
+## This won't work as the connectionPathList attribute can only be edited in place
+path_list = Sdf.PathListOp.Create(appendedItems=[height_attr_spec.path])
+# width_attr_spec.connectionPathList = path_list
+#// ANCHOR_END: attributeConnections
+
+
+#// ANCHOR: attributePurpose
+### High Level ###
+from pxr import Sdf, Usd, UsdGeom
+stage = Usd.Stage.CreateInMemory()
+cube_prim = stage.DefinePrim(Sdf.Path("/bicycle/RENDER/cube"), "Cube")
+render_prim = cube_prim.GetParent()
+render_prim.SetTypeName("Xform")
+UsdGeom.Imageable(render_prim).GetPurposeAttr().Set(UsdGeom.Tokens.render)
+sphere_prim = stage.DefinePrim(Sdf.Path("/bicycle/PROXY/sphere"), "Sphere")
+proxy_prim = sphere_prim.GetParent()
+proxy_prim.SetTypeName("Xform")
+UsdGeom.Imageable(proxy_prim).GetPurposeAttr().Set(UsdGeom.Tokens.proxy)
+# We can also query the inherited purpose:
+imageable_api = UsdGeom.Imageable(cube_prim)
+print(imageable_api.ComputePurpose()) # Returns: 'render'
+
+### Low Level ###
+from pxr import Sdf, UsdGeom
+layer = Sdf.Layer.CreateAnonymous()
+prim_path = Sdf.Path("/bicycle")
+prim_spec = Sdf.CreatePrimInLayer(layer, prim_path)
+prim_spec.specifier = Sdf.SpecifierDef
+prim_spec.typeName = "Cube"
+attr_spec = Sdf.AttributeSpec(prim_spec, "purpose", Sdf.ValueTypeNames.Token)
+attr_spec.default = UsdGeom.Tokens.render
+#// ANCHOR_END: attributePurpose
+
+#// ANCHOR: attributeVisibility
+### High Level ###
+from pxr import Sdf, Usd, UsdGeom
+stage = Usd.Stage.CreateInMemory()
+cube_prim = stage.DefinePrim(Sdf.Path("/set/yard/bicycle"), "Cube")
+sphere_prim = stage.DefinePrim(Sdf.Path("/set/garage/bicycle"), "Sphere")
+set_prim = cube_prim.GetParent().GetParent()
+set_prim.SetTypeName("Xform")
+cube_prim.GetParent().SetTypeName("Xform")
+sphere_prim.GetParent().SetTypeName("Xform")
+UsdGeom.Imageable(set_prim).GetVisibilityAttr().Set(UsdGeom.Tokens.invisible)
+# We can also query the inherited visibility:
+# ComputeEffectiveVisibility -> This handles per purpose visibility
+# MakeInvisible, ComputeVisibility,  
+imageable_api = UsdGeom.Imageable(cube_prim)
+print(imageable_api.ComputeVisibility()) # Returns: 'invisible'
+# Make only the cube visible. Notice how this automatically sparsely
+# selects only the needed parent prims (garage) and makes them invisible.
+# How cool is that!
+imageable_api.MakeVisible()
+
+### Low Level ###
+from pxr import Sdf, UsdGeom
+layer = Sdf.Layer.CreateAnonymous()
+bicycle_prim_path = Sdf.Path("/set/bicycle")
+bicycle_prim_spec = Sdf.CreatePrimInLayer(layer, prim_path)
+bicycle_prim_spec.specifier = Sdf.SpecifierDef
+bicycle_prim_spec.typeName = "Cube"
+bicycle_vis_attr_spec = Sdf.AttributeSpec(prim_spec, "visibility", Sdf.ValueTypeNames.Token)
+bicycle_vis_attr_spec.default = UsdGeom.Tokens.inherited
+#// ANCHOR_END: attributeVisibility

@@ -23,21 +23,21 @@ flowchart TD
     2. [Attribute Data Types & Roles](#attributeDataTypeRole)
     3. [Static (Default) Values vs Time Samples vs Value Blocking](#attributeAnimation)
         1. [Re-writing a range of values from a different layer](#attributeReauthor)
-        2. [Time freezing mesh data](#attributeReauthorTimeSampleToStatic)
+        2. [Time freezing (mesh) data](#attributeReauthorTimeSampleToStatic)
     4. [Attribute To Attribute Connections (Node Graph Encoding)](#attributeConnections)
     5. [The **primvars** (primvars:<AttributeName>) namespace](#attributePrimvars)
         1. [Reading inherited primvars](#attributePrimvarsInherited)
         1. [Indexed Primvars](#attributePrimvarsIndexed)
-    1. [Common Attribtes](#attributeCommon):
-        1. [Purpose]
-        1. [Proxy Prim]
-        1. [Visiblity]
-        1. [Extents Hint vs Extent]
-        1. [Xform Ops]
-1. [Relationships](#primProperties)
+    6. [Common Attributes](#attributeCommon):
+        1. [Purpose](#attributePurpose)
+        2. [Visibility](#attributeVisibility)
+        3. [Extents Hint vs Extent](attributeExtent)
+        4. [Xform Ops](attributeXformOps)
+        5. [Proxy Prim](#propertyProxyPrim)
+3. [Relationships](#primProperties)
     1. [Collections](#relationshipCollections)
     1. [Relationships Forwarding](#relationshipForwarding)
-1. [Common Schemas]
+4. [Schemas](#propertySchemas)
 
 ## Resources
 - [Usd.Property](https://openusd.org/dev/api/class_usd_property.html)
@@ -45,6 +45,7 @@ flowchart TD
 - [Usd.Relationship](https://openusd.org/dev/api/stitch_clips_8h.html#details)
 - [Usd.GeomPrimvar](https://openusd.org/release/api/class_usd_geom_primvar.html)
 - [Usd.GeomPrimvarsAPI](https://openusd.org/dev/api/class_usd_geom_primvars_a_p_i.html)
+- [Usd.GeomImageable](https://openusd.org/release/api/class_usd_geom_imageable.html)
 
 ## Properties <a name="propertyOverview"></a>
 Let's first have a look at the shared base class `Usd.Property`. This inherits most its functionality from `Usd.Object`, which mainly exposes metadata data editing. We won't cover how metadata editing works for properties here, as it is extensively covered in our [metadata](./metadata.md#metadataSpecialProperty) section.
@@ -159,18 +160,8 @@ To edit the time samples directly, we can open the layer as a stage or edit the 
 ```
 ~~~
 
-#### Time freezing mesh data <a name="attributeReauthorTimeSampleToStatic"></a>
+#### Time freezing (mesh) data <a name="attributeReauthorTimeSampleToStatic"></a>
 If we want to time freeze a prim (where the data comes from composed layers), we simply re-write a specific time sample to the default value.
-
-~~~admonish danger
-If you have to do this for a whole hierarchy/scene, this does mean that you are flattening everything into your memory, so be aware! USD currently offers no other mechanism.
-~~~
-
-~~~admonish tip title="Hint | Click to expand" collapsible=true
-We just need to write the time sample of your choice to the `attr_spec.default` attribute and clear the time samples ;
-~~~
-
-We'll leave "Time freezing" data from the active layer to you as an exercise.
 
 ~~~admonish tip title="Pro Tip | Time Freeze | Click to expand code" collapsible=true
 ```python
@@ -178,6 +169,71 @@ We'll leave "Time freezing" data from the active layer to you as an exercise.
 ```
 ~~~
 
+~~~admonish danger
+If you have to do this for a whole hierarchy/scene, this does mean that you are flattening everything into your memory, so be aware! USD currently offers no other mechanism.
+~~~
+
+We'll leave "Time freezing" data from the active layer to you as an exercise.
+
+~~~admonish tip title="Hint | Time Freeze | Active Layer | Click to expand" collapsible=true
+We just need to write the time sample of your choice to the `attr_spec.default` attribute and clear the time samples ;
+~~~
+
+### Attribute To Attribute Connections (Node Graph Encoding)<a name="attributeConnections"></a>
+Attributes can also encode relationship-like paths to other attributes. These connections are encoded directly on the attribute. It is up to Usd/Hydra to evaluate these "attribute graphs", if you simply connect two attributes, it will not forward attribute value A to connected attribute B (USD does not have a concept for a mechanism like that (yet)).
+
+~~~admonish important
+Attribute connections are encoded from target attribute to source attribute.
+The USD file syntax is: `<data type> <attribute name>.connect = </path/to/other/prim.<attribute name>`
+~~~
+
+Currently the main use of connections is encoding node graphs for shaders via the [UsdShade.ConnectableAPI](https://openusd.org/dev/api/class_usd_shade_connectable_a_p_i.html).
+
+
+Here is an example of how a material network is encoded.
+
+~~~admonish important title=""
+```python
+def Scope "materials"
+{
+    def Material "karmamtlxsubnet" (
+    )
+    {
+        token outputs:mtlx:surface.connect = </materials/karmamtlxsubnet/mtlxsurface.outputs:out>
+
+        def Shader "mtlxsurface" ()
+        {
+            uniform token info:id = "ND_surface"
+            string inputs:edf.connect = </materials/karmamtlxsubnet/mtlxuniform_edf.outputs:out>
+            token outputs:out
+        }
+
+        def Shader "mtlxuniform_edf"
+        {
+            uniform token info:id = "ND_uniform_edf"
+            color3f inputs:color.connect = </materials/karmamtlxsubnet/mtlx_constant.outputs:out>
+            token outputs:out
+        }
+
+        def Shader "mtlx_constant"
+        {
+            uniform token info:id = "ND_constant_float"
+            float outputs:out
+        }
+    }
+}
+```
+~~~
+
+Connections, like relationships and composition arcs, are encoded via `List Editable Ops`. These are a core USD concept that is crucial to understand (They are like fancy version of a Python list with rules how sub-lists are merged). Checkout our [List Editable Ops](../composition/listeditableops.md) section for more info. 
+
+Here is how connections are managed on the high and low API level. Note as mentioned above this doesn't do anything other than make the connection. USD doesn't drive attribute values through connections. So this example is just to demonstrate the API.
+
+~~~admonish info title=""
+```python
+{{#include ../../../../code/core/elements.py:attributeConnections}}
+```
+~~~
 
 ### The **primvars** (primvars:<AttributeName>) namespace <a name="attributePrimvars"></a>
 Attributes in the `primvars` namespace `:` are USD's way of marking attributes to be exported for rendering. These can then be used by materials and AOVs. Primvars can be written per attribute type (detail/prim/vertex/point), it is up to the render delegate to correctly access them.
@@ -244,3 +300,53 @@ If you are a Houdini user you might know this method, as this is how Houdini's i
 You can find more info in the [USD Docs](https://openusd.org/release/api/class_usd_geom_primvar.html)
 
 
+### Common Attributes <a name="attributeCommon"></a>
+Now that we got the basics down, let's have a look at some common attributes (and their schemas to access them).
+
+#### Purpose <a name="attributePurpose"></a>
+The `purpose` is a special USD attribute that:
+- Affects certain scene traversal methods (e.g. [bounding box or xform cache lookups](../../production/caches.md) can be limited to a specific purpose).
+- Is a mechanism for Hydra (USD's render abstraction interface) to only pull in data with a specific purpose. Since any rendering (viewport or final image) is run via Hydra, this allows users to load in only prims tagged with a specific purpose. For example the `pxr.UsdGeom.Tokens.preview` purpose is used for scene navigation and previewing only, while the ``UsdGeom.Tokens.render` purpose is used for final frame rendering.
+- It is inherited (like [primvars](#the-primvars-primvars-namespace)) down the hierarchy. You won't see this in UIs unlike with primvars.
+
+~~~admonish tip title="Pro Tip | Where to mark the purpose"
+As a best practice you should build your hierarchies in such a way that you don't have to write a purpose value per prim.
+A typical setup is to have a `<asset root>/GEO`, `<asset root>/PROXY`, ... hierarchy, where you can then tag the `GEO`, `PROXY`, ... prims with the purpose. That way all child prims receive the purpose and you have a single point where you can override the purpose.
+
+This is useful, if you for example want to load a whole scene in `proxy` purpose and a specific asset in `render` purpose. You then just have to edit a single prim to make it work.
+~~~
+
+The purpose is provided by the `UsdGeom.Imageable` (renderable) typed non-concrete schema, and is therefore on anything that is renderable.
+
+~~~admonish tip title="Usd.GeomImageable inheritance graph | Click to expand code" collapsible=true
+![](./schemasTypedNonConcreteUsdGeomImageable.jpg#center)
+~~~
+
+There are 4 different purposes:
+- `UsdGeom.Tokens.default`: The default purpose. This is the fallback purpose, when no purpose is explicitly defined. It means that this prim should be traversed/visible to any purpose.
+- `UsdGeom.Tokens.render`: Tag any (parent) prim with this to mark it suitable for final frame rendering.
+- `UsdGeom.Tokens.proxy`:  Tag any (parent) prim with this to mark it suitable for low resolution previewing. We usually tag prims with this that can be loaded very quickly.
+- `UsdGeom.Tokens.guide`: Tag any (parent) prim with this to mark it suitable for displaying guide indicators like rig controls or other useful scene visualizers.
+
+~~~admonish tip title=""
+```python
+{{#include ../../../../code/core/elements.py:attributePurpose}}
+```
+~~~
+
+#### Visibility <a name="attributeVisibility"></a>
+The `visibility` attribute controls if the prim and its children are visible to Hydra or not. Unlike the `active` [metadata](./metadata.md#activeactivation), it does not prune the child prims, they are still reachable for inspection and traversal. Since it is an attribute, we can also animate it. Here we only cover  how to set/compute the attribute, for more info checkout our [Loading mechansims](./loading_mechanisms.md) section
+
+The attribute data type is `Sdf.Token` and can have two values:
+- UsdGeom.Tokens.inherited
+- UsdGeom.Tokens.invisible
+
+~~~admonish tip title=""
+```python
+{{#include ../../../../code/core/elements.py:attributeVisibility}}
+```
+~~~
+
+~~~admonish note
+In the near future visibility can be set per purpose (It is already possible, just not widely used). Be aware that this might incur further API changes.
+~~~

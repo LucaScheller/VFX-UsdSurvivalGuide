@@ -41,6 +41,7 @@
 - [USD in Production / General Tips & Tricks](./production/overview.md)
     - [Production Checklist before you start a USD pipeline](./production/prerequisites.md)
     - [A practical guide to composition](./production/composition.md)
+    - [Common schemas ('Classes' in OOP terminology) for production](./production/schemas.md)
     - [Stage API Query Caches)](./production/caches/overview.md)
         - [Xform Cache](./production/caches/xform.md)
         - [BoundingBox Cache](./production/caches/boundingbox.md)

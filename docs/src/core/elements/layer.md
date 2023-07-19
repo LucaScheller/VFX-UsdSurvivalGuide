@@ -26,3 +26,6 @@ flowchart LR
     layerRoot -- Composition Arc --> layer3([...])
     layer3 -- Composition Arc --> layer3Layer1([...])
 ```
+
+
+- traversals (purpose/specifier), also with respect to cache stage queries (bbox etc.)

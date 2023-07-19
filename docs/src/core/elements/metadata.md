@@ -12,18 +12,19 @@ Metadata is the smallest building block in Usd. It is part of the base class fro
     2. [Validation of dict content](#metadataValidateDict)
     3. [Nested key path syntax](#metadataNestedKeyPath)
     3. [Special metadata fields for prims](#metadataSpecialPrim)
-        1. [Asset Info](#metadataAssetInfo)
-        2. [Custom Data](#metadataCustomData) 
-        3. [Comment](#metadataComment)
-        4. [Icon (UI)](#metadataIcon)
-        5. [Hidden (UI)](#metadataHidden)
-    4. [Special metadata fields for properties](#metadataSpecialProperty)
-        1. [Support for animation (USD speak **variability**)](#metadataVariability)
-        1. [Custom vs schema defined properties](#metadataCustom) 
-    5. [Authored vs fallback metadata values (High level API)](#metadataAuthored)
-    6. [Reading metadata documentation strings (High level API)](#metadataDocs)
-    7. [Reading/writing stage and layer metadata (Low level API)](#metadataLayer)
-    8. [Reading/writing metadata via prim/property specs(Low level API)](#metadataPrimPropertySpec)
+        1. [Active/Activation](#metadataActive)
+        2. [Asset Info](#metadataAssetInfo)
+        3. [Custom Data](#metadataCustomData) 
+        4. [Comment](#metadataComment)
+        5. [Icon (UI)](#metadataIcon)
+        6. [Hidden (UI)](#metadataHidden)
+        7. [Special metadata fields for properties](#metadataSpecialProperty)
+        8. [Support for animation (USD speak **variability**)](#metadataVariability)
+        9. [Custom vs schema defined properties](#metadataCustom) 
+        10. [Authored vs fallback metadata values (High level API)](#metadataAuthored)
+        11. [Reading metadata documentation strings (High level API)](#metadataDocs)
+        12. [Reading/writing stage and layer metadata (Low level API)](#metadataLayer)
+        13. [Reading/writing metadata via prim/property specs(Low level API)](#metadataPrimPropertySpec)
 
 
 ## TL;DR - Metadata In-A-Nutshell <a name="summary"></a>
@@ -130,6 +131,17 @@ The `ByKey`/`ByDictKey` take a root key and a key path (with `:` if nested), e.g
 
 ### Special metadata fields for prims <a name="metadataSpecialPrim"></a>
 Here are the most common prim metadata keys we'll be working with.
+
+
+#### Active/Activation <a name="metadataActive"></a>
+The `active` metadata controls if the prim and its children are loaded or not.
+We only cover here how to set the metadata, for more info checkout our [Loading mechansims](./loading_mechanisms.md) section. Since it is a metadata entry, it can not be animated. For animated pruning we must use [visibility](./property.md#visibility).
+
+~~~admonish info title=""
+```python
+{{#include ../../../../code/core/elements.py:metadataActive}}
+```
+~~~
 
 #### Asset Info <a name="metadataAssetInfo"></a>
 The `assetInfo` metadata carries asset related data. This is just a predefined standardized location all vendors/companies should adhere to when writing asset data that should be tracked.

@@ -7,9 +7,10 @@ For an overview and summary please see the parent [Data Containers](./data_conta
     1. [Specifier](#primSpecifier)
     2. [Type Name](#primTypeName)
     3. [Kind](#primKind)
-    4. [Metadata](#primMetadata)
-    5. [Tokens (Low Level API)](#primTokens)
-    6. [Debugging](#primDebugging)
+    4. [Active](#primActive)
+    5. [Metadata](#primMetadata)
+    6. [Tokens (Low Level API)](#primTokens)
+    7. [Debugging](#primDebugging)
 2. [Hierarchy (Parent/Child)](#primHierarchy)
 3. [Schemas](#primSchemas)
 4. [Composition](#primComposition)
@@ -143,6 +144,16 @@ Here is the reference code on how to set kinds. For a practical example with sta
 ~~~admonish info title=""
 ```python
 {{#include ../../../../code/core/elements.py:dataContainerPrimBasicsKinds}}
+```
+~~~
+
+#### Active <a name="primActive"></a>
+The `active` metadata controls if the prim and its children are loaded or not.
+We only cover here how to set the metadata, for more info checkout our [Loading mechansims](./loading_mechanisms.md) section. Since it is a metadata entry, it can not be animated. For animated pruning we must use [visibility](./property.md#visibility).
+
+~~~admonish info title=""
+```python
+{{#include ../../../../code/core/elements.py:metadataActive}}
 ```
 ~~~
 
