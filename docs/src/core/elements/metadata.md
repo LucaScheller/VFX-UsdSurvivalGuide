@@ -11,16 +11,19 @@ Metadata is the smallest building block in Usd. It is part of the base class fro
     1. [Basics (High level API)](#metadataBasics)
     2. [Validation of dict content](#metadataValidateDict)
     3. [Nested key path syntax](#metadataNestedKeyPath)
-    3. [Special metadata fields](#metadataSpecial)
+    3. [Special metadata fields for prims](#metadataSpecialPrim)
         1. [Asset Info](#metadataAssetInfo)
         2. [Custom Data](#metadataCustomData) 
-        3. [Payload Asset Dependencies](#metadataPayloadAssetDependencies)
-        4. [Comment](#metadataComment)
-        1. [Icon](#metadataIcon)
-    1. [Authored vs fallback metadata values (High level API)](#metadataAuthored)
-    1. [Reading metadata documentation strings (High level API)](#metadataDocs)
-    1. [Reading/writing stage and layer metadata (Low level API)](#metadataLayer)
-    1. [Reading/writing metadata via prim/property specs(Low level API)](#metadataPrimPropertySpec)
+        3. [Comment](#metadataComment)
+        4. [Icon (UI)](#metadataIcon)
+        5. [Hidden (UI)](#metadataHidden)
+    4. [Special metadata fields for properties](#metadataSpecialProperty)
+        1. [Support for animation (USD speak **variability**)](#metadataVariability)
+        1. [Custom vs schema defined properties](#metadataCustom) 
+    5. [Authored vs fallback metadata values (High level API)](#metadataAuthored)
+    6. [Reading metadata documentation strings (High level API)](#metadataDocs)
+    7. [Reading/writing stage and layer metadata (Low level API)](#metadataLayer)
+    8. [Reading/writing metadata via prim/property specs(Low level API)](#metadataPrimPropertySpec)
 
 
 ## TL;DR - Metadata In-A-Nutshell <a name="summary"></a>
@@ -125,7 +128,8 @@ To access nested dict keys, we use the `:` symbol as the path separator.
 The `Get`/`Set` methods without the `ByKey`/`ByDictKey` allow you to set root dict keys, e.g. `SetMetadata("typeName", "Xform")`
 The `ByKey`/`ByDictKey` take a root key and a key path (with `:` if nested), e.g. `SetMetadataByDictKey('assetInfo', "data:version", 1)` which will result in `{"assetInfo": {"data": "version": 1}}`
 
-### Special metadata fields <a name="metadataSpecial"></a>
+### Special metadata fields for prims <a name="metadataSpecialPrim"></a>
+Here are the most common prim metadata keys we'll be working with.
 
 #### Asset Info <a name="metadataAssetInfo"></a>
 The `assetInfo` metadata carries asset related data. This is just a predefined standardized location all vendors/companies should adhere to when writing asset data that should be tracked.
@@ -159,11 +163,55 @@ There is also a special key to track user comments:
 ```
 ~~~
 
-#### Icon <a name="metadataIcon"></a>
+#### Icon (UI) <a name="metadataIcon"></a>
 You can also write an `icon` key into the `customData` dict, which UI applications can then optionally use to draw the prim icon with.
 ~~~admonish info title=""
 ```python
 {{#include ../../../../code/core/elements.py:metadataComment}}
+```
+~~~
+
+#### Hidden (UI) <a name="metadataHidden"></a>
+There is also a special key `hidden` key that is a UI hint that can be used by applications to hide the prim in views. It is up to the application to implement.
+
+This also exists for properties, but is not read by most UIs in apps/DCCs.
+
+~~~admonish info title=""
+```python
+{{#include ../../../../code/core/elements.py:metadataHidden}}
+```
+~~~
+
+### Special metadata fields for properties <a name="metadataSpecialProperty"></a>
+Setting metadata works the same for properties, but they do have a different set of default core metadata.
+Here we cover the most important ones.
+ 
+#### Support for animation (USD speak **variability**) <a name="metadataVariability"></a>
+The term `variability` in USD just means if a property can have animation ([time samples](./animation.md)) or not. There are two values:
+- `Sdf.VariabilityUniform` (No animation/time samples)
+- `Sdf.VariabilityVarying` (Supports time samples)
+
+~~~admonish important
+The variability actually only declares the intent of time capabilities of the property. You can still write time samples for uniform variability attributes, there are chances though that something else somewhere in the API/Hydra won't work then though. So as a best practice don't write animated attributes to `Sdf.VariabilityUniform` declared schema attributes. Relationships always have the `Sdf.VariabilityUniform` intent as they can't be animated.  
+~~~
+
+~~~admonish info title=""
+```python
+{{#include ../../../../code/core/elements.py:metadataVariability}}
+```
+~~~
+
+#### Custom vs schema defined properties <a name="metadataCustom"></a>
+All properties that are not registered via a [schema](../elements/schemas.md) are marked as `custom`.
+
+This is one of the examples where we can clearly see the benefit of the high level API:
+It automatically checks if a property is in the assigned schemas and marks it as `custom` if necessary.
+
+With the lower level API, we have to mark it ourselves.
+
+~~~admonish info title=""
+```python
+{{#include ../../../../code/core/elements.py:metadataCustom}}
 ```
 ~~~
 

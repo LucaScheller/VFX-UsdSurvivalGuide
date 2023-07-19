@@ -951,6 +951,60 @@ prim_spec = Sdf.CreatePrimInLayer(layer, prim_path)
 prim_spec.customData = {"icon": "/path/to/icon.png"}
 #// ANCHOR_END: metadataIcon
 
+#// ANCHOR: metadataHidden
+from pxr import Sdf, Usd
+### High Level ###
+stage = Usd.Stage.CreateInMemory()
+prim_path = Sdf.Path("/bicycle")
+prim = stage.DefinePrim(prim_path, "Xform")
+prim.SetHidden(True)
+
+### Low Level ###
+layer = Sdf.Layer.CreateAnonymous()
+prim_path = Sdf.Path("/cube")
+prim_spec = Sdf.CreatePrimInLayer(layer, prim_path)
+prim_spec.SetInfo("hidden", True)
+#// ANCHOR_END: metadataHidden
+
+#// ANCHOR: metadataVariability
+from pxr import Sdf, Usd
+### High Level ###
+stage = Usd.Stage.CreateInMemory()
+prim_path = Sdf.Path("/box")
+prim = stage.DefinePrim(prim_path, "Cube")
+attr = prim.CreateAttribute("height", Sdf.ValueTypeNames.Double)
+attr.SetMetadata("variability", Sdf.VariabilityUniform)
+### Low Level ###
+layer = Sdf.Layer.CreateAnonymous()
+prim_path = Sdf.Path("/box")
+prim_spec = Sdf.CreatePrimInLayer(layer, prim_path)
+prim_spec.typeName = "Cube"
+attr_spec = Sdf.AttributeSpec(prim_spec, "height", Sdf.ValueTypeNames.Double)
+attr_spec.SetInfo("variability", Sdf.VariabilityVarying)
+#// ANCHOR_END: metadataVariability
+
+#// ANCHOR: metadataCustom
+from pxr import Sdf, Usd
+### High Level ###
+stage = Usd.Stage.CreateInMemory()
+prim_path = Sdf.Path("/box")
+prim = stage.DefinePrim(prim_path, "Cube")
+attr = prim.CreateAttribute("height", Sdf.ValueTypeNames.Double)
+# This is not necessary to do explicitly as
+# the high level API does this for us.
+attr.SetMetadata("custom", True)
+# Or
+print(attr.IsCustom())
+attr.SetCustom(True)
+### Low Level ###
+layer = Sdf.Layer.CreateAnonymous()
+prim_path = Sdf.Path("/box")
+prim_spec = Sdf.CreatePrimInLayer(layer, prim_path)
+prim_spec.typeName = "Cube"
+attr_spec = Sdf.AttributeSpec(prim_spec, "height", Sdf.ValueTypeNames.Double)
+attr_spec.SetInfo("custom", True)
+#// ANCHOR_END: metadataCustom
+
 #// ANCHOR: debuggingTokens
 from pxr import Tf
 # To check if a symbol is active:
@@ -2104,3 +2158,38 @@ print(schemas.Tokens)
 # Schema Get/Set/Create methods
 schemas.Complex.CreateIntAttrAttr()
 #// ANCHOR_END: schemasPluginCompiledTest
+
+
+#// ANCHOR: propertyOverview
+# Methods & Attributes of interest:
+# 'IsDefined', 'IsAuthored'
+# 'FlattenTo'
+# 'GetPropertyStack'
+from pxr import Usd, Sdf
+### High Level ###
+stage = Usd.Stage.CreateInMemory()
+prim_path = Sdf.Path("/bicycle")
+prim = stage.DefinePrim(prim_path, "Cube")
+# Check if the attribute defined
+attr = prim.CreateAttribute("height", Sdf.ValueTypeNames.Double)
+print(attr.IsDefined()) # Returns: True
+attr = prim.GetAttribute("someRandomName")
+print(attr.IsDefined())
+if not attr:
+    prim.CreateAttribute("someRandomName", Sdf.ValueTypeNames.String)
+# Check if the attribute is defined in the active edit target (== layer)
+print(attr.IsAuthored()) # Returns: True
+attr.Set("debugString")
+# Flatten the attribute to another prim (with optionally a different name)
+prim_path = Sdf.Path("/box")
+prim = stage.DefinePrim(prim_path, "Cube")
+attr.FlattenTo(prim, "someNewName")
+# Inspect the property value source layer stack.
+# Note the method signature takes a time code as an input. If you supply a default time code
+# value clips will be stripped from the result.
+time_code = Usd.TimeCode(1001)
+print(prim.GetPropertyStack(time_code))
+### Low Level ###
+# The low level API does not offer any "extras" worthy of noting.
+#// ANCHOR_END: propertyOverview
+
