@@ -40,7 +40,11 @@ jobs:
       - name: Build with mdBook
         run: mdbook build -d book docs
       - name: Generate site map
-        run: cd docs && mdbook-sitemap -d lucascheller.github.io/VFX-UsdSurvivalGuide -o book/sitemap.xml
+        run: |
+          chmod +x ~/tools/mdbook-sitemap
+          cd docs
+          mdbook-sitemap -d lucascheller.github.io/VFX-UsdSurvivalGuide -o book/sitemap.xml
+          cd ..
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v1
         with:
