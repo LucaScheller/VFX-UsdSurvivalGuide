@@ -2177,7 +2177,7 @@ attr = prim.GetAttribute("someRandomName")
 print(attr.IsDefined())
 if not attr:
     prim.CreateAttribute("someRandomName", Sdf.ValueTypeNames.String)
-# Check if the attribute is defined in the active edit target (== layer)
+# Check if the attribute has any written values in any layer
 print(attr.IsAuthored()) # Returns: True
 attr.Set("debugString")
 # Flatten the attribute to another prim (with optionally a different name)
@@ -2390,6 +2390,52 @@ for layer_identifier in layer_identifiers:
         value = layer.QueryTimeSample(attr_spec.path, frame)
         layer.SetTimeSample(attr_spec.path, frame, value + 125)
 #// ANCHOR_END: attributeReauthorPerLayer
+
+
+#// ANCHOR: attributeReauthorTimeSampleToStatic
+from pxr import Sdf, Usd
+# Spawn example data, this would be a file on disk
+layer = Sdf.Layer.CreateAnonymous()
+prim_path = Sdf.Path("/bicycle")
+prim_spec = Sdf.CreatePrimInLayer(layer, prim_path)
+prim_spec.specifier = Sdf.SpecifierDef
+prim_spec.typeName = "Cube"
+attr_spec = Sdf.AttributeSpec(prim_spec, "size", Sdf.ValueTypeNames.Double)
+for frame in range(1001, 1010):
+    value = float(frame - 1001)
+    layer.SetTimeSample(attr_spec.path, frame, value)
+# Reference data
+stage = Usd.Stage.CreateInMemory()
+ref = Sdf.Reference(layer.identifier, "/bicycle")
+prim_path = Sdf.Path("/bicycle")
+prim = stage.DefinePrim(prim_path)
+ref_api = prim.GetReferences()
+ref_api.AddReference(ref)
+
+# Freeze content
+freeze_frame = 1001
+attrs = []
+for prim in stage.Traverse():
+    ### High Level ###
+    for attr in prim.GetAuthoredAttributes():      
+        # attr.Set(attr.Get(freeze_frame))
+        ### Low Level ###
+        attrs.append(attr)
+
+### Low Level ###
+active_layer = stage.GetEditTarget().GetLayer()
+with Sdf.ChangeBlock():
+    for attr in attrs:
+        attr_spec =  active_layer.GetAttributeAtPath(attr.GetPath())
+        if not attr_spec:
+            prim_path = attr.GetPrim().GetPath()
+            prim_spec = active_layer.GetPrimAtPath(prim_path)
+            if not prim_spec:
+                prim_spec = Sdf.CreatePrimInLayer(active_layer, prim_path)
+            attr_spec = Sdf.AttributeSpec(prim_spec, attr.GetName(),attr.GetTypeName())
+        attr_spec.default = attr.Get(freeze_frame)
+#// ANCHOR_END: attributeReauthorTimeSampleToStatic
+
 
 #// ANCHOR: attributePrimvarAPI
 ## UsdGeom.PrimvarsAPI(prim)

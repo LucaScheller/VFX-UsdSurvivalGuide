@@ -45,7 +45,7 @@ the getters/setters come in part from schemas or schema APIs. For example settin
 We are also a few "shortcuts" that check specifiers/kinds (`.IsAbstract`, `.IsDefined`, `.IsGroup`, `.IsModel`), more about these in the kind section below.
 
 ##### Low Level
-The Python lower level Sdf.PrimSpec offers quick access to setting common core metadata via standard class attributes:
+The Python lower level Sdf.PrimSpec offers quick access to setting common core metadata via standard class instance attributes:
 ~~~admonish info title=""
 ```python
 {{#include ../../../../code/core/elements.py:dataContainerPrimCoreLowLevel}}

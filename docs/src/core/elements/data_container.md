@@ -32,8 +32,8 @@ The high level API also has the extra destinction of \<ContainerType\>.HasAuthor
 The low level API only has the explicitly defined values, as does not operate on the composed state and is therefore not aware of schemas (at least when it comes to looking up values). 
 
 Let's do a little thought experiment:
-- If we were to compare Usd to .json files, each layer would be a .json file, where the nested key hierarchy is the Sdf.Path. Each path would then have custom properties (a `attributes` key & a `relationships` key) as well as standard keys like `typeName`/`specifier`.
-- If we would then write an API for the .json files, our low level API would directly edit the keys. This is what the Sdf API does via `Sdf.PrimSpec`/`Sdf.PropertySpec`/`Sdf.AttributeSpec`/`Sdf.RelationshipSpec` classes. These are very small wrappers that set the keys more or less directly (They are still wrappers though.).
+- If we were to compare Usd to .json files, each layer would be a .json file, where the nested key hierarchy is the Sdf.Path. Each path would then have standard direct key/value pairs like `typeName`/`specifier` that define metadata as well as the `attributes` and `relationships` keys which carry dicts with data about custom properties.
+- If we would then write an API for the .json files, our low level API would directly edit the keys. This is what the Sdf API does via `Sdf.PrimSpec`/`Sdf.PropertySpec`/`Sdf.AttributeSpec`/`Sdf.RelationshipSpec` classes. These are very small wrappers that set the keys more or less directly. They are still wrappers though.
 - To make our lives easier, we would also create a high level API, that would call into the low level API. The high level API would then be a public API, so that if we decide to change the low-level API, the high level API still works. Usd does this via the `Usd.Prim`/`Usd.Property`/`Usd.Attribute`/`Usd.Relationship` classes. These classes provide OOP patterns like Getter/Setters as well as common methods to manipulate the underlying data.
 
 This is in very simplified terms how the Usd API works in terms of data storage.
@@ -72,6 +72,6 @@ In production, these are the classes you'll have the most contact with. They han
 - [Sdf.RelationshipSpec](https://openusd.org/dev/api/class_sdf_relationship_spec.html)
 
 ## Overview <a name="overview"></a>
-We cover the details for prims and properties in their own sections as they are big enough topics on their on:
+We cover the details for prims and properties in their own sections as they are big enough topics on their own:
 - [Prims](./prim.md)
 - [Properties](./property.md)

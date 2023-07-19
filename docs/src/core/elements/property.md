@@ -23,10 +23,11 @@ flowchart TD
     2. [Attribute Data Types & Roles](#attributeDataTypeRole)
     3. [Static (Default) Values vs Time Samples vs Value Blocking](#attributeAnimation)
         1. [Re-writing a range of values from a different layer](#attributeReauthor)
+        2. [Time freezing mesh data](#attributeReauthorTimeSampleToStatic)
     4. [Attribute To Attribute Connections (Node Graph Encoding)](#attributeConnections)
     5. [The **primvars** (primvars:<AttributeName>) namespace](#attributePrimvars)
         1. [Reading inherited primvars](#attributePrimvarsInherited)
-        2. [Indexed Primvars](#attributePrimvarsIndexed)
+        1. [Indexed Primvars](#attributePrimvarsIndexed)
     1. [Common Attribtes](#attributeCommon):
         1. [Purpose]
         1. [Proxy Prim]
@@ -158,7 +159,27 @@ To edit the time samples directly, we can open the layer as a stage or edit the 
 ```
 ~~~
 
-#### The **primvars** (primvars:<AttributeName>) namespace <a name="attributePrimvars"></a>
+#### Time freezing mesh data <a name="attributeReauthorTimeSampleToStatic"></a>
+If we want to time freeze a prim (where the data comes from composed layers), we simply re-write a specific time sample to the default value.
+
+~~~admonish danger
+If you have to do this for a whole hierarchy/scene, this does mean that you are flattening everything into your memory, so be aware! USD currently offers no other mechanism.
+~~~
+
+~~~admonish tip title="Hint | Click to expand" collapsible=true
+We just need to write the time sample of your choice to the `attr_spec.default` attribute and clear the time samples ;
+~~~
+
+We'll leave "Time freezing" data from the active layer to you as an exercise.
+
+~~~admonish tip title="Pro Tip | Time Freeze | Click to expand code" collapsible=true
+```python
+{{#include ../../../../code/core/elements.py:attributeReauthorTimeSampleToStatic}}
+```
+~~~
+
+
+### The **primvars** (primvars:<AttributeName>) namespace <a name="attributePrimvars"></a>
 Attributes in the `primvars` namespace `:` are USD's way of marking attributes to be exported for rendering. These can then be used by materials and AOVs. Primvars can be written per attribute type (detail/prim/vertex/point), it is up to the render delegate to correctly access them.
 
 Primvars that are written as `detail` (UsdGeom.Tokens.constant interpolation) attributes, get inherited down the hierarchy. This makes them ideal transport mechanism of assigning render geometry properties, like dicing settings or render ray visibility.
@@ -179,16 +200,16 @@ To deal with primvars, the high level API has the `UsdGeom.PrimvarsAPI` [(API Do
 ```
 ~~~
 
-##### Reading inherited primvars <a name="attributePrimvarsInherited"></a>
+#### Reading inherited primvars <a name="attributePrimvarsInherited"></a>
 To speed up the lookup of inherited primvars see this guide [API Docs](https://openusd.org/dev/api/class_usd_geom_primvars_a_p_i.html#usdGeom_PrimvarFetchingAPI). Below is an example how to self implement a high performant lookup, as we couldn't get the `.FindIncrementallyInheritablePrimvars` to work with Python as expected.
 
-~~~admonish danger title="High performance primvars inheritance calulation | Click to expand code" collapsible=true
+~~~admonish danger title="High performance primvars inheritance calculation | Click to expand code" collapsible=true
 ```python
 {{#include ../../../../code/core/elements.py:attributePrimvarInherited}}
 ```
 ~~~
 
-##### Indexed primvars <a name="attributePrimvarsIndexed"></a>
+#### Indexed primvars <a name="attributePrimvarsIndexed"></a>
 Primvars can optionally be encoded via an index table. Let's explain via an example:
 
 Here we store it without an index table, as you can see we have a lot of duplicates in our string list. 
