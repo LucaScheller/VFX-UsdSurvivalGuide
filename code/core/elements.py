@@ -2940,3 +2940,58 @@ proxy_prim_spec.typeName = "Cube"
 proxyPrim_rel_spec = Sdf.RelationshipSpec(render_prim_spec, "proxyPrim")
 proxyPrim_rel_spec.targetPathList.Append(Sdf.Path("/proxy"))
 #// ANCHOR_END: relationshipProxyPrim
+
+
+#// ANCHOR: productionQueryCacheCollectionInvert
+from pxr import Sdf, Usd, UsdUtils
+stage = Usd.Stage.CreateInMemory()
+# Create hierarchy
+prim_paths = [
+    "/set/yard/biycle",
+    "/set/yard/shed/shovel",
+    "/set/yard/shed/flower_pot",
+    "/set/yard/shed/lawnmower",
+    "/set/yard/shed/soil",
+    "/set/yard/shed/wood",
+    "/set/garage/car",
+    "/set/garage/tractor",
+    "/set/garage/helicopter",
+    "/set/garage/boat",
+    "/set/garage/key_box",
+    "/set/garage/key_box/red",
+    "/set/garage/key_box/blue",
+    "/set/garage/key_box/green",
+    "/set/people/mike",
+    "/set/people/charolotte"
+]
+for prim_path in prim_paths:
+    prim = stage.DefinePrim(prim_path, "Cube")
+print("<< hierarchy >>")
+for prim in stage.Traverse():
+    print(prim.GetPath())
+    parent_prim = prim.GetParent()
+    while True:
+        if parent_prim.IsPseudoRoot():
+            break
+        parent_prim.SetTypeName("Xform")
+        parent_prim = parent_prim.GetParent()
+# Collections
+collection_prim = stage.DefinePrim("/collections")
+storage_include_prim_paths = ["/set/garage/key_box", "/set/yard/shed"]
+storage_exclude_prim_paths = ["/set/yard/shed/flower_pot"]
+collection_api = UsdUtils.AuthorCollection("storage", collection_prim, storage_include_prim_paths, storage_exclude_prim_paths)
+collection_query = collection_api.ComputeMembershipQuery()
+included_paths = collection_api.ComputeIncludedPaths(collection_query, stage)
+# print(included_paths)
+# Prune inverse:
+print("<< hierarchy pruned >>")
+iterator = iter(Usd.PrimRange(stage.GetPseudoRoot()))
+for prim in iterator:
+    if prim.IsPseudoRoot():
+        continue
+    if prim.GetPath() not in included_paths and not len(prim.GetAllChildrenNames()):
+        iterator.PruneChildren()
+        prim.SetActive(False)
+    else:    
+        print(prim.GetPath())
+#// ANCHOR_END: productionQueryCacheCollectionInvert

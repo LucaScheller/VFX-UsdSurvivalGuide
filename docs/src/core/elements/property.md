@@ -401,7 +401,7 @@ Per prim transforms are also encoded via attributes. As this is a bigger topic, 
 Relationships in USD are used to encode prim path to prim path connections.
 They can be in the form of `single` -> `single` prim path or `single` -> `multiple` primpaths.
 
-Technically relationships can also target properties (because they encode `Sdf.Path` objects), I'm not aware of it being used other than to target other collection properties. 
+Technically relationships can also target properties (because they encode `Sdf.Path` objects), I'm not aware of it being used other than to target other collection properties. The paths must always be absolute (we'll get an error otherwise).
 
 Relationships are [list-editable](../composition/listeditableops.md), this is often not used, as a more explicit behavior is favoured.
 
@@ -411,93 +411,12 @@ When we start looking at composition (aka loading nested USD files), you'll noti
 ### Material Binding <a name="relationshipMaterialBinding">
 One of the most common use cases of relationships is encoding the material binding. Here we simply link from any imageable (renderable) prim to a `UsdShade.Material` (`Material`) prim.
 
-~~~admonish important
-Material bindings are a special kind of relationship. Here are a few important things to know:
-- When looking up material bindings, USD also looks at parent prims if it can't find a written binding on the prim directly. This means you can create the binding on any parent prim and just as with primvars, it will be inherited downwards to its children.
-- The "binding strength" can be adjusted, so that a child prim assignment can also be override from a binding higher up the hierarchy.
-- Material bindings can also be written per purpose, if not then they bind to all purposes. (Technically it is not called purpose, the token names are `UsdShade.MaterialBindingAPI.GetMaterialPurposes() -> ['', 'preview', 'full']`). The 'preview' is usually bound to the 'UsdGeom.Tokens.proxy' purpose, the 'full' to the 'UsdGeom.Tokens.render' purpose.
-- The material binding can be written in two ways:
-    - Direct Binding: A relationship that points directly to a material prim
-    - Collection Based Binding: A relationship that points to another collection, that then stores the actual binding paths) and to a material prim to bind.
-~~~
-
-Here is an example of a direct binding:
-```python
-over "asset"
-{
-    over "GEO"(
-        prepend apiSchemas = ["MaterialBindingAPI"]
-    )
-    {
-        rel material:binding = </materials/metal>
-        over "plastic_mesh" (
-            prepend apiSchemas = ["MaterialBindingAPI"]
-        )
-        {
-            rel material:binding = </asset/materials/plastic>
-        }
-    }
-}
-```
-
-And here is an example of a collection based binding. As you can see it is very easy to exclude a certain prim from a single control point, whereas with the direct binding we have to author it on the prim itself.
-```python
-def "asset" (
-    prepend apiSchemas = ["MaterialBindingAPI", "CollectionAPI:material_metal"]
-)
-{
-    rel material:binding:collection:material_metal = [
-        </shaderball.collection:material_metal>,
-        </materials/metal>,
-    ]
-
-    uniform token collection:material_metal:expansionRule = "expandPrims"
-    rel collection:material_metal:includes = </asset>
-    rel collection:material_metal:excludes = </asset/GEO/plastic_mesh>
-}
-```
-
-For creating bindings in the high level API, we use the `UsdShade.MaterialBindingAPI` schema.
-Here is the link to the official [API docs](https://openusd.org/dev/api/class_usd_shade_material_binding_a_p_i.html).
-
-For more info about the load order (how collection based bindings win over direct bindings), you can read the "Bound Material Resolution" section on the API docs page.
-
-~~~admonish tip title=""
-```python
-{{#include ../../../../code/core/elements.py:relationshipMaterialBinding}}
-```
-~~~
-
-~~~admonish question title="Still under construction!"
-This sub-section is still needs some love, we'll likely create a dedicated material page at some point.
-~~~
+As this is a topic in itself, we have a dedicated [materials](./materials.md) section for it.
 
 ### Collections <a name="relationshipCollections"></a>
-Collections are USD's mechanism of storing a set of prim paths. We can nest/forward collections to other collections and relationships, which allows for powerful workflows. For example we can forward multiple collections to a light linking relationship or forwarding material binding relationships to a single collection on the asset root prim, which then in return forwards to the material prim.
+Collections are USD's concept for storing a set of prim paths. We can nest/forward collections to other collections and relationships, which allows for powerful workflows. For example we can forward multiple collections to a light linking relationship or forwarding material binding relationships to a single collection on the asset root prim, which then in return forwards to the material prim.
 
-Collections are made up of relationships and attributes:
-- `collection:<collectionName>:includes` relationship: A list of target `Sdf.Path`s to include, we can als target other collections.
-- `collection:<collectionName>:excludes` relationship: A list of target `Sdf.Path`s to exclude. These must be below the include paths. Excluding another collection does not work. 
-- `collection:<collectionName>:expansionRule`attribute: This controls how collections are expanded:
-    - `explicitOnly`: Do not expand to any child prims, instead just do an explicit diff between include and exclude paths. This is like a Python `set().difference()`.  
-    - `expandPrims`: Expand the include paths to all children and subtract the exclude paths.
-    - `expandPrimsAndProperties`: Same as `expandPrims`, but expand properties too. (Not used by anything at the moment).
-- (Optional) `collection:<collectionName>:includeRoot` attribute: When using `expandPrims`/`expandPrimsAndProperties` this bool attribute enables the includes to target the `/` pseudo root prim.
-
-~~~admonish danger title="Collection Size"
-Make sure that you write your collections as sparsely as possible, as otherwise they can take a long time to combine when stitching multiple files, when writing per frame USD files.
-~~~
-
-We interact with them via the `Usd.CollectionAPI` class [API Docs](https://openusd.org/release/api/class_usd_collection_a_p_i.html). The collection api is a multi-apply API schema, so we can add multiple collections to any prim.
-
-~~~admonish tip title=""
-```python
-{{#include ../../../../code/core/elements.py:relationshipCollections}}
-```
-~~~
-
-Here are the UsdUtils.ComputeCollectionIncludesAndExcludes [API docs](https://openusd.org/dev/api/authoring_8h.html#ad2939a973bd544ff30e4828ff09765db).
-
+As this is a bigger topic, we have a dedicated [collections](./collection.md) section for it.
 
 ### Relationship Forwarding <a name="relationshipForwarding"></a>
 Relationships can also point to other relations ships. This is called `Relationship Forwarding`.

@@ -13,6 +13,7 @@ Our approach is incrementally going from the smallest building blocks to the lar
 - [Layers & Stages (Containers of actual data)](./layer.md)
 - [Loading Data (Purpose/Visibility/Activation/Population)](./loading_mechanisms.md)
 - [Animation/Time Varying Data](./animation.md)
+- [Collections](./collection.md)
 - [Transforms](./transform.md)
 - [Notices/Event Listeners](./notice.md)
 - [Standalone Utilities](./standalone_utilities.md)
