@@ -6,7 +6,7 @@ This sub-section is still under development, it is subject to change and needs e
 ~~~
 
 # Table of contents
-1. [API Overview In-A-Nutshell](#summary)
+1. [<Topic> In-A-Nutshell](#summary)
 2. [What should I use it for?](#usage)
 3. [Resources](#resources)
 4. [Overview](#overview)

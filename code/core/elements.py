@@ -2247,7 +2247,7 @@ attr = prim.CreateAttribute("tire:size", Sdf.ValueTypeNames.Float)
 # Python handles the casting to the correct precision automatically for base data types.
 attr.Set(10)
 # For attributes the `typeName` metadata specifies the data type/role.
-print(attr.GetTypeName())
+print(attr.GetTypeName()) # Returns: Sdf.ValueTypeNames.Float
 # Non-base data types
 attr = prim.CreateAttribute("someArray", Sdf.ValueTypeNames.Half3Array)
 attr.Set([Gf.Vec3h()]  *3)
@@ -2266,12 +2266,17 @@ attr_spec = Sdf.AttributeSpec(prim_spec, "tire:size", Sdf.ValueTypeNames.Double)
 # Python handles the casting to the correct precision automatically for base data types.
 attr_spec.default = 10
 # For attributes the `typeName` metadata specifies the data type/role.
-print(attr_spec.typeName)
+print(attr_spec.typeName) # Returns: Sdf.ValueTypeNames.Float
 # Non-base data types
 attr_spec = Sdf.AttributeSpec(prim_spec, "someArray", Sdf.ValueTypeNames.Half3Array)
 attr_spec.default = ([Gf.Vec3h()] * 3)
 attr_spec = Sdf.AttributeSpec(prim_spec, "someAssetPathArray", Sdf.ValueTypeNames.AssetArray)
 attr_spec.default = Sdf.AssetPathArray(["testA.usd", "testB.usd"])
+# Creating an attribute spec with the same data type as an existing attribute (spec)
+# is as easy as passing in the type name from the existing attribute (spec)
+same_type_attr_spec = Sdf.AttributeSpec(prim_spec, "tire:size", attr.GetTypeName())
+# Or
+same_type_attr_spec = Sdf.AttributeSpec(prim_spec, "tire:size", attr_spec.typeName)
 #// ANCHOR_END: attributeDataTypeRole
 
 
@@ -2818,8 +2823,7 @@ mat_bind_api = UsdShade.MaterialBindingAPI(render_prim)
 mat_bind_api.UnbindAllBindings()
 # Bind via collection
 collection_name = "material_example"
-Usd.CollectionAPI.Apply(bicycle_prim, collection_name)
-collection_api = Usd.CollectionAPI(bicycle_prim, collection_name)
+collection_api = Usd.CollectionAPI.Apply(bicycle_prim, collection_name)
 collection_api.GetIncludesRel().AddTarget(material_prim.GetPath())
 collection_api.GetExpansionRuleAttr().Set(Usd.Tokens.expandPrims)
 mat_bind_api.Bind(collection_api, material, "material_example")
@@ -2843,7 +2847,7 @@ schemas = Sdf.TokenListOp.Create(
 render_prim_spec.SetInfo("apiSchemas", schemas)
 #// ANCHOR_END: relationshipMaterialBinding
 
-#// ANCHOR: relationshipCollections
+#// ANCHOR: collectionOverview
 # Usd.CollectionAPI.Apply(prim, collection_name)
 # collection_api = Usd.CollectionAPI(prim, collection_nam)
 # collection_query = collection_api.ComputeMembershipQuery()
@@ -2861,8 +2865,7 @@ bicycle_prim.GetParent().SetTypeName("Xform")
 car_prim.GetParent().SetTypeName("Xform")
 # Create collection
 collection_name = "vehicles"
-Usd.CollectionAPI.Apply(set_prim, collection_name)
-collection_api = Usd.CollectionAPI(set_prim, collection_name)
+collection_api = Usd.CollectionAPI.Apply(set_prim, collection_name)
 collection_api.GetIncludesRel().AddTarget(set_prim.GetPath())
 collection_api.GetExcludesRel().AddTarget(bicycle_prim.GetPath())
 collection_api.GetExpansionRuleAttr().Set(Usd.Tokens.expandPrims)
@@ -2888,7 +2891,7 @@ print(collection_api.ComputeIncludedPaths(collection_query, stage))
 # collections more sparse, that the include to exclude ratio is kept at an optimal size.
 # The Python signature differs from the C++ signature:
 """
-include_paths, exclude_paths, UsdUtils.ComputeCollectionIncludesAndExcludes(
+include_paths, exclude_paths = UsdUtils.ComputeCollectionIncludesAndExcludes(
     target_paths,
     stage,
     minInclusionRatio = 0.75,
@@ -2907,7 +2910,45 @@ print(include_paths, exclude_paths)
 # Returns: [Sdf.Path('/set/garage')] [Sdf.Path('/set/garage/boat')]
 # Create a collection from the result
 collection_api = UsdUtils.AuthorCollection("optimized", set_prim, include_paths, exclude_paths)
-#// ANCHOR_END: relationshipCollections
+#// ANCHOR_END: collectionOverview
+
+#// ANCHOR: relationshipOverview
+### High Level ###
+# Get: 'GetForwardedTargets', 'GetTargets',
+# Set: 'AddTarget', 'SetTargets'
+# Clear: 'RemoveTarget', 'ClearTargets'
+from pxr import Sdf, Usd, UsdGeom
+stage = Usd.Stage.CreateInMemory()
+cube_prim = stage.DefinePrim(Sdf.Path("/cube_prim"), "Cube")
+sphere_prim = stage.DefinePrim(Sdf.Path("/sphere_prim"), "Sphere")
+myFavoriteSphere_rel = cube_prim.CreateRelationship("myFavoriteSphere")
+myFavoriteSphere_rel.AddTarget(sphere_prim.GetPath())
+print(myFavoriteSphere_rel.GetForwardedTargets()) # Returns:[Sdf.Path('/sphere_prim')]
+# myFavoriteSphere_rel.ClearTargets()
+# We can also forward relationships to other relationships.
+cylinder_prim = stage.DefinePrim(Sdf.Path("/sphere_prim"), "Cylinder")
+myFavoriteSphereForward_rel = cylinder_prim.CreateRelationship("myFavoriteSphereForward")
+myFavoriteSphereForward_rel.AddTarget(myFavoriteSphere_rel.GetPath())
+# GetForwardedTargets: This gives us the final fowarded paths. We'll use this most of the time.
+# GetTargets: Gives us the paths set on the relationship, forwarded paths are not baked down.
+print(myFavoriteSphereForward_rel.GetForwardedTargets()) # Returns:[Sdf.Path('/sphere_prim')]
+print(myFavoriteSphereForward_rel.GetTargets()) # Returns: [Sdf.Path('/cube_prim.myFavoriteSphere')]
+
+### Low Level ###
+from pxr import Sdf, UsdGeom
+layer = Sdf.Layer.CreateAnonymous()
+cube_prim_spec = Sdf.CreatePrimInLayer(layer, Sdf.Path("/cube_prim"))
+cube_prim_spec.specifier = Sdf.SpecifierDef
+cube_prim_spec.typeName = "Cube"
+sphere_prim_spec = Sdf.CreatePrimInLayer(layer, Sdf.Path("/sphere_prim"))
+sphere_prim_spec.specifier = Sdf.SpecifierDef
+sphere_prim_spec.typeName = "Cube"
+rel_spec = Sdf.RelationshipSpec(cube_prim_spec, "proxyPrim")
+rel_spec.targetPathList.Append(sphere_prim_spec.path)
+# The targetPathList is a list editable Sdf.PathListOp.
+# Forwarded rels can only be calculated via the high level API.
+#// ANCHOR_END: relationshipOverview
+
 
 #// ANCHOR: relationshipProxyPrim
 ### High Level ###
@@ -2942,7 +2983,7 @@ proxyPrim_rel_spec.targetPathList.Append(Sdf.Path("/proxy"))
 #// ANCHOR_END: relationshipProxyPrim
 
 
-#// ANCHOR: productionQueryCacheCollectionInvert
+#// ANCHOR: collectionInvert
 from pxr import Sdf, Usd, UsdUtils
 stage = Usd.Stage.CreateInMemory()
 # Create hierarchy
@@ -2975,6 +3016,32 @@ for prim in stage.Traverse():
             break
         parent_prim.SetTypeName("Xform")
         parent_prim = parent_prim.GetParent()
+# Returns:
+"""
+<< hierarchy >>
+/HoudiniLayerInfo
+/set
+/set/yard
+/set/yard/biycle
+/set/yard/shed
+/set/yard/shed/shovel
+/set/yard/shed/flower_pot
+/set/yard/shed/lawnmower
+/set/yard/shed/soil
+/set/yard/shed/wood
+/set/garage
+/set/garage/car
+/set/garage/tractor
+/set/garage/helicopter
+/set/garage/boat
+/set/garage/key_box
+/set/garage/key_box/red
+/set/garage/key_box/blue
+/set/garage/key_box/green
+/set/people
+/set/people/mike
+/set/people/charolotte
+"""
 # Collections
 collection_prim = stage.DefinePrim("/collections")
 storage_include_prim_paths = ["/set/garage/key_box", "/set/yard/shed"]
@@ -2994,4 +3061,61 @@ for prim in iterator:
         prim.SetActive(False)
     else:    
         print(prim.GetPath())
-#// ANCHOR_END: productionQueryCacheCollectionInvert
+# Returns:
+"""
+<< hierarchy pruned >>
+/set
+/set/yard
+/set/yard/shed
+/set/yard/shed/shovel
+/set/yard/shed/lawnmower
+/set/yard/shed/soil
+/set/yard/shed/wood
+/set/garage
+/set/garage/key_box
+/set/garage/key_box/red
+/set/garage/key_box/blue
+/set/garage/key_box/green
+/set/people
+"""
+#// ANCHOR_END: collectionInvert
+
+
+#// ANCHOR: dataTypeRoleOverview
+import pxr
+
+### Value Type Names (pxr.Sdf.ValueTypeNames) ###
+# Point3f
+value_type_name = pxr.Sdf.ValueTypeNames.Point3fArray
+## Aliases and cpp names
+value_type_name.aliasesAsStrings
+value_type_name.cppTypeName
+value_type_name.role              # Role name like 'Color', 'Normal' 
+## Array vs Scalar (Single Value)
+value_type_name.isArray, value_type_name.isScalar
+### Convert type between Scalar <-> Array
+array_type_name = value_type_name.arrayType  # (Same as type_name in this case)
+scale_type_name = value_type_name.scalarType
+## Type (Actual type definiton, holds data about
+# container format like 'pxr.Gf.Vec3f' (for arrays of single element))
+value_type = value_type_name.type
+### Get the Python Class (or default value)
+cls = value_type.pythonClass
+# Or
+default_value = value_type_name.defaultValue
+cls = default_value.__class__
+### pxr.Vt.Type Registry ###
+# All registered types (Wraps type objects like float, int, bool, GfVec3d
+# for type_def in pxr.Tf.Type.GetRoot().derivedTypes:
+#    print(type_def)
+type_def = pxr.Tf.Type.FindByName(value_type_name.cppTypeName)
+type_def.typeName # The same as value_type_name.cppTypeName
+# Root/Base/Derived Types
+type_def.GetRoot(), type_def.baseTypes, type_def.derivedTypes
+# For Python usage, you will only use the array types, as they handle the auto conversion
+# form buffer protocol arrays like numpy arrays, the rest is auto converted and you don't need
+# to worry about it.
+### pxr.Gf Graphics Foundations  ###
+# Hold base types like 
+pxr.Gf.Vec2f, pxr.Gf.Matrix4d
+#// ANCHOR_END: dataTypeRoleOverview

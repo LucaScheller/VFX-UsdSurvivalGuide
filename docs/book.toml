@@ -29,7 +29,7 @@ line-numbers = true
 
 [output.html.fold]
 enable = true
-level = 3
+level = 1
 
 [output.html.playground]
 editable = false

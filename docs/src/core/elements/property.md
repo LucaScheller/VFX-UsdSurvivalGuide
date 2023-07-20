@@ -408,6 +408,12 @@ Relationships are [list-editable](../composition/listeditableops.md), this is of
 When we start looking at composition (aka loading nested USD files), you'll notice that relationships that where written in a different file are mapped into the hierarchy where it is being loaded. That way every path still targets the correct destination path.
 (Don't worry, we'll look at some examples in our [Composition](../composition/overview.md) and [Houdini](../../dcc/houdini/overview.md) sections. 
 
+~~~admonish tip title=""
+```python
+{{#include ../../../../code/core/elements.py:relationshipOverview}}
+```
+~~~
+
 ### Material Binding <a name="relationshipMaterialBinding">
 One of the most common use cases of relationships is encoding the material binding. Here we simply link from any imageable (renderable) prim to a `UsdShade.Material` (`Material`) prim.
 
@@ -438,3 +444,8 @@ To edit and query the `proxyPrim`, we use the `UsdGeom.Imageable` schema class.
 {{#include ../../../../code/core/elements.py:relationshipProxyPrim}}
 ```
 ~~~
+
+## Schemas <a name="propertySchemas"></a>
+Schemas are like OOP classes in USD, we cover them in detail [here](./schemas.md). Once applied to a prim, they provide different metadata and properties with fallback values. They also expose convenience methods to edit these.
+
+We have used a few so far in our examples, for a list of the most usefull ones see our [Common Schemas in Production](../../production/schemas.md) section.
