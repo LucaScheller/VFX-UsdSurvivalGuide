@@ -23,7 +23,7 @@ Here is the TL;DR version. Usd is made up of two main APIs:
     - [Sdf - Scene Description Foundations](https://openusd.org/release/api/sdf_page_front.html)
     - [Pcp - PrimCache Population (Composition)](https://openusd.org/release/api/pcp_page_front.html)
 
-Individual components of Usd are loaded via a [plugin based system](https://openusd.org/release/api/plug_page_front.html), for example Hydra, kinds, file plugins (Vdbs, abc) etc.
+Individual components of Usd are loaded via a [plugin based system](./plugins/overview.md), for example Hydra, kinds, file plugins (Vdbs, abc) etc.
 
 Here is a simple comparison:
 ~~~admonish info title=""

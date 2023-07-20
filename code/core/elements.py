@@ -2730,7 +2730,6 @@ sphere_prim.GetParent().SetTypeName("Xform")
 UsdGeom.Imageable(set_prim).GetVisibilityAttr().Set(UsdGeom.Tokens.invisible)
 # We can also query the inherited visibility:
 # ComputeEffectiveVisibility -> This handles per purpose visibility
-# MakeInvisible, ComputeVisibility,  
 imageable_api = UsdGeom.Imageable(cube_prim)
 print(imageable_api.ComputeVisibility()) # Returns: 'invisible'
 # Make only the cube visible. Notice how this automatically sparsely
@@ -2752,39 +2751,97 @@ bicycle_vis_attr_spec.default = UsdGeom.Tokens.inherited
 
 #// ANCHOR: attributeExtent
 ### High Level ###
-# UsdGeom.Imageable()
-# Get: 'ComputeVisibility'
-# Set: 'MakeVisible', 'MakeInvisible'
+# UsdGeom.Boundable()
+# Get: 'GetExtentAttr', 'CreateExtentAttr'
+# Set: 'ComputeExtent '
 from pxr import Sdf, Usd, UsdGeom
 stage = Usd.Stage.CreateInMemory()
-cube_prim = stage.DefinePrim(Sdf.Path("/set/yard/bicycle"), "Cube")
-sphere_prim = stage.DefinePrim(Sdf.Path("/set/garage/bicycle"), "Sphere")
-set_prim = cube_prim.GetParent().GetParent()
-set_prim.SetTypeName("Xform")
-cube_prim.GetParent().SetTypeName("Xform")
-sphere_prim.GetParent().SetTypeName("Xform")
-UsdGeom.Imageable(set_prim).GetVisibilityAttr().Set(UsdGeom.Tokens.invisible)
-# We can also query the inherited visibility:
-# ComputeEffectiveVisibility -> This handles per purpose visibility
-# MakeInvisible, ComputeVisibility,  
-imageable_api = UsdGeom.Imageable(cube_prim)
-print(imageable_api.ComputeVisibility()) # Returns: 'invisible'
-# Make only the cube visible. Notice how this automatically sparsely
-# selects only the needed parent prims (garage) and makes them invisible.
-# How cool is that!
-imageable_api.MakeVisible()
+cube_prim = stage.DefinePrim(Sdf.Path("/bicycle/cube"), "Cube")
+bicycle_prim = cube_prim.GetParent()
+bicycle_prim.SetTypeName("Xform")
+# If we change the size, we have to re-compute the bounds
+cube_prim.GetAttribute("size").Set(10)
+boundable_api = UsdGeom.Boundable(cube_prim)
+print(boundable_api.GetExtentAttr().Get()) # Returns:  [(-1, -1, -1), (1, 1, 1)]
+extent = boundable_api.ComputeExtent(Usd.TimeCode.Default())
+boundable_api.GetExtentAttr().Set(extent)
+print(boundable_api.GetExtentAttr().Get()) # Returns: [(-5, -5, -5), (5, 5, 5)]
+# Author extentsHint
+# The bbox cache has to be specified with what frame and purpose to query
+bbox_cache = UsdGeom.BBoxCache(1001, [UsdGeom.Tokens.default_, UsdGeom.Tokens.render])
+model_api = UsdGeom.ModelAPI(bicycle_prim)
+extentsHint = model_api.ComputeExtentsHint(bbox_cache)
+model_api.SetExtentsHint(extentsHint)
+# Or model_api.SetExtentsHint(extentsHint, <frame>)
+### Low Level ###
+from pxr import Sdf, UsdGeom, Vt
+layer = Sdf.Layer.CreateAnonymous()
+cube_prim_path = Sdf.Path("/bicycle/cube")
+cube_prim_spec = Sdf.CreatePrimInLayer(layer, cube_prim_path)
+cube_prim_spec.specifier = Sdf.SpecifierDef
+cube_prim_spec.typeName = "Cube"
+bicycle_prim_path = Sdf.Path("/bicycle")
+bicycle_prim_spec = Sdf.CreatePrimInLayer(layer, cube_prim_path)
+bicycle_prim_spec.specifier = Sdf.SpecifierDef
+bicycle_prim_spec.typeName = "Xform"
+# The querying should be done via the high level API.
+extent_attr_spec = Sdf.AttributeSpec(cube_prim_spec, "extent", Sdf.ValueTypeNames.Vector3fArray)
+extent_attr_spec.default = Vt.Vec3fArray([(-1, -1, -1), (1, 1, 1)])
+site_attr_spec = Sdf.AttributeSpec(cube_prim_spec, "size", Sdf.ValueTypeNames.Float)
+site_attr_spec.default = 10
+extent_attr_spec.default = Vt.Vec3fArray([(-5, -5, -5), (5, 5, 5)])
+# Author extentsHint
+extents_hint_attr_spec = Sdf.AttributeSpec(bicycle_prim_spec, "extentsHint", Sdf.ValueTypeNames.Vector3fArray)
+extents_hint_attr_spec.default = Vt.Vec3fArray([(-5, -5, -5), (5, 5, 5)])
+#// ANCHOR_END: attributeExtent
+
+
+#// ANCHOR: relationshipMaterialBinding
+## UsdShade.MaterialBindingAPI(<boundable prim>)
+# This handles all the binding get and setting
+## These classes can inspect an existing binding
+# UsdShade.MaterialBindingAPI.DirectBinding()
+# UsdShade.MaterialBindingAPI.CollectionBinding()
+### High Level ###
+from pxr import Sdf, Usd, UsdGeom, UsdShade
+stage = Usd.Stage.CreateInMemory()
+render_prim = stage.DefinePrim(Sdf.Path("/bicycle/RENDER/render"), "Cube")
+material_prim = stage.DefinePrim(Sdf.Path("/bicycle/MATERIALS/example_material"), "Material")
+bicycle_prim = render_prim.GetParent().GetParent()
+bicycle_prim.SetTypeName("Xform")
+render_prim.GetParent().SetTypeName("Xform")
+material_prim.GetParent().SetTypeName("Xform")
+# Bind materials via direct binding
+material = UsdShade.Material(material_prim)
+mat_bind_api = UsdShade.MaterialBindingAPI(render_prim)
+# Unbind all
+mat_bind_api.UnbindAllBindings()
+# Bind via collection
+collection_name = "material_example"
+Usd.CollectionAPI.Apply(bicycle_prim, collection_name)
+collection_api = Usd.CollectionAPI(bicycle_prim, collection_name)
+collection_api.GetIncludesRel().AddTarget(material_prim.GetPath())
+collection_api.GetExpansionRuleAttr().Set(Usd.Tokens.expandPrims)
+mat_bind_api.Bind(collection_api, material, "material_example")
 
 ### Low Level ###
 from pxr import Sdf, UsdGeom
 layer = Sdf.Layer.CreateAnonymous()
-bicycle_prim_path = Sdf.Path("/set/bicycle")
-bicycle_prim_spec = Sdf.CreatePrimInLayer(layer, prim_path)
-bicycle_prim_spec.specifier = Sdf.SpecifierDef
-bicycle_prim_spec.typeName = "Cube"
-bicycle_vis_attr_spec = Sdf.AttributeSpec(prim_spec, "visibility", Sdf.ValueTypeNames.Token)
-bicycle_vis_attr_spec.default = UsdGeom.Tokens.inherited
-#// ANCHOR_END: attributeExtent
-
+render_prim_spec = Sdf.CreatePrimInLayer(layer, Sdf.Path("/render"))
+render_prim_spec.specifier = Sdf.SpecifierDef
+render_prim_spec.typeName = "Cube"
+material_prim_spec = Sdf.CreatePrimInLayer(layer, Sdf.Path("/material"))
+material_prim_spec.specifier = Sdf.SpecifierDef
+material_prim_spec.typeName = "Material"
+## Direct binding
+material_bind_rel_spec = Sdf.RelationshipSpec(render_prim_spec, "material:binding")
+material_bind_rel_spec.targetPathList.Append(Sdf.Path("/render"))
+# Applied Schemas
+schemas = Sdf.TokenListOp.Create(
+    prependedItems=["MaterialBindingAPI"]
+)
+render_prim_spec.SetInfo("apiSchemas", schemas)
+#// ANCHOR_END: relationshipMaterialBinding
 
 #// ANCHOR: relationshipProxyPrim
 ### High Level ###

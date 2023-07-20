@@ -21,7 +21,8 @@ flowchart LR
 ### Structure
 Large parts of the (high level and parts of the low level) API follow this pattern:
 
-- \<ContainerType\>.Has\<Name\>()
+- \<ContainerType\>.Has\<Name\>() or \<ContainerType\>.Is\<Name\>()
+- \<ContainerType\>.Create\<Name\>()
 - \<ContainerType\>.Get\<Name\>()
 - \<ContainerType\>.Set\<Name\>()
 - \<ContainerType\>.Clear\<Name\>() or .Remove\<Name\>()

@@ -32,8 +32,9 @@ flowchart TD
         1. [Purpose](#attributePurpose)
         1. [Visibility](#attributeVisibility)
         1. [Extents Hint vs Extent](#attributeExtent)
-        1. [Xform Ops](attributeXformOps)
+        1. [Xform Ops](#attributeXformOps)
 1. [Relationships](#relationshipOverview)
+    1. [Material Binding](#relationshipMaterialBinding)
     1. [Collections](#relationshipCollections)
     1. [Relationships Forwarding](#relationshipForwarding)
     1. [Proxy Prim](#relationshipProxyPrim)
@@ -46,6 +47,7 @@ flowchart TD
 - [Usd.GeomPrimvar](https://openusd.org/release/api/class_usd_geom_primvar.html)
 - [Usd.GeomPrimvarsAPI](https://openusd.org/dev/api/class_usd_geom_primvars_a_p_i.html)
 - [Usd.GeomImageable](https://openusd.org/release/api/class_usd_geom_imageable.html)
+- [Usd.GeomBoundable](https://openusd.org/dev/api/class_usd_geom_boundable.html)
 
 ## Properties <a name="propertyOverview"></a>
 Let's first have a look at the shared base class `Usd.Property`. This inherits most its functionality from `Usd.Object`, which mainly exposes metadata data editing. We won't cover how metadata editing works for properties here, as it is extensively covered in our [metadata](./metadata.md#metadataSpecialProperty) section.
@@ -323,7 +325,7 @@ The purpose is provided by the `UsdGeom.Imageable` (renderable) typed non-concre
 ~~~
 
 There are 4 different purposes:
-- `UsdGeom.Tokens.default`: The default purpose. This is the fallback purpose, when no purpose is explicitly defined. It means that this prim should be traversed/visible to any purpose.
+- `UsdGeom.Tokens.default_`: The default purpose. This is the fallback purpose, when no purpose is explicitly defined. It means that this prim should be traversed/visible to any purpose.
 - `UsdGeom.Tokens.render`: Tag any (parent) prim with this to mark it suitable for final frame rendering.
 - `UsdGeom.Tokens.proxy`:  Tag any (parent) prim with this to mark it suitable for low resolution previewing. We usually tag prims with this that can be loaded very quickly.
 - `UsdGeom.Tokens.guide`: Tag any (parent) prim with this to mark it suitable for displaying guide indicators like rig controls or other useful scene visualizers.
@@ -372,6 +374,12 @@ Since boundable prims are leaf prims (they have (or at least should have) no chi
 We cover how to use the a bounding box cache in detail in our [stage API query caches](../../production/caches.md) for optimized bounding box calculation and extent writing.
 ~~~
 
+~~~admonish tip title=""
+```python
+{{#include ../../../../code/core/elements.py:attributeExtent}}
+```
+~~~
+
 There is also an `extentsHint` attribute we can create on non-boundable prims. This attribute can be consulted by bounding box lookups too and it is another optimization level on top of the `extent` attribute.
 We usually write it on asset root prims, so that when we unload payloads, it can be used to give a correct bbox representation.
 
@@ -383,13 +391,89 @@ For just the default purpose it looks like:
 For the default and proxy purpose (without render): 
 `Vt.Vec3fArray(6, (Gf.Vec3f(<min_x>, <min_y>, <min_z>), Gf.Vec3f(<max_x>, <max_y>, <max_z>), Gf.Vec3f(0, 0, 0), Gf.Vec3f(0, 0, 0), Gf.Vec3f(<proxy_min_x>, <proxy_min_y>, <proxy_min_z>), Gf.Vec3f(<proxy_max_x>, <proxy_max_y>, <proxy_max_z>)))`
 
-As you can see the order is `UsdGeom.Tokens.default`, `UsdGeom.Tokens.render`,`UsdGeom.Tokens.proxy`, `UsdGeom.Tokens.guide`. It a purpose is not authored, it will be sliced off (it it is at the end of the array).
+As you can see the order is `UsdGeom.Tokens.default_`, `UsdGeom.Tokens.render`,`UsdGeom.Tokens.proxy`, `UsdGeom.Tokens.guide`. It a purpose is not authored, it will be sliced off (it it is at the end of the array).
 
 
 #### Xform (Transform) Ops <a name="attributeXformOps"></a>
-The `visibility` attribute controls if the prim and i
+Per prim transforms are also encoded via attributes. As this is a bigger topic, we have a dedicated [Transforms](./transform.md) section for it.
 
 ## Relationships <a name="relationshipOverview"></a>
+Relationships in USD are used to encode prim path to prim path connections.
+They can be in the form of `single` -> `single` prim path or `single` -> `multiple` primpaths.
+
+When we start looking at composition (aka loading nested USD files), you'll notice that relationships that where written in a different file are mapped into the hierarchy where it is being loaded. That way every path still targets the correct destination path.
+(Don't worry, we'll look at some examples in our [Composition](../composition/overview.md) and [Houdini](../../dcc/houdini/overview.md) sections. 
+
+### Material Binding <a name="relationshipMaterialBinding">
+One of the most common use cases of relationships is encoding the material binding. Here we simply link from any imageable (renderable) prim to a `UsdShade.Material` (`Material`) prim.
+
+~~~admonish important
+Material bindings are a special kind of relationship. Here are a few important things to know:
+- When looking up material bindings, USD also looks at parent prims if it can't find a written binding on the prim directly. This means you can create the binding on any parent prim and just as with primvars, it will be inherited downwards to its children.
+- The "binding strength" can be adjusted, so that a child prim assignment can also be override from a binding higher up the hierarchy.
+- Material bindings can also be written per purpose, if not then they bind to all purposes. (Technically it is not called purpose, the token names are `UsdShade.MaterialBindingAPI.GetMaterialPurposes() -> ['', 'preview', 'full']`). The 'preview' is usually bound to the 'UsdGeom.Tokens.proxy' purpose, the 'full' to the 'UsdGeom.Tokens.render' purpose.
+- The material binding can be written in two ways:
+    - Direct Binding: A relationship that points directly to a material prim
+    - Collection Based Binding: A relationship that points to another collection, that then stores the actual binding paths) and to a material prim to bind.
+~~~
+
+Here is an example of a direct binding:
+```python
+over "asset"
+{
+    over "GEO"(
+        prepend apiSchemas = ["MaterialBindingAPI"]
+    )
+    {
+        rel material:binding = </materials/metal>
+        over "plastic_mesh" (
+            prepend apiSchemas = ["MaterialBindingAPI"]
+        )
+        {
+            rel material:binding = </asset/materials/plastic>
+        }
+    }
+}
+```
+
+And here is an example of a collection based binding. As you can see it is very easy to exclude a certain prim from a single control point, whereas with the direct binding we have to author it on the prim itself.
+```python
+def "asset" (
+    prepend apiSchemas = ["MaterialBindingAPI", "CollectionAPI:material_metal"]
+)
+{
+    rel material:binding:collection:material_metal = [
+        </shaderball.collection:material_metal>,
+        </materials/metal>,
+    ]
+
+    uniform token collection:material_metal:expansionRule = "expandPrims"
+    rel collection:material_metal:includes = </asset>
+    rel collection:material_metal:excludes = </asset/GEO/plastic_mesh>
+}
+```
+
+For creating bindings in the high level API, we use the `UsdShade.MaterialBindingAPI` schema.
+Here is the link to the official [API docs](https://openusd.org/dev/api/class_usd_shade_material_binding_a_p_i.html).
+
+For more info about the load order (how collection based bindings win over direct bindings), you can read the "Bound Material Resolution" section on the API docs page.
+
+~~~admonish tip title=""
+```python
+{{#include ../../../../code/core/elements.py:relationshipMaterialBinding}}
+```
+~~~
+
+~~~admonish question title="Still under construction!"
+This sub-section is still needs some love, we'll likely create a dedicated material page at some point.
+~~~
+
+### Collections <a name="relationshipCollections"></a>
+Collections
+
+### Relationship Forwarding <a name="relationshipForwarding"></a>
+Relationships can also point to other relations ships. This is called `Relationship Forwarding`.
+We cover this topic in detail in our [Advanced Topics](../../production/concepts.md#relationship-forwarding) section.
 
 ### Proxy Prim <a name="relationshipProxyPrim"></a>
 The `proxyPrim` is a relationship from a prim with the `UsdGeom.Token.render` purpose to a prim with the `UsdGeom.Token.proxy` purpose. It can be used by DCCs/USD consumers to find a preview representation of a render prim. A good use case example is when we need to simulate rigid body dynamics and need to find a low resolution representation of an asset.
