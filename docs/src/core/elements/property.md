@@ -18,26 +18,26 @@ flowchart TD
 
 # Table of contents
 1. [Properties](#propertyOverview)
-2. [Attributes](#attributeOverview)
+1. [Attributes](#attributeOverview)
     1. [Attribute Types (Detail/Prim/Vertex/Point) (USD Speak: **Interpolation**)](#attributeInterpolation)
-    2. [Attribute Data Types & Roles](#attributeDataTypeRole)
-    3. [Static (Default) Values vs Time Samples vs Value Blocking](#attributeAnimation)
+    1. [Attribute Data Types & Roles](#attributeDataTypeRole)
+    1. [Static (Default) Values vs Time Samples vs Value Blocking](#attributeAnimation)
         1. [Re-writing a range of values from a different layer](#attributeReauthor)
-        2. [Time freezing (mesh) data](#attributeReauthorTimeSampleToStatic)
-    4. [Attribute To Attribute Connections (Node Graph Encoding)](#attributeConnections)
-    5. [The **primvars** (primvars:<AttributeName>) namespace](#attributePrimvars)
+        1. [Time freezing (mesh) data](#attributeReauthorTimeSampleToStatic)
+    1. [Attribute To Attribute Connections (Node Graph Encoding)](#attributeConnections)
+    1. [The **primvars** (primvars:<AttributeName>) namespace](#attributePrimvars)
         1. [Reading inherited primvars](#attributePrimvarsInherited)
         1. [Indexed Primvars](#attributePrimvarsIndexed)
-    6. [Common Attributes](#attributeCommon):
+    1. [Common Attributes](#attributeCommon):
         1. [Purpose](#attributePurpose)
-        2. [Visibility](#attributeVisibility)
-        3. [Extents Hint vs Extent](attributeExtent)
-        4. [Xform Ops](attributeXformOps)
-        5. [Proxy Prim](#propertyProxyPrim)
-3. [Relationships](#primProperties)
+        1. [Visibility](#attributeVisibility)
+        1. [Extents Hint vs Extent](#attributeExtent)
+        1. [Xform Ops](attributeXformOps)
+1. [Relationships](#relationshipOverview)
     1. [Collections](#relationshipCollections)
     1. [Relationships Forwarding](#relationshipForwarding)
-4. [Schemas](#propertySchemas)
+    1. [Proxy Prim](#relationshipProxyPrim)
+1. [Schemas](#propertySchemas)
 
 ## Resources
 - [Usd.Property](https://openusd.org/dev/api/class_usd_property.html)
@@ -349,4 +349,61 @@ The attribute data type is `Sdf.Token` and can have two values:
 
 ~~~admonish note
 In the near future visibility can be set per purpose (It is already possible, just not widely used). Be aware that this might incur further API changes.
+~~~
+
+#### Extents Hint vs Extent <a name="attributeExtent"></a>
+In order for Hydra delegates but also stage bounding box queries to not have to compute the bounding box of each individual boundable prim, we can write an extent attribute.
+
+This attribute is mandatory for all boundable prims. The data format is:
+
+`Vt.Vec3fArray(2, (Gf.Vec3f(<min_x>, <min_y>, <min_z>), Gf.Vec3f(<max_x>, <max_y>, <max_z>)))`
+
+E.g.: `Vt.Vec3fArray(2, (Gf.Vec3f(-5.0, 0.0, -5.0), Gf.Vec3f(5.0, 0.0, 5.0)))`
+
+Here are all boundable prims (prims that have a bounding box).
+
+~~~admonish tip title="UsdGeom.Boundable inheritance graph | Click to view" collapsible=true
+![](./schemasTypedNonConcreteUsdBoundable.jpg#center)
+~~~
+
+Since boundable prims are leaf prims (they have (or at least should have) no children), a prim higher in the hierarchy can easily compute an accurate bounding box representation, by iterating over all leaf prims and reading the `extent` attribute. This way, if a single leaf prim changes, the parent prims can reflect the update without having to do expensive per prim point position attribute lookups.
+
+~~~admonish tip title="Pro Tip | Bounding Box Cached Queries in Production"
+We cover how to use the a bounding box cache in detail in our [stage API query caches](../../production/caches.md) for optimized bounding box calculation and extent writing.
+~~~
+
+There is also an `extentsHint` attribute we can create on non-boundable prims. This attribute can be consulted by bounding box lookups too and it is another optimization level on top of the `extent` attribute.
+We usually write it on asset root prims, so that when we unload payloads, it can be used to give a correct bbox representation.
+
+The `extentsHint` has a different data format: It can store the extent hint per purpose or just for the default purpose.
+
+For just the default purpose it looks like:
+`Vt.Vec3fArray(2, (Gf.Vec3f(<min_x>, <min_y>, <min_z>), Gf.Vec3f(<max_x>, <max_y>, <max_z>)))`
+
+For the default and proxy purpose (without render): 
+`Vt.Vec3fArray(6, (Gf.Vec3f(<min_x>, <min_y>, <min_z>), Gf.Vec3f(<max_x>, <max_y>, <max_z>), Gf.Vec3f(0, 0, 0), Gf.Vec3f(0, 0, 0), Gf.Vec3f(<proxy_min_x>, <proxy_min_y>, <proxy_min_z>), Gf.Vec3f(<proxy_max_x>, <proxy_max_y>, <proxy_max_z>)))`
+
+As you can see the order is `UsdGeom.Tokens.default`, `UsdGeom.Tokens.render`,`UsdGeom.Tokens.proxy`, `UsdGeom.Tokens.guide`. It a purpose is not authored, it will be sliced off (it it is at the end of the array).
+
+
+#### Xform (Transform) Ops <a name="attributeXformOps"></a>
+The `visibility` attribute controls if the prim and i
+
+## Relationships <a name="relationshipOverview"></a>
+
+### Proxy Prim <a name="relationshipProxyPrim"></a>
+The `proxyPrim` is a relationship from a prim with the `UsdGeom.Token.render` purpose to a prim with the `UsdGeom.Token.proxy` purpose. It can be used by DCCs/USD consumers to find a preview representation of a render prim. A good use case example is when we need to simulate rigid body dynamics and need to find a low resolution representation of an asset.
+
+The relation can also be used by clients to redirect edits back from the proxy prim to the render prim, for example transform edits or material assignments. Since the relation is from render to proxy and not the other way around, it can come with a high cost to relay this info, because we first need to find the correct prims. Therefore it is more common to just edit a mutual parent instead of redirecting what UI manipulators do on the preview prim to the render prim.
+
+~~~admonish tip title="Pro Tip | Preview Purpose Prim Counts"
+One of the biggest bottlenecks in USD is creating enormous hierarchies as you then have a lot of prims that need to be considered as value sources. When creating proxy purpose prims/meshes, we should try to keep it as low-res as possible. Best case we only have a single proxy prim per asset.
+~~~
+
+To edit and query the `proxyPrim`, we use the `UsdGeom.Imageable` schema class.
+
+~~~admonish tip title=""
+```python
+{{#include ../../../../code/core/elements.py:relationshipProxyPrim}}
+```
 ~~~

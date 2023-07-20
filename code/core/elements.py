@@ -2716,6 +2716,9 @@ attr_spec.default = UsdGeom.Tokens.render
 
 #// ANCHOR: attributeVisibility
 ### High Level ###
+# UsdGeom.Imageable()
+# Get: 'ComputeVisibility'
+# Set: 'MakeVisible', 'MakeInvisible'
 from pxr import Sdf, Usd, UsdGeom
 stage = Usd.Stage.CreateInMemory()
 cube_prim = stage.DefinePrim(Sdf.Path("/set/yard/bicycle"), "Cube")
@@ -2745,3 +2748,72 @@ bicycle_prim_spec.typeName = "Cube"
 bicycle_vis_attr_spec = Sdf.AttributeSpec(prim_spec, "visibility", Sdf.ValueTypeNames.Token)
 bicycle_vis_attr_spec.default = UsdGeom.Tokens.inherited
 #// ANCHOR_END: attributeVisibility
+
+
+#// ANCHOR: attributeExtent
+### High Level ###
+# UsdGeom.Imageable()
+# Get: 'ComputeVisibility'
+# Set: 'MakeVisible', 'MakeInvisible'
+from pxr import Sdf, Usd, UsdGeom
+stage = Usd.Stage.CreateInMemory()
+cube_prim = stage.DefinePrim(Sdf.Path("/set/yard/bicycle"), "Cube")
+sphere_prim = stage.DefinePrim(Sdf.Path("/set/garage/bicycle"), "Sphere")
+set_prim = cube_prim.GetParent().GetParent()
+set_prim.SetTypeName("Xform")
+cube_prim.GetParent().SetTypeName("Xform")
+sphere_prim.GetParent().SetTypeName("Xform")
+UsdGeom.Imageable(set_prim).GetVisibilityAttr().Set(UsdGeom.Tokens.invisible)
+# We can also query the inherited visibility:
+# ComputeEffectiveVisibility -> This handles per purpose visibility
+# MakeInvisible, ComputeVisibility,  
+imageable_api = UsdGeom.Imageable(cube_prim)
+print(imageable_api.ComputeVisibility()) # Returns: 'invisible'
+# Make only the cube visible. Notice how this automatically sparsely
+# selects only the needed parent prims (garage) and makes them invisible.
+# How cool is that!
+imageable_api.MakeVisible()
+
+### Low Level ###
+from pxr import Sdf, UsdGeom
+layer = Sdf.Layer.CreateAnonymous()
+bicycle_prim_path = Sdf.Path("/set/bicycle")
+bicycle_prim_spec = Sdf.CreatePrimInLayer(layer, prim_path)
+bicycle_prim_spec.specifier = Sdf.SpecifierDef
+bicycle_prim_spec.typeName = "Cube"
+bicycle_vis_attr_spec = Sdf.AttributeSpec(prim_spec, "visibility", Sdf.ValueTypeNames.Token)
+bicycle_vis_attr_spec.default = UsdGeom.Tokens.inherited
+#// ANCHOR_END: attributeExtent
+
+
+#// ANCHOR: relationshipProxyPrim
+### High Level ###
+from pxr import Sdf, Usd, UsdGeom
+stage = Usd.Stage.CreateInMemory()
+render_prim = stage.DefinePrim(Sdf.Path("/bicycle/RENDER/render"), "Cube")
+proxy_prim = stage.DefinePrim(Sdf.Path("/bicycle/PROXY/proxy"), "Sphere")
+bicycle_prim = render_prim.GetParent().GetParent()
+bicycle_prim.SetTypeName("Xform")
+render_prim.GetParent().SetTypeName("Xform")
+proxy_prim.GetParent().SetTypeName("Xform")
+imageable_api = UsdGeom.Imageable(render_prim)
+imageable_api.SetProxyPrim(proxy_prim)
+# Query the proxy prim
+print(imageable_api.ComputeProxyPrim()) # Returns: None
+# Why does this not work? We have to set the purpose!
+UsdGeom.Imageable(render_prim).GetPurposeAttr().Set(UsdGeom.Tokens.render)
+UsdGeom.Imageable(proxy_prim).GetPurposeAttr().Set(UsdGeom.Tokens.proxy)
+print(imageable_api.ComputeProxyPrim()) # Returns: (Usd.Prim(</bicycle/PROXY/proxy>), Usd.Prim(</bicycle/RENDER/render>))
+
+### Low Level ###
+from pxr import Sdf, UsdGeom
+layer = Sdf.Layer.CreateAnonymous()
+render_prim_spec = Sdf.CreatePrimInLayer(layer, Sdf.Path("/render"))
+render_prim_spec.specifier = Sdf.SpecifierDef
+render_prim_spec.typeName = "Cube"
+proxy_prim_spec = Sdf.CreatePrimInLayer(layer, Sdf.Path("/proxy"))
+proxy_prim_spec.specifier = Sdf.SpecifierDef
+proxy_prim_spec.typeName = "Cube"
+proxyPrim_rel_spec = Sdf.RelationshipSpec(render_prim_spec, "proxyPrim")
+proxyPrim_rel_spec.targetPathList.Append(Sdf.Path("/proxy"))
+#// ANCHOR_END: relationshipProxyPrim

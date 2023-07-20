@@ -20,3 +20,5 @@ pig_layer.TransferContent(rubbertoy_layer)
 - common schemas for productions tips and tricks
 - 
 - Purpose Swapping for preview, bake point color for preview
+- 
+- large hierarchies vs combined meshes

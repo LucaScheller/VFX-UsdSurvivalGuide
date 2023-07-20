@@ -104,7 +104,7 @@ All the blue colored endpoints are the ones you'll set/apply/use via code, the g
     - In OOP terms you can think of it as the primary base class that your prim is instancing.
     - Applied via `Prim.SetTypeName(<typeName>)`/`PrimSpec.typeName="<typeName>"`/`SchemaClass.Define(stage, Sdf.Path("/path"))`
 
-Here is an example of the inheritance graph of the [Usd.GeomImageable](https://openusd.org/dev/api/class_usd_geom_imageable.html) typed non-concrete schema:
+Here is an example of the inheritance graph of the [UsdGeom.Imageable](https://openusd.org/dev/api/class_usd_geom_imageable.html) typed non-concrete schema:
 ~~~admonish note title="Click to expand content" collapsible=true
 ![](./schemasTypedNonConcreteUsdGeomImageable.jpg#center)
 ~~~
