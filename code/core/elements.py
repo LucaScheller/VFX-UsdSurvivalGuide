@@ -3082,40 +3082,63 @@ for prim in iterator:
 
 
 #// ANCHOR: dataTypeRoleOverview
-import pxr
-
-### Value Type Names (pxr.Sdf.ValueTypeNames) ###
-# Point3f
-value_type_name = pxr.Sdf.ValueTypeNames.Point3fArray
+from pxr import Sdf, Vt
+##### Value Type Names - pxr.Sdf.ValueTypeNames #####
+### Looking at TexCoord2fArray as an example
+value_type_name = Sdf.ValueTypeNames.TexCoord2fArray
+print("Value Type Name", value_type_name) # Returns: Sdf.ValueTypeName("texCoord2f[]")
 ## Aliases and cpp names
-value_type_name.aliasesAsStrings
-value_type_name.cppTypeName
-value_type_name.role              # Role name like 'Color', 'Normal' 
+print("Value Type Name Alias", value_type_name.aliasesAsStrings)    # ['texCoord2f[]']
+print("Value Type Name Cpp Type Name", value_type_name.cppTypeName) # 'VtArray<GfVec2f>'
+print("Value Type Name Role", value_type_name.role)                 # Returns: 'TextureCoordinate'
 ## Array vs Scalar (Single Value)
-value_type_name.isArray, value_type_name.isScalar
-### Convert type between Scalar <-> Array
-array_type_name = value_type_name.arrayType  # (Same as type_name in this case)
-scale_type_name = value_type_name.scalarType
-## Type (Actual type definiton, holds data about
-# container format like 'pxr.Gf.Vec3f' (for arrays of single element))
+print("Value Type Name IsArray", value_type_name.isArray)          # Returns: True
+print("Value Type Name IsArray", value_type_name.isScalar)         # Returns: False
+## Convert type between Scalar <-> Array
+print("Value Type Name -> Get Array Type", value_type_name.arrayType)   # Returns: Sdf.ValueTypeName("texCoord2f[]") (Same as type_name in this case)
+print("Value Type Name -> Get Scalar Type", value_type_name.scalarType) # Returns: Sdf.ValueTypeName("texCoord2f")
+### Type (Actual type definiton, holds data about container format
+### like C++ type name and the Python class
 value_type = value_type_name.type
-### Get the Python Class (or default value)
+print(value_type) # Returns: Tf.Type.FindByName('VtArray<GfVec2f>')
+### Get the Python Class
 cls = value_type.pythonClass
-# Or
+# Or (for base types like float, int)
 default_value = value_type_name.defaultValue
 cls = default_value.__class__
-### pxr.Vt.Type Registry ###
-# All registered types (Wraps type objects like float, int, bool, GfVec3d
-# for type_def in pxr.Tf.Type.GetRoot().derivedTypes:
+instance = cls()
+
+##### Types - pxr.Vt.Type Registry #####
+from pxr import Vt
+# For Python usage, the only thing of interest for data types in the Vt.Type module are the `*Array`ending classes.`
+# You will only use these array types to handle the auto conversion
+# form buffer protocol arrays like numpy arrays, the rest is auto converted and you don't need
+# to worry about it. Normal Python lists do not support the buffer protocol.
+from array import array
+Vt.Vec3hArray.FromBuffer(array("f", [1,2,3]))
+# Returns:
+# Vt.Vec3hArray(1, (Gf.Vec3h(1.0, 2.0, 3.0),))
+# From Numpy
+import numpy as np
+vt_array = Vt.Vec3hArray.FromNumpy(np.ones((10, 3)))
+Vt.Vec3hArray.FromBuffer(np.ones((10, 3))) # Numpy also supports the buffer protocol.
+# Returns:
+"""
+Vt.Vec3hArray(10, (Gf.Vec3h(1.0, 1.0, 1.0), Gf.Vec3h(1.0, 1.0, 1.0), Gf.Vec3h(1.0, 1.0, 1.0), Gf.Vec3h(1.0, 1.
+0, 1.0), Gf.Vec3h(1.0, 1.0, 1.0), Gf.Vec3h(1.0, 1.0, 1.0), Gf.Vec3h(1.0, 1.0, 1.0), Gf.Vec3h(1.0, 1.0, 1.0), G
+f.Vec3h(1.0, 1.0, 1.0), Gf.Vec3h(1.0, 1.0, 1.0)))
+"""
+# We can also go the other way:
+np.array(vt_array)
+#// ANCHOR_END: dataTypeRoleOverview
+
+#// ANCHOR: tfTypeRegistry
+##### Types - pxr.Vt.Type Registry #####
+# All registered types (including other plugin types, so not limited to data types)
+# for type_def in Tf.Type.GetRoot().derivedTypes:
 #    print(type_def)
-type_def = pxr.Tf.Type.FindByName(value_type_name.cppTypeName)
-type_def.typeName # The same as value_type_name.cppTypeName
+type_def = Tf.Type.FindByName(Sdf.ValueTypeNames.TexCoord2fArray.cppTypeName)
+print(type_def.typeName) # Returns: VtArray<GfVec2f> # The same as value_type_name.cppTypeName
 # Root/Base/Derived Types
 type_def.GetRoot(), type_def.baseTypes, type_def.derivedTypes
-# For Python usage, you will only use the array types, as they handle the auto conversion
-# form buffer protocol arrays like numpy arrays, the rest is auto converted and you don't need
-# to worry about it.
-### pxr.Gf Graphics Foundations  ###
-# Hold base types like 
-pxr.Gf.Vec2f, pxr.Gf.Matrix4d
-#// ANCHOR_END: dataTypeRoleOverview
+#// ANCHOR_END: tfTypeRegistry
