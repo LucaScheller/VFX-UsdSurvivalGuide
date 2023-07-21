@@ -11,6 +11,9 @@ Metadata is the smallest building block in Usd. It is part of the base class fro
     1. [Basics (High level API)](#metadataBasics)
     1. [Validation of dict content](#metadataValidateDict)
     1. [Nested key path syntax](#metadataNestedKeyPath)
+    1. [Reading metadata documentation strings (High level API)](#metadataDocs)
+    1. [Authored vs fallback metadata values (High level API)](#metadataAuthored)
+    1. [Reading/writing metadata via prim/property specs(Low level API)](#metadataPrimPropertySpec)
     1. [Special metadata fields for prims](#metadataSpecialPrim)
         1. [Active/Activation](#metadataActive)
         1. [Asset Info](#metadataAssetInfo)
@@ -18,13 +21,12 @@ Metadata is the smallest building block in Usd. It is part of the base class fro
         1. [Comment](#metadataComment)
         1. [Icon (UI)](#metadataIcon)
         1. [Hidden (UI)](#metadataHidden)
-        1. [Special metadata fields for properties](#metadataSpecialProperty)
-            1. [Support for animation (USD speak **variability**)](#metadataVariability)
-        1. [Custom vs schema defined properties](#metadataCustom) 
-        1. [Authored vs fallback metadata values (High level API)](#metadataAuthored)
-        1. [Reading metadata documentation strings (High level API)](#metadataDocs)
-        1. [Reading/writing stage and layer metadata (Low level API)](#metadataLayer)
-        1. [Reading/writing metadata via prim/property specs(Low level API)](#metadataPrimPropertySpec)
+    1. [Special metadata fields for properties](#metadataSpecialProperty)
+        1. [Support for animation (USD speak **variability**)](#metadataVariability)
+        1. [Custom vs schema defined properties](#metadataCustom)
+    1. [Special metadata fields for layers and stages](#metadataMetricsLayer)
+        1. [Reading/writing stage and layer metrics (FPS/Scene Unit Scale/Up Axis) (High/Low level API)](#metadataMetricsLayer)
+        2. [Reading/writing stage and layer customData metadata (High/Low level API)](#metadataCustomDataLayer)
 
 
 ## TL;DR - Metadata In-A-Nutshell <a name="summary"></a>
@@ -129,6 +131,39 @@ To access nested dict keys, we use the `:` symbol as the path separator.
 The `Get`/`Set` methods without the `ByKey`/`ByDictKey` allow you to set root dict keys, e.g. `SetMetadata("typeName", "Xform")`
 The `ByKey`/`ByDictKey` take a root key and a key path (with `:` if nested), e.g. `SetMetadataByDictKey('assetInfo', "data:version", 1)` which will result in `{"assetInfo": {"data": "version": 1}}`
 
+### Reading metadata documentation strings (High level API) <a name="metadataDocs"></a>
+This is quite useful if you need to expose docs in UIs.
+~~~admonish info title=""
+```python
+{{#include ../../../../code/core/elements.py:metadataDocs}}
+```
+~~~
+
+~~~admonish note title="Click here to view the result" collapsible=true
+```python
+{{#include ../../../../code/core/elements.py:metadataDocsResult}}
+```
+~~~
+
+### Authored vs fallback metadata values (High level API) <a name="metadataAuthored"></a>
+The getters offer the distinction between retrieving authored or fallback values provided by the schemas that registered the metadata.
+~~~admonish info title=""
+```python
+{{#include ../../../../code/core/elements.py:metadataAuthored}}
+```
+~~~
+
+### Reading/writing metadata via prim/property specs(Low level API) <a name="metadataPrimPropertySpec"></a>
+Same as with the layer customData, the lower level APIs on prim/property specs expose it to Python via lower camel case syntax in combination with direct assignment, instead of offer getter and setters.
+
+~~~admonish info title=""
+```python
+{{#include ../../../../code/core/elements.py:metadataPrimPropertySpec}}
+```
+~~~
+As you can see the higher level API gives us fallback info via the Get(authored) methods. In the lower level API we have to process this data logic ourselves.
+
+
 ### Special metadata fields for prims <a name="metadataSpecialPrim"></a>
 Here are the most common prim metadata keys we'll be working with.
 
@@ -227,29 +262,27 @@ With the lower level API, we have to mark it ourselves.
 ```
 ~~~
 
-### Authored vs fallback metadata values (High level API) <a name="metadataAuthored"></a>
-The getters offer the distinction between retrieving authored or fallback values provided by the schemas that registered the metadata.
+### Special metadata fields for layers and stages <a name="metadataLayerStage"></a>
+For stages (root layer/session layer) and layers, we can also write a few special fields as covered below.
+
+#### Reading/writing stage and layer metrics (FPS/Scene Unit Scale/Up Axis) (High/Low level API) <a name="metadataMetricsLayer"></a>
+
+For more info about the FPS, see our [animation](./animation.md#frames-per-second) section.
+
+We can supply an up axis and scene scale hint in the layer metadata, but this does not seem to be used by most DCCs or in fact Hydra itself when rendering the geo. So if you have a mixed values, you'll have to counter correct via transforms yourself.
+
+The default scene `metersPerUnit` value is centimeters (0.01) and the default `upAxis` is `Y`.
+
+See [Scene Up Axis API Docs](https://openusd.org/dev/api/group___usd_geom_up_axis__group.html) and [Scene Unit API Docs](https://openusd.org/dev/api/group___usd_geom_linear_units__group.html) for more info.
+
+
 ~~~admonish info title=""
 ```python
-{{#include ../../../../code/core/elements.py:metadataAuthored}}
+{{#include ../../../../code/core/elements.py:metadataLayerMetrics}}
 ```
 ~~~
 
-### Reading metadata documentation strings (High level API) <a name="metadataDocs"></a>
-This is quite useful if you need to expose docs in UIs.
-~~~admonish info title=""
-```python
-{{#include ../../../../code/core/elements.py:metadataDocs}}
-```
-~~~
-
-~~~admonish note title="Click here to view the result" collapsible=true
-```python
-{{#include ../../../../code/core/elements.py:metadataDocsResult}}
-```
-~~~
-
-### Reading/writing stage and layer metadata (Low level API) <a name="metadataLayer"></a>
+#### Reading/writing stage and layer customData metadata (High/Low level API) <a name="metadataCustomDataLayer"></a>
 ~~~admonish tip
 This is often used to track pipeline relevant data in DCCs. For node based DCCs, this is a convenient way to pass general data down through the node network. For layer based DCCs, this can be used to tag layers (for example to anonymous layers that carry specific pipeline data).
 ~~~
@@ -272,14 +305,3 @@ It writes the metadata to the session or root layer. So you won't see any compos
 {{#include ../../../../code/core/elements.py:metadataStage}}
 ```
 ~~~
-
-### Reading/writing metadata via prim/property specs(Low level API) <a name="metadataPrimPropertySpec"></a>
-Same as with the layer customData, the lower level APIs on prim/property specs expose it to Python via lower camel case syntax in combination with direct assignment, instead of offer getter and setters.
-
-~~~admonish info title=""
-```python
-{{#include ../../../../code/core/elements.py:metadataPrimPropertySpec}}
-```
-~~~
-As you can see the higher level API gives us fallback info via the Get(authored) methods. In the lower level API we have to process this data logic ourselves.
-

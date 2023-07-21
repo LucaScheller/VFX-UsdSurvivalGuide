@@ -50,7 +50,7 @@ The `Vt.Array` wrapper around the `Gf` data base classes implements the buffer p
 
 ## Resources <a name="resources"></a>
 - [USD API Data Type Docs](https://openusd.org/dev/api/_usd__page__datatypes.html)
-- [NVidia USD Data Types Docs](https://docs.omniverse.nvidia.com/dev-guide/latest/dev_usd/quick-start/usd-types.html)
+- [Nvidia USD Data Types Docs](https://docs.omniverse.nvidia.com/dev-guide/latest/dev_usd/quick-start/usd-types.html)
 
 ## Overview <a name="overview"></a>
 When reading and writing data in USD, all data is of a specific data type. USD extends the standard base types (`float`, `int`) with computer graphics related classes (`Gf.Matrix3d`, `Gf.Vec3h`) that make it easy to perform common 3d math operations. To give a hint about how a data type should be used, we also have the concept of data roles.

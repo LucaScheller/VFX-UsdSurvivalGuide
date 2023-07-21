@@ -811,14 +811,18 @@ prim = stage.DefinePrim(prim_path, "Cube")
 # Get: 'GetDocumentation'
 # Set: 'SetDocumentation'
 # Clear: 'ClearDocumentation'
+print(prim.GetDocumentation())
 for attr in prim.GetAttributes():
     print(attr.GetName(), attr.GetDocumentation())
     # Or
-    print(attr.GetMetadata("documentation"))
+    # print(attr.GetMetadata("documentation"))
 #// ANCHOR_END: metadataDocs
 
 #// ANCHOR: metadataDocsResult
 """
+Defines a primitive rectilinear cube centered at the origin.
+    The fallback values for Cube, Sphere, Cone, and Cylinder are set so that
+    they all pack into the same volume/bounds.
 doubleSided Although some renderers treat all parametric or polygonal
         surfaces as if they were effectively laminae with outward-facing
         normals on both sides, some renderers derive significant optimizations
@@ -860,8 +864,7 @@ purpose Purpose is a classification of geometry into categories that
         purpose is computed and used.
 size Indicates the length of each edge of the cube.  If you
         author size you must also author extent.
-        
-        \sa GetExtentAttr()
+
 visibility Visibility is meant to be the simplest form of "pruning" 
         visibility that is supported by most DCC apps.  Visibility is 
         animatable, allowing a sub-tree of geometry to be present for some 
@@ -1022,6 +1025,50 @@ prim_spec.typeName = "Cube"
 attr_spec = Sdf.AttributeSpec(prim_spec, "height", Sdf.ValueTypeNames.Double)
 attr_spec.SetInfo("custom", True)
 #// ANCHOR_END: metadataCustom
+
+#// ANCHOR: metadataLayerMetrics
+from pxr import Sdf, Usd, UsdGeom
+### High Level ###
+stage = Usd.Stage.CreateInMemory()
+prim_path = Sdf.Path("/bicycle")
+prim = stage.DefinePrim(prim_path, "Cone")
+size_attr = prim.GetAttribute("radius")
+for frame in range(1001, 1006):
+    time_code = Usd.TimeCode(frame)
+    size_attr.Set(frame - 1000, time_code)
+# FPS Metadata
+time_samples = Sdf.Layer.ListAllTimeSamples(layer)
+stage.SetTimeCodesPerSecond(25)
+stage.SetFramesPerSecond(25)
+stage.SetStartTimeCode(time_samples[0])
+stage.SetEndTimeCode(time_samples[-1])
+# Scene Unit Scale
+UsdGeom.SetStageMetersPerUnit(stage, UsdGeom.LinearUnits.centimeters)
+# To map 24 fps (default) to 25 fps we have scale by 24/25 when loading the layer in the Sdf.LayerOffset
+# Scene Up Axis
+UsdGeom.SetStageUpAxis(stage, UsdGeom.Tokens.y) # Or  UsdGeom.Tokens.z
+
+### Low Level ###
+from pxr import Sdf
+layer = Sdf.Layer.CreateAnonymous()
+prim_path = Sdf.Path("/bicycle")
+prim_spec = Sdf.CreatePrimInLayer(layer, prim_path)
+prim_spec.specifier = Sdf.SpecifierDef
+prim_spec.typeName = "Cube"
+attr_spec = Sdf.AttributeSpec(prim_spec, "size", Sdf.ValueTypeNames.Double)
+for frame in range(1001, 1006):
+    value = float(frame - 1000)
+    layer.SetTimeSample(attr_spec.path, frame, value)
+# FPS Metadata
+layer.timeCodesPerSecond = 25
+layer.framesPerSecond = 25
+layer.startTimeCode = time_samples[0]
+layer.endTimeCode = time_samples[-1]
+# Scene Unit Scale
+layer.SetInfo(UsdGeom.Tokens.metersPerUnit, UsdGeom.LinearUnits.centimeters)
+# Scene Up Axis
+layer.SetInfo(UsdGeom.Tokens.upAxis, UsdGeom.Tokens.y) # Or  UsdGeom.Tokens.z
+#// ANCHOR_END: metadataLayerMetrics
 
 #// ANCHOR: debuggingTokens
 from pxr import Tf
@@ -1708,7 +1755,7 @@ for frame in range(1001, 1005):
     value = float(frame - 1001)
     layer.SetTimeSample(attr_spec.path, frame, value)
 # FPS Metadata
-time_samples = Sdf.Layer.ListAllTimeSamples()
+time_samples = Sdf.Layer.ListAllTimeSamples(layer)
 layer.timeCodesPerSecond = 25
 layer.framesPerSecond = 25
 layer.startTimeCode = time_samples[0]

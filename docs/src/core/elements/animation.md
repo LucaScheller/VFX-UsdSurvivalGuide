@@ -212,16 +212,16 @@ When writing layers, we should always write these layer metrics, so that we know
 the original intended FPS were. 
 
 ~~~admonish warning
-If we want to load a let's say 25 FPS cache in a 24 FPS setup, we will have to apply a layer offset (as seen above) when loading in the layer. This way we can move back the sample to the "correct" frame based times. It will of course still have the FPS scaling issue (that 25 frames need to happen in 24 frames), so your samples will end up being at fractional frames to match the same image. If we have data that can't interpolate, we'll have to re-cache. In Houdini this can be easily done in SOPs.
+If we want to load a let's say 24 FPS cache in a 25 FPS setup, we will have to apply a `Sdf.LayerOffset` when loading in the layer. This way we can move back the sample to the "correct" frame based times by scaling with a factor of 24/25.
 ~~~
 
 ```python
 (
-    endTimeCode = 1010
+    timeCodesPerSecond = 24
     framesPerSecond = 24
     metersPerUnit = 1
     startTimeCode = 1001
-    timeCodesPerSecond = 24
+    endTimeCode = 1010
 )
 ```
 
@@ -422,6 +422,6 @@ It will return:
 (1001, 1001.25, 1002, 1002.25, 1003, 1003.25)
 ```
 ~~~admonish important
-With value clips it can be very expensive to call `attribute.GetTimesamples()` as this will open all layers to get the sample in the interval that is specified in the metadata. If possible use `attribute.GetTimeSamplesInInterval()` as this only opens the layers in the interested interval range.
+With value clips it can be very expensive to call `attribute.GetTimesamples()` as this will open all layers to get the samples in the interval that is specified in the metadata. It does not only read the value clip metadata. If possible use `attribute.GetTimeSamplesInInterval()` as this only opens the layers in the interested interval range.
 ~~~
 

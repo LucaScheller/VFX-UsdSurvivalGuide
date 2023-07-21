@@ -54,6 +54,7 @@
         - [Collection Membership](./production/caches/collection.md)
         - [Composition](./production/caches/composition.md)
     - [Advanced Concepts](./production/concepts.md)
+    - [FAQ (Frequently Asked Questions)](./production/faq.md)
 - [Software Integrations](./dcc/overview.md)
     - [Houdini](./dcc/houdini/overview.md)
         - [General Approach](./dcc/houdini/general/overview.md)
