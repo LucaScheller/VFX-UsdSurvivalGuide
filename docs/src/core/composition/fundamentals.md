@@ -34,6 +34,7 @@ Some may consider it a deep dive topic, we'd recommend starting out with it firs
 - [USD Glossary]():
     - [Layer Stack](https://openusd.org/release/glossary.html#usdglossary-layerstack)
     - [Root Layer Stack](https://openusd.org/release/glossary.html#usdglossary-rootlayerstack)
+    - [Prim Index](https://openusd.org/release/glossary.html#usdglossary-index)
     - [List Editing](https://openusd.org/release/glossary.html#list-editing)
     - [LIVRPS](https://openusd.org/release/glossary.html#livrps-strength-ordering)
     - [Path Translation](https://openusd.org/release/glossary.html#usdglossary-pathtranslation)
@@ -45,11 +46,12 @@ Before we start looking at the actual composition arcs and their strength orderi
 
 ## Terminology <a name="terminology"></a>
 USD's mechanism of linking different USD files with each other is called `composition`. Let's first clarify some terminology before we start, so that we are all on the same page:
-- **`layer`**: A layer is an USD file on disk with [prims](../elements/prim.md) & [properties](../elements/property.md). (Technically it can also be in memory, but for simplicity on this page, let's think of it as a file on disk). More info in our [layer section](../elements/layer.md).
-- **`layer stack`**: A stack of layers (Hehe 😉). We'll explain it more in detail below, just remember it is talking about all the loaded layers that use the `sublayer` composition arc.
-- **`composition arc`**: A method of linking (pointing to) another layer or another part of the scene hierarchy. USD has different kinds of composition arcs, each with a specific behavior.
-- **`prim index`**: Once USD has processed all of our composition arcs, it builds a `prim index` that tracks where values can come from. We can think of the `prim index` as something that outputs an ordered list of `[(<layer (stack)>, <hierarchy path>), (<layer (stack)>, <hierarchy path>)]` ordered by the composition rules.
-- **`composed value`**: When looking up a value of a property, USD then checks each location of the `prim index` for a value and moves on to the next one if it can't find one. If no value was found, it uses a schema fallback (if the property came from a schema), other wise it falls back to not having a value (USD speak: not being `authored`).
+- **Opinion**: A written value in a layer for a metadata field or property.
+- **Layer**: A layer is an USD file on disk with [prims](../elements/prim.md) & [properties](../elements/property.md). (Technically it can also be in memory, but for simplicity on this page, let's think of it as a file on disk). More info in our [layer section](../elements/layer.md).
+- **Layer Stack**: A stack of layers (Hehe 😉). We'll explain it more in detail below, just remember it is talking about all the loaded layers that use the `sublayer` composition arc.
+- **Composition Arc**: A method of linking (pointing to) another layer or another part of the scene hierarchy. USD has different kinds of composition arcs, each with a specific behavior.
+- **Prim Index**: Once USD has processed all of our composition arcs, it builds a `prim index` that tracks where values can come from. We can think of the `prim index` as something that outputs an ordered list of `[(<layer (stack)>, <hierarchy path>), (<layer (stack)>, <hierarchy path>)]` ordered by the composition rules.
+- **Composed Value**: When looking up a value of a property, USD then checks each location of the `prim index` for a value and moves on to the next one if it can't find one. If no value was found, it uses a schema fallback (if the property came from a schema), other wise it falls back to not having a value (USD speak: not being `authored`).
 
 Composition is "easy" to explain in theory, but hard to master in production. It also a topic that keeps on giving and makes you question if you really understand USD. So don't worry if you don't fully understand the concepts of this page, they can take a long time to master. To be honest, it's one of those topics that you have to read yourself back into every time you plan on making larger changes to your pipeline.
 
