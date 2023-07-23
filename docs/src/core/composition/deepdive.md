@@ -10,7 +10,7 @@ If you detect an error or have useful production examples, please [submit a tick
 - Production Examples
 
 
-
+## Terminology
 
 USD's mechanism of linking different USD files with each other is called `composition`. Let's first clarify some terminology before we start, so that we are all on the same page:
 - **`layer`**: A layer is an USD file on disk with [prims](../elements/prim.md) & [properties](../elements/property.md). (Technically it can also be in memory, but for simplicity on this page, let's think of it as a file on disk). More info in our [layer section](../elements/layer.md).
@@ -23,11 +23,16 @@ Composition is "easy" to explain in theory, but hard to master in production. It
 
 We recommend really playing through as much scenarios as possible before you start using USD in production. Houdini is one of the best tools on the market that let's you easily concept and play around with composition. Therefore we will use it in our examples below.
 
+
+
+## Composition Editing Principles - What do we need to know before we start?
 Now before we talk about individual `composition arcs`, let's first focus on three different principles composition runs on.
 These three principles build on each other, so make sure you work through them in order they are listed below.
+- [List-Editable Operations](#list-editable-operations-ops)
+- [Encapsulation](#encapsulation)
+- [Layer Stack](#layer-stack)
 
-
-## List-Editable Operations (Ops)
+### List-Editable Operations (Ops)
 USD has the concept of list editable operations. Instead of having a "flat" array (`[Sdf.Path("/cube"), Sdf.Path("/sphere")]`) that stores what files/hierarchy paths we want to point to, we have wrapper array class that stores multiple sub-arrays. When flattening the list op, USD removes duplicates, so that the end result is like an ordered Python `set()`.
 
 To make it even more confusing, composition arc list editable ops run on a different logic than "normal" list editable ops when looking at the final `composed value`.
@@ -61,91 +66,60 @@ When working with multiple layers, each layer can have list editable ops data in
 
 Here comes the fun part:
 
-~~~admonish danger title="List-Editable Ops | Combined Value"
+~~~admonish danger title="List-Editable Ops | Getting the composed (combined) value"
 When looking at the metadata of a prim via UIs (USD View/Houdini) or getting it via the Usd.Prim.GetMetadata() method, you will only see the list editable op of the last layer that edited the metadata, **NOT** the composed result. 
 
-This is probably the most confusing part of USD in my opinion when first starting out. To inspect the full composition result, we actually have to consult the [PCP](pcp.md) cache or run a `Usd.PrimCompositionQuery`. There is a caveat though, as you'll see in the next section: Composition is **encapsulated**. This means our edits to list editable ops only work in the active `layer stack`. More info below!
+This is probably the most confusing part of USD in my opinion when first starting out. To inspect the full composition result, we actually have to consult the [PCP cache](pcp.md) or run a `Usd.PrimCompositionQuery`. There is another caveat though too, as you'll see in the next section: Composition is **encapsulated**. This means our edits to list editable ops only work in the active `layer stack`. More info below!
 ~~~
 
+In Houdini the list editable ops are exposed on the `reference` node. The "Reference Operation" parm sets what sub-array (prepend,append,delete) to use, the "Pre-Operation" sets if to `.Clear()` the active list editable op or if to run `.ClearAndMakeExplicit()`.
 
+![Houdini Reference Node - List Editable Ops](houdiniReferenceComposition.gif)
 
+Here is how Houdini (but also the USD view) displays the references metadata field with different layers, as this is how the stage sees it.
 
+![Houdini - List Editable Ops with layers](houdiniReferenceListEditableOpsLayers.gif)
 
+You can see, as soon as we have our reference list editable op on different layers, the metadata only show the top most layer. To inspect all the references that are being loaded, we therefore need to look at the layer stack (the "Scene Graph Layers" panel) or perform a [compsition query](../../production/caches/composition.md).
 
+Also a hint on terminology: In the USD docs/glossary the `Reference` arc often refers to all composition arcs other than `sublayer`, I guess this is a relic, as this was probably the first arc.
 
+### Encapsulation
+When you start digging through the API docs, you'll read the word "encapsulation" a few times. (IMHO not enough times 😉). Here is what it means and why it is crucial to understand.
 
-
-So far so good? Now let's bring layers/a layer stack into the mix. 
-
-
-
-~~~admonish danger title="List-Editable Ops | Combined Value"
-When multiple list editable ops from different layers get combined, each individual sub-list in each list editable op gets combined based on the layer order. It does not get "applied" in the sense that it flattens out the list to a single 
-
-It is very important to know, that list editable ops only store lists these sublists, and don't actually 
-
+~~~admonish danger title="Encapsulation | Why are layers loaded via references/payloads composition arc locked?"
+To make USD composition fast and more understandable, the content of what is loaded from an external file via the **`Reference`** and **`Payload`** composition arcs, is **composition locked** or as USD calls it **encapsulated**. This means that you can't remove any of the composition arcs in the layer stack, that is being loaded, via the list editable ops `deletedItems` list or via the `explicitItems`.
 ~~~
 
+The only way to get rid of a `payload`/`reference` is by putting it behind a `variant` in the first place and then changing the `variant` selection. This can have some unwanted side effects though. You can find a detailed explanation with an example here: [USD FAQ - When can you delete a reference?](https://openusd.org/release/usdfaq.html#when-can-you-delete-a-reference-or-other-deletable-thing)
 
-
-~~~admonish tip title=""
-```python
-
-# No you m
-
-
-# To get only added/explicit items (This does not make use of the deleteItems remove list!):
-print(path_list_op.GetAddedOrExplicitItems()) # Returns: [Sdf.Path('/cube'), Sdf.Path('/sphere')]
-print(path_list_op.GetAddedOrExplicitItems()) # Returns: [Sdf.Path('/cube'), Sdf.Path('/sphere')]
-
-# We can also mark it as "explicit", this means that any other values from la
-
-['ApplyOperations', 'Clear', 'ClearAndMakeExplicit', 'Create', 'CreateExplicit', 'GetAddedOrExplicitItems', 
-'HasItem', 'isExplicit',
-
-# Setup scene
-from pxr import Sdf, Usd
-stage = Usd.Stage.CreateInMemory()
-layer_top = Sdf.Layer.CreateAnonymous()
-layer_middle = Sdf.Layer.CreateAnonymous()
-layer_bottom = Sdf.Layer.CreateAnonymous()
-layers = [layer_top, layer_middle, layer_bottom]
-stage.GetRootLayer().subLayerPaths = [l.identifier for l in layers]
-prim_path = Sdf.Path("/cube")
-for layer in layers:
-    prim_spec = Sdf.CreatePrimInLayer(layer, prim_path)
-    prim_spec.specifier = Sdf.SpecifierDef
-    prim_spec.typeName = "Cube"
-top_prim_spec = layer_top.GetPrimAtPath(prim_path)
-middle_prim_spec = layer_middle.GetPrimAtPath(prim_path)
-bottom_prim_spec = layer_bottom.GetPrimAtPath(prim_path)
-# Write list editable ops for inherits
-
-```
+~~~admonish important title="Encapsulation | Are my loaded layers then self contained?"
+You might be wondering now, if encapsulation forces the content of `Reference`/`Payload` to be self contained, in the sense that the composition arcs within that file do not "look" outside the file. The answer is no: For `Inherits`, `Internal References` and `Specializes` the arcs still evaluate relative to the composed scene. E.g. that means if you have internal reference some where in a referenced in layer stack, that `internal reference` will still be live. So if you edit a property in the active stage, that referenced in the file, it will still propagate to all the changes from the internal reference source to all the internal reference targets. The only thing that is "locked" is the composition arcs structure, not the way the composition arc evaluates.
 ~~~
 
-## Encapsulation
+### Layer Stack
+What is the layer stack, that we keep mentioning, you might ask yourself?
+To quote from the [USD Glossary](https://openusd.org/release/glossary.html#usdglossary-layerstack)
 
-
-
-
-
-## Layer Stack
-Now if you read through the USD docs/glossary, you'll notice a recurring sentence, when it comes to composition:
- 
-~~~admonish important title=""
-Composition arcs target the layer stack, not individual layers.
+~~~admonish quote title=""
+The ordered set of layers resulting from the recursive gathering of all SubLayers of a Layer, plus the layer itself as first and strongest.
 ~~~
 
-This is absolutely crucial to understand.
+So to summarize, all (sub)-layers in the stage that were not loaded by `Reference` and `Payload` arcs.
 
+Now you might be thinking, isn't that the same thing as when we open a Usd file via `Usd.Stage.Open`? Well kind of, yes. When opening a stage, the USD file you open and its sublayers are the layer stack. So one could say, **editing a stage is process of editing a layer stack**. To extend that analogy, we could call a stage, that was written to disk and is being loaded via `Reference` and `Payload` arcs, an encapsulated layer stack.
 
+These are the important things to understand (as also mentioned in the glossary):
 
+~~~admonish important title="Layer Stack | How does it affect composition?"
+- Composition arcs target the layer stack, not individual layers. They recursively target the composed result (aka the result of all layers combined via the composition arc rules) of each layer they load in.
+- We can only list edit composition arcs via list editable ops in the active layer stack. The active layer stack is usually the active stage (unless when we "hack" around it via edit targets, which you 99% of the time don't do).
+~~~
 
+So to make it clear again (as this is very important when we setup our asset/shot composition structure): **We can only update `Reference` and `Payload` arcs in the active layer stack. Once the active layer stack has been loaded via `Reference` and `Payload` arcs into another layer stack, it is encapsulated and we can't change the composition structure.**
 
-
-
-
-
-
+This means to keep our pipeline flexible, we usually have "only" three kind of layer stacks:
+- **Asset Layer Stack**: When building assets, we build a packaged asset element. The end result is a (nested) layer stack that loads in different aspects of the asset (model/materials/fx/etc.). Here the main "asset.usd" file, that at the end we reference into our shots, is in control of "final" asset layer stack. We usually don't have any encapsulation issue scenarios, as the different assets layers are usually self contained or our asset composition structure is usually developed to sidestep encapsulation problems via variants. 
+- **Shot Layer Stack**: The shot layer stack is the one that sublayers in all of your different shot layers that come from different departments. That's right, since we sublayer everything, we still have access to list editable ops on everything that is loaded in via composition arcs that are generated in individual shot layers. This keeps the shot pipeline flexible, as we don't run into the encapsulation problem.
+- **Set/Environment/Assembly Layer Stack** (Optional): We can also reference in multiple assets to an assembly type of asset, that then gets referenced into our shots. This is where you might run into encapsulation problems. For example, if we want to remove a reference from the set from our shot stage, we can't as it is baked into the composition structure. The usual way around it is to: 1. Write the assembly with variants, so we can variant away unwanted assets. 2. Deactivate the asset reference 3. Write the asset reference with variants and then switch to a variant that is empty.
 
