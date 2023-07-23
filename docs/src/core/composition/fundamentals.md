@@ -1,21 +1,53 @@
-# Composition Deep Dive
+# Composition Fundamentals
 ~~~admonish question title="Still under construction!"
 As composition is USD's most complicated topic, this section will be enhanced with more examples in the future.
 If you detect an error or have useful production examples, please [submit a ticket](https://github.com/LucaScheller/VFX-UsdSurvivalGuide/issues/new), so we can improve the guide!
-~~~
 
-
+In the near future, we'll add examples for:
 - Pixar Glossary Examples
 - Pixar FAQ Examples
 - Production Examples
+~~~
 
+# Table of contents
+1. [Composition Fundamentals In-A-Nutshell](#summary)
+1. [Why should I understand the editing fundamentals?](#usage)
+1. [Resources](#resources)
+1. [Overview](#overview)
+1. [Terminology](#terminology)
+1. [Composition Editing Principles - What do we need to know before we start?](#compositionFundamentals)
+    1. [List-Editable Operations](#compositionFundamentalsListEditableOps)
+    1. [Encapsulation](#compositionFundamentalsEncapsulation)
+    1. [Layer Stack](#compositionFundamentalsLayerStack)
 
-## Terminology
+## TL;DR - Composition Fundamentals In-A-Nutshell <a name="summary"></a>
+- Composition editing works in the active [layer stack](#compositionFundamentalsLayerStack) via [list editable ops](#compositionFundamentalsListEditableOps). 
+- When loading a layer (stack) from disk via `Reference` and `Payload` arcs, the contained composition structure is immutable (USD speak [encapsulated](#compositionFundamentalsEncapsulation)). The arcs themselves still target the "live" composed stage and therefore still reflect changes from the encapsulated arcs.
 
+## Why should I understand the editing fundamentals? <a name="usage"></a>
+~~~admonish tip
+This section houses terminology essentials and a detailed explanation of how the underlying mechanism of editing/composing arcs works.
+Some may consider it a deep dive topic, we'd recommend starting out with it first though, as it saves time later on when you don't understand why something might not work.
+~~~
+
+## Resources <a name="resources"></a>
+- [USD Glossary]():
+    - [Layer Stack](https://openusd.org/release/glossary.html#usdglossary-layerstack)
+    - [Root Layer Stack](https://openusd.org/release/glossary.html#usdglossary-rootlayerstack)
+    - [List Editing](https://openusd.org/release/glossary.html#list-editing)
+    - [LIVRPS](https://openusd.org/release/glossary.html#livrps-strength-ordering)
+    - [Path Translation](https://openusd.org/release/glossary.html#usdglossary-pathtranslation)
+    - [References](https://openusd.org/release/glossary.html#usdglossary-references)
+- [USD FAQ - When can you delete a reference?](https://openusd.org/release/usdfaq.html#when-can-you-delete-a-reference-or-other-deletable-thing)
+
+## Overview <a name="overview"></a>
+Before we start looking at the actual composition arcs and their strength ordering rules, let's first look at how composition editing works.
+
+## Terminology <a name="terminology"></a>
 USD's mechanism of linking different USD files with each other is called `composition`. Let's first clarify some terminology before we start, so that we are all on the same page:
 - **`layer`**: A layer is an USD file on disk with [prims](../elements/prim.md) & [properties](../elements/property.md). (Technically it can also be in memory, but for simplicity on this page, let's think of it as a file on disk). More info in our [layer section](../elements/layer.md).
-- **`layer stack`**: A stack of layers (Hehe 😉). We'll explain it more in detail below, just remember that composition targets the layer stack, never individual layers.
-- **`composition arc`**: A method of linking (pointing to) another layer or another part of the scene hierarchy. USD has several, each with a specific behavior.
+- **`layer stack`**: A stack of layers (Hehe 😉). We'll explain it more in detail below, just remember it is talking about all the loaded layers that use the `sublayer` composition arc.
+- **`composition arc`**: A method of linking (pointing to) another layer or another part of the scene hierarchy. USD has different kinds of composition arcs, each with a specific behavior.
 - **`prim index`**: Once USD has processed all of our composition arcs, it builds a `prim index` that tracks where values can come from. We can think of the `prim index` as something that outputs an ordered list of `[(<layer (stack)>, <hierarchy path>), (<layer (stack)>, <hierarchy path>)]` ordered by the composition rules.
 - **`composed value`**: When looking up a value of a property, USD then checks each location of the `prim index` for a value and moves on to the next one if it can't find one. If no value was found, it uses a schema fallback (if the property came from a schema), other wise it falls back to not having a value (USD speak: not being `authored`).
 
@@ -23,21 +55,19 @@ Composition is "easy" to explain in theory, but hard to master in production. It
 
 We recommend really playing through as much scenarios as possible before you start using USD in production. Houdini is one of the best tools on the market that let's you easily concept and play around with composition. Therefore we will use it in our examples below.
 
-
-
-## Composition Editing Principles - What do we need to know before we start?
+## Composition Editing Fundamentals - What do we need to know before we start? <a name="compositionFundamentals"></a>
 Now before we talk about individual `composition arcs`, let's first focus on three different principles composition runs on.
 These three principles build on each other, so make sure you work through them in order they are listed below.
 - [List-Editable Operations](#list-editable-operations-ops)
 - [Encapsulation](#encapsulation)
 - [Layer Stack](#layer-stack)
 
-### List-Editable Operations (Ops)
+### List-Editable Operations (Ops) <a name="compositionFundamentalsListEditableOps"></a>
 USD has the concept of list editable operations. Instead of having a "flat" array (`[Sdf.Path("/cube"), Sdf.Path("/sphere")]`) that stores what files/hierarchy paths we want to point to, we have wrapper array class that stores multiple sub-arrays. When flattening the list op, USD removes duplicates, so that the end result is like an ordered Python `set()`.
 
 To make it even more confusing, composition arc list editable ops run on a different logic than "normal" list editable ops when looking at the final `composed value`.
 
-We take a closer look at "normal" list editable ops (and "composition" list editable ops) in our [List Editable Ops section](./listeditableops.md), on this page we'll stay focused on the composition ones.
+We take a closer look at "normal" list editable ops in our [List Editable Ops section](./listeditableops.md), on this page we'll stay focused on the composition ones.
 
 Alright, let's have a quick primer on how these work. There are three sub-classes for composition related list editable ops:
 - `Sdf.ReferenceListOp`: The list op for the `reference` composition arc, stores `Sdf.Reference` objects.
@@ -72,7 +102,7 @@ When looking at the metadata of a prim via UIs (USD View/Houdini) or getting it 
 This is probably the most confusing part of USD in my opinion when first starting out. To inspect the full composition result, we actually have to consult the [PCP cache](pcp.md) or run a `Usd.PrimCompositionQuery`. There is another caveat though too, as you'll see in the next section: Composition is **encapsulated**. This means our edits to list editable ops only work in the active `layer stack`. More info below!
 ~~~
 
-In Houdini the list editable ops are exposed on the `reference` node. The "Reference Operation" parm sets what sub-array (prepend,append,delete) to use, the "Pre-Operation" sets if to `.Clear()` the active list editable op or if to run `.ClearAndMakeExplicit()`.
+In Houdini the list editable ops are exposed on the `reference` node. The "Reference Operation" parm sets what sub-array (prepend,append,delete) to use, the "Pre-Operation" sets it to `.Clear()` in `Clear Reference Edits in active layer` mode and to `.ClearAndMakeExplicit()` in "Clear All References" mode.
 
 ![Houdini Reference Node - List Editable Ops](houdiniReferenceComposition.gif)
 
@@ -82,9 +112,9 @@ Here is how Houdini (but also the USD view) displays the references metadata fie
 
 You can see, as soon as we have our reference list editable op on different layers, the metadata only show the top most layer. To inspect all the references that are being loaded, we therefore need to look at the layer stack (the "Scene Graph Layers" panel) or perform a [compsition query](../../production/caches/composition.md).
 
-Also a hint on terminology: In the USD docs/glossary the `Reference` arc often refers to all composition arcs other than `sublayer`, I guess this is a relic, as this was probably the first arc.
+Also a hint on terminology: In the USD docs/glossary the `Reference` arc often refers to all composition arcs other than `sublayer`, I guess this is a relic, as this was probably the first arc. That's why Houdini uses a similar terminology.
 
-### Encapsulation
+### Encapsulation <a name="compositionFundamentalsEncapsulation"></a>
 When you start digging through the API docs, you'll read the word "encapsulation" a few times. (IMHO not enough times 😉). Here is what it means and why it is crucial to understand.
 
 ~~~admonish danger title="Encapsulation | Why are layers loaded via references/payloads composition arc locked?"
@@ -94,10 +124,10 @@ To make USD composition fast and more understandable, the content of what is loa
 The only way to get rid of a `payload`/`reference` is by putting it behind a `variant` in the first place and then changing the `variant` selection. This can have some unwanted side effects though. You can find a detailed explanation with an example here: [USD FAQ - When can you delete a reference?](https://openusd.org/release/usdfaq.html#when-can-you-delete-a-reference-or-other-deletable-thing)
 
 ~~~admonish important title="Encapsulation | Are my loaded layers then self contained?"
-You might be wondering now, if encapsulation forces the content of `Reference`/`Payload` to be self contained, in the sense that the composition arcs within that file do not "look" outside the file. The answer is no: For `Inherits`, `Internal References` and `Specializes` the arcs still evaluate relative to the composed scene. E.g. that means if you have internal reference some where in a referenced in layer stack, that `internal reference` will still be live. So if you edit a property in the active stage, that referenced in the file, it will still propagate to all the changes from the internal reference source to all the internal reference targets. The only thing that is "locked" is the composition arcs structure, not the way the composition arc evaluates.
+You might be wondering now, if encapsulation forces the content of `Reference`/`Payload` to be self contained, in the sense that the composition arcs within that file do not "look" outside the file. The answer is no: For `Inherits`, `Internal References` and `Specializes` the arcs still evaluate relative to the composed scene. E.g. that means if you have internal reference some where in a referenced in layer stack, that `internal reference` will still be live. So if you edit a property in the active stage, that referenced in the file, it will still propagate all the changes from the internal reference source to all the internal reference targets. The only thing that is "locked" is the composition arcs structure, not the way the composition arc evaluates.
 ~~~
 
-### Layer Stack
+### Layer Stack <a name="compositionFundamentalsLayerStack"></a>
 What is the layer stack, that we keep mentioning, you might ask yourself?
 To quote from the [USD Glossary](https://openusd.org/release/glossary.html#usdglossary-layerstack)
 
@@ -107,7 +137,7 @@ The ordered set of layers resulting from the recursive gathering of all SubLayer
 
 So to summarize, all (sub)-layers in the stage that were not loaded by `Reference` and `Payload` arcs.
 
-Now you might be thinking, isn't that the same thing as when we open a Usd file via `Usd.Stage.Open`? Well kind of, yes. When opening a stage, the USD file you open and its sublayers are the layer stack. So one could say, **editing a stage is process of editing a layer stack**. To extend that analogy, we could call a stage, that was written to disk and is being loaded via `Reference` and `Payload` arcs, an encapsulated layer stack.
+Now you might be thinking, isn't that the same thing as when we open a Usd file via `Usd.Stage.Open`? Well kind of, yes. When opening a stage, the USD file you open and its sublayers are the layer stack. USD actually calls this the `Root Layer Stack` (it also includes the sessions layers). So one could say, **editing a stage is process of editing a layer stack**. To extend that analogy, we could call a stage, that was written to disk and is being loaded via `Reference` and `Payload` arcs, an encapsulated layer stack.
 
 These are the important things to understand (as also mentioned in the glossary):
 

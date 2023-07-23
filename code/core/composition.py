@@ -38,7 +38,7 @@ result = result.ApplyOperations(path_list_op_layer_middle)
 result = result.ApplyOperations(path_list_op_layer_bottom)
 # Notice how on merge it makes sure that each sublist does not have the values of the other sublists, just like a Python set()
 print(result) # Returns: SdfPathListOp(Deleted Items: [/cube], Prepended Items: [/disc, /cone], Appended Items: [/sphere])
-# Get the flattened result
+# Get the flattened result. This does not apply the deleteItems, only ApplyOperations does that. 
 print(result.GetAddedOrExplicitItems()) # Returns: [Sdf.Path('/disc'), Sdf.Path('/cone'), Sdf.Path('/sphere')]
 
 ### Deleted and added items ###

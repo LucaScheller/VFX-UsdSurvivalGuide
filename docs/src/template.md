@@ -7,14 +7,14 @@ This sub-section is still under development, it is subject to change and needs e
 
 # Table of contents
 1. [<Topic> In-A-Nutshell](#summary)
-2. [What should I use it for?](#usage)
-3. [Resources](#resources)
-4. [Overview](#overview)
-6. [Example A](#exampleA)
+1. [What should I use it for?](#usage)
+1. [Resources](#resources)
+1. [Overview](#overview)
+1. [Example A](#exampleA)
     1. [Subexample A](#subexampleA)
-    2. [Subexample B](#subexampleB)
+    1. [Subexample B](#subexampleB)
 
-## TL;DR - Metadata In-A-Nutshell <a name="summary"></a>
+## TL;DR - <Topic> In-A-Nutshell <a name="summary"></a>
 - Main points to know
 
 ## What should I use it for? <a name="usage"></a>
