@@ -3,43 +3,52 @@ In this section we'll cover how to create composition arcs via code. To check ou
 
 Please read out [fundamentals section](./fundamentals.md) as we often refer to it on this page. 
 
-~~~admonish question title="Still under construction!"
-This sub-section is still under development, it is subject to change and needs extra validation.
-~~~
 
 # Table of contents
-1. [<Topic> In-A-Nutshell](#summary)
+1. [Composition Arcs In-A-Nutshell](#summary)
 1. [What should I use it for?](#usage)
 1. [Resources](#resources)
 1. [Overview](#overview)
 1. [Composition Arcs](#compositionArcs)
-    1. [Sublayer / Local Opinion](#compositionArcSublayer)
+    1. [Sublayers / Local Opinions](#compositionArcSublayer)
         1. [Value Clips](#compositionArcValueClips)
-    1. [Inherit](#compositionArcInherit)
-    1. [Variant](#compositionArcVariant)
-    1. [Reference](#compositionArcReference)
-        1. [Reference File](#compositionArcReferenceExternal)
-        1. [Reference Internal](#compositionArcReferenceInternal)
-    1. [Payload](#compositionArcPayload)
-    1. [Specialize](#compositionArcSpecialize)
+    1. [Inherits](#compositionArcInherit)
+    1. [Variants](#compositionArcVariant)
+    1. [References](#compositionArcReference)
+        1. [References File](#compositionArcReferenceExternal)
+        1. [References Internal](#compositionArcReferenceInternal)
+    1. [Payloads](#compositionArcPayload)
+    1. [Specializes](#compositionArcSpecialize)
 
-## TL;DR - <Topic> In-A-Nutshell <a name="summary"></a>
-- Main points to know
+## TL;DR - Composition Arcs In-A-Nutshell <a name="summary"></a>
+- Creating composition arcs is straight forward, the high level API wraps the low level list editable ops with a thin wrappers. We can access the high level API via the `Usd.Prim.Get<ArcName>` syntax.
+- Editing via the low level API is often just as easy, if not easier, especially when [creating (nested) variants](#compositionArcVariantCopySpec). The list editable ops can be set via `Sdf.PrimSpec.SetInfo(<arcType>, <listEditableOp>)` or via the properties e.g. `Sdf.PrimSpec.<arcType>List`.
 
 ## What should I use it for? <a name="usage"></a>
 ~~~admonish tip
-Summarize actual production relevance.
+We'll be using the below code, whenever we write composition arcs in USD.
 ~~~
 
 ## Resources <a name="resources"></a>
-- [API Docs]()
+- [Sdf.Layer](https://openusd.org/dev/api/class_sdf_layer.html)
+- [Sdf.LayerOffset](https://openusd.org/dev/api/class_sdf_layer_offset.html)
+- [Sdf.\<Arc\>ListOp](https://www.sidefx.com/docs/hdk/list_op_8h.html)
+- [Usd.Inherits](https://openusd.org/dev/api/class_usd_inherits.html)
+- [Usd.VariantSets](https://openusd.org/dev/api/class_usd_variant_sets.html)
+- [Usd.VariantSet](https://openusd.org/dev/api/class_usd_variant_set.html)
+- [Usd.References](https://openusd.org/dev/api/class_usd_references.html)
+- [Sdf.VariantSetSpec](https://openusd.org/dev/api/class_sdf_variant_set_spec.html)
+- [Sdf.VariantSpec](https://openusd.org/dev/api/class_sdf_variant_spec.html)
+- [Sdf.Reference](https://openusd.org/dev/api/class_sdf_reference.html)
+- [Usd.Payloads](https://openusd.org/dev/api/class_usd_payloads.html)
+- [Sdf.Reference](https://openusd.org/dev/api/class_sdf_payload.html)
+- [Usd.Specializes](https://openusd.org/dev/api/class_usd_specializes.html)
 
 ## Overview <a name="overview"></a>
-
 Here is a comparison between arcs that can target external layers (files) and arcs that target another part of the hierarchy:
 ```mermaid
 flowchart TD
-    compositionArcSublayer(["Sublayer (Direct Opinions)"])
+    compositionArcSublayer(["Sublayers (Direct Opinions)"])
     compositionArcValueClip(["Value Clips (Lower than Direct Opinions)"])
     compositionArcInherit(["Inherits"])
     compositionArcVariant(["Variants"])
@@ -64,7 +73,7 @@ Some arcs can specify a time offset/scale via a`Sdf.LayerOffset`:
 ```mermaid
 flowchart TD
     compositionArcLayerOffset(["Sdf.LayerOffset"])
-    compositionArcSublayer(["Sublayer (Direct Opinions)"])
+    compositionArcSublayer(["Sublayers"])
     compositionArcReference(["References (External/Internal)"])
     compositionArcPayload(["Payloads"])
     compositionArcLayerOffset --> compositionArcSublayer
@@ -80,10 +89,10 @@ All arcs that make use of [list-editable ops](./fundamentals.md#list-editable-op
 - `Usd.ListPositionFrontOfPrependList`: Prepend to prepend list, the same as `Sdf.<Type>ListOp`.appendedItems.insert(0, item)
 - `Usd.ListPositionBackOfPrependList`: Append to prepend list, the same as `Sdf.<Type>ListOp`.appendedItems.append(item)
 
-As we can see, all arc APIs, except for variants and sublayers, in the high level API, are thin wrappers around the [list editable op](./fundamentals.md#list-editable-operations-ops) of the arc.
+As we can see, all arc APIs, except for sublayers, in the high level API, are thin wrappers around the [list editable op](./fundamentals.md#list-editable-operations-ops) of the arc.
 
 
-### Sublayer / Local Opinion <a name="compositionArcSublayer"></a>
+### Sublayers / Local Opinions <a name="compositionArcSublayer"></a>
 
 ~~~admonish tip title=""
 ```python
@@ -108,7 +117,8 @@ We cover value clips in our [animation section](../elements/animation.md). Their
 
 The write them via metadata entries as covered here in our [value clips](../elements/animation.md#value-clips-loading-time-samples-from-multiple-files) section.
 
-### Inherit <a name="compositionArcInherit"></a>
+### Inherits <a name="compositionArcInherit"></a>
+Inherits, like specializes, don't have a object representation, they directly edit the list-editable op list.
 
 ~~~admonish tip title=""
 ```python
@@ -116,13 +126,88 @@ The write them via metadata entries as covered here in our [value clips](../elem
 ```
 ~~~
 
-### Variant <a name="compositionArcVariant"></a>
+### Variants <a name="compositionArcVariant"></a>
+Variant sets (the variant set->variant name mapping) are also managed via list editable ops.
+The actual variant set data is not though. It is written "in-line" into the prim spec via the `Sdf.VariantSetSpec`/`Sdf.VariantSpec` specs, so that's why we have dedicated specs.
 
-### Reference <a name="compositionArcReference"></a>
+This means we can add variant data, but hide it by not adding the variant set name to the `variantSets`metadata.
 
+For example here we added it:
 
-#### Reference File <a name="compositionArcReferenceExternal"></a>
+```python
+def Xform "car" (
+    variants = {
+        string color = "colorA"
+    }
+    prepend variantSets = "color"
+)
+{
+    variantSet "color" = {
+        "colorA" {
+            def Cube "cube"
+            {
+            }
+        }
+        "colorB" {
+            def Sphere "sphere"
+            {
+            }
+        }
+    }
+}
+```
+Here we skipped it, by commenting out the:
+`car_prim_spec.SetInfo("variantSetNames", Sdf.StringListOp.Create(prependedItems=["color"]))` line in the below code.
+This will make it not appear in UIs for variant selections.
 
+```python
+def Xform "car" (
+    variants = {
+        string color = "colorA"
+    }
+)
+{
+    variantSet "color" = {
+        "colorA" {
+            def Cube "cube"
+            {
+            }
+        }
+        "colorB" {
+            def Sphere "sphere"
+            {
+            }
+        }
+    }
+}
+```
+
+~~~admonish tip title=""
+```python
+{{#include ../../../../code/core/composition.py:compositionArcVariant}}
+```
+~~~
+
+<a name="compositionArcVariantCopySpec"></a>
+~~~admonish tip title="Pro Tip | Copying layer content into a variant"
+When editing variants, we can also move layer content into a variant very easily via the `Sdf.CopySpec` command. This is a very powerful feature!
+
+```python
+{{#include ../../../../code/core/composition.py:compositionArcVariantCopySpec}}
+```
+~~~
+
+### References <a name="compositionArcReference"></a>
+
+The `Sdf.Reference` class create a read-only reference description object:
+~~~admonish tip title=""
+```python
+{{#include ../../../../code/core/composition.py:compositionArcReferenceClass}}
+```
+~~~
+
+#### References File <a name="compositionArcReferenceExternal"></a>
+Here is how we add external references (references that load data from other files):
 ~~~admonish tip title=""
 ```python
 {{#include ../../../../code/core/composition.py:compositionArcReferenceExternal}}
@@ -130,22 +215,32 @@ The write them via metadata entries as covered here in our [value clips](../elem
 ~~~
 
 
-#### Reference Internal <a name="compositionArcReferenceInternal"></a>
-
+#### References Internal <a name="compositionArcReferenceInternal"></a>
+Here is how we add internal references (references that load data from another part of the hierarchy) :
 ~~~admonish tip title=""
 ```python
 {{#include ../../../../code/core/composition.py:compositionArcReferenceInternal}}
 ```
 ~~~
 
-### Payload <a name="compositionArcPayload"></a>
+### Payloads <a name="compositionArcPayload"></a>
+The `Sdf.Payload` class create a read-only payload description object:
+~~~admonish tip title=""
+```python
+{{#include ../../../../code/core/composition.py:compositionArcPayloadClass}}
+```
+~~~
+
+Here is how we add payloads. Payloads always load data from other files:
 ~~~admonish tip title=""
 ```python
 {{#include ../../../../code/core/composition.py:compositionArcPayload}}
 ```
 ~~~
 
-### Specialize <a name="compositionArcSpecialize"></a>
+### Specializes <a name="compositionArcSpecialize"></a>
+Specializes, like inherits, don't have a object representation, they directly edit the list-editable op list.
+
 ~~~admonish tip title=""
 ```python
 {{#include ../../../../code/core/composition.py:compositionArcSpecialize}}

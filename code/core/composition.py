@@ -199,6 +199,107 @@ cube_prim_spec.typeName = "Cube"
 bicycle_prim_spec.inheritPathList.appendedItems = [cube_prim_path]
 #// ANCHOR_END: compositionArcInherit
 
+#// ANCHOR: compositionArcVariant
+### High Level ###
+from pxr import Sdf, Usd
+stage = Usd.Stage.CreateInMemory()
+
+bicycle_prim_path = Sdf.Path("/bicycle")
+bicycle_prim = stage.DefinePrim(bicycle_prim_path, "Xform")
+## Methods of Usd.VariantSets
+# Has: 'HasVariantSet'
+# Get: 'GetNames', 'GetVariantSet', 'GetVariantSelection', 'GetAllVariantSelections'
+# Set: 'AddVariantSet', 'SetSelection'
+variant_sets_api = bicycle_prim.GetVariantSets()
+## Methods of Usd.VariantSet
+# Has: 'HasAuthoredVariant', 'HasAuthoredVariantSelection'
+# Get: 'GetName', 'GetVariantNames', 'GetVariantSelection', 'GetVariantEditContext', 'GetVariantEditTarget'
+# Set: 'AddVariant', 'SetVariantSelection'
+# Clear: 'BlockVariantSelection', 'ClearVariantSelection'
+variant_set_api = variant_sets_api.AddVariantSet("color", position=Usd.ListPositionBackOfPrependList)
+variant_set_api.AddVariant("colorA")
+# If we want to author on the selected variant, we have to select it first
+variant_set_api.SetVariantSelection("colorA")
+with variant_set_api.GetVariantEditContext():
+    # Anything we write in the context, goes into the variant (prims and properties)
+    cube_prim_path = bicycle_prim_path.AppendChild("cube")
+    cube_prim = stage.DefinePrim(cube_prim_path, "Cube")
+# We can also generate the edit target ourselves, but we still need to set the
+# variant selection, seems like a bug. Changing variants is a heavy op ...
+variant_set_api.AddVariant("colorB")
+variant_set_api.SetVariantSelection("colorB")
+variant_prim_path = bicycle_prim_path.AppendVariantSelection("color", "colorB") 
+layer = stage.GetEditTarget().GetLayer()
+edit_target = Usd.EditTarget.ForLocalDirectVariant(layer, variant_prim_path)
+# Or
+edit_target = variant_set_api.GetVariantEditTarget()
+edit_context = Usd.EditContext(stage, edit_target) 
+with edit_context as ctx:
+    sphere_prim_path = bicycle_prim_path.AppendChild("sphere")
+    sphere_prim = stage.DefinePrim("/bicycle/sphere", "Sphere")
+### Low Level ###
+from pxr import Sdf
+layer = Sdf.Layer.CreateAnonymous()
+bicycle_prim_path = Sdf.Path("/bicycle")
+bicycle_prim_spec = Sdf.CreatePrimInLayer(layer, bicycle_prim_path)
+bicycle_prim_spec.specifier = Sdf.SpecifierDef
+bicycle_prim_spec.typeName = "Xform"
+# Variants
+cube_prim_path = bicycle_prim_path.AppendVariantSelection("color", "colorA").AppendChild("cube")
+cube_prim_spec = Sdf.CreatePrimInLayer(layer, cube_prim_path)
+cube_prim_spec.specifier = Sdf.SpecifierDef
+cube_prim_spec.typeName = "Cube"
+sphere_prim_path = bicycle_prim_path.AppendVariantSelection("color", "colorB").AppendChild("sphere")
+sphere_prim_spec = Sdf.CreatePrimInLayer(layer, sphere_prim_path)
+sphere_prim_spec.specifier = Sdf.SpecifierDef
+sphere_prim_spec.typeName = "Sphere"
+# Variant Selection
+bicycle_prim_spec.variantSelections["color"] = "colorA"
+
+# We can also author the variants via variant specs
+layer = Sdf.Layer.CreateAnonymous()
+car_prim_path = Sdf.Path("/car")
+car_prim_spec = Sdf.CreatePrimInLayer(layer, car_prim_path)
+car_prim_spec.specifier = Sdf.SpecifierDef
+car_prim_spec.typeName = "Xform"
+# Variants
+variant_set_spec = Sdf.VariantSetSpec(car_prim_spec, "color")
+variant_spec = Sdf.VariantSpec(variant_set_spec, "colorA")
+cube_prim_spec = Sdf.PrimSpec(variant_spec.primSpec, "cube", Sdf.SpecifierDef)
+cube_prim_spec.typeName = "Cube"
+variant_spec = Sdf.VariantSpec(variant_set_spec, "colorB")
+cube_prim_spec = Sdf.PrimSpec(variant_spec.primSpec, "sphere", Sdf.SpecifierDef)
+cube_prim_spec.typeName = "Sphere"
+# Ironically this does not setup the variant set names metadata, so we have to author it ourselves.
+car_prim_spec.SetInfo("variantSetNames", Sdf.StringListOp.Create(prependedItems=["color"]))
+# Variant Selection
+car_prim_spec.variantSelections["color"] = "colorA"
+#// ANCHOR_END: compositionArcVariant
+
+#// ANCHOR: compositionArcVariantCopySpec
+from pxr import Sdf
+# Spawn other layer, this usually comes from other stages, that your DCC creates/owns.
+some_other_layer = Sdf.Layer.CreateAnonymous()
+root_prim_path = Sdf.Path("/root")
+cube_prim_path = Sdf.Path("/root/cube")
+cube_prim_spec = Sdf.CreatePrimInLayer(some_other_layer, cube_prim_path)
+cube_prim_spec.specifier = Sdf.SpecifierDef
+cube_prim_spec.typeName = "Cube"
+# Create demo layer
+bicycle_prim_path = Sdf.Path("/bicycle")
+bicycle_prim_spec = Sdf.CreatePrimInLayer(layer, bicycle_prim_path)
+bicycle_prim_spec.specifier = Sdf.SpecifierDef
+bicycle_prim_spec.typeName = "Xform"
+# Copy content into variant
+variant_set_spec = Sdf.VariantSetSpec(bicycle_prim_spec, "color")
+variant_spec = Sdf.VariantSpec(variant_set_spec, "colorA")
+variant_prim_path = bicycle_prim_path.AppendVariantSelection("color", "colorA")
+Sdf.CopySpec(some_other_layer, root_prim_path, layer, variant_prim_path)
+# Variant Selection
+bicycle_prim_spec.SetInfo("variantSetNames", Sdf.StringListOp.Create(prependedItems=["color"]))
+bicycle_prim_spec.variantSelections["color"] = "colorA"
+#// ANCHOR_END: compositionArcVariantCopySpec
+
 
 #// ANCHOR: compositionArcReferenceExternal
 ### High Level ###
@@ -247,6 +348,19 @@ reference = Sdf.Reference(reference_layer.identifier, layerOffset=reference_laye
 bicycle_prim_spec.referenceList.appendedItems = [reference]
 #// ANCHOR_END: compositionArcReferenceExternal
 
+#// ANCHOR: compositionArcReferenceClass
+from pxr import Sdf
+ref = Sdf.Reference("/file/path.usd", "/prim/path", Sdf.LayerOffset(offset=10, scale=1))
+# The reference object is a read only instance.
+print(ref.assetPath) # Returns: "/file/path.usd"
+print(ref.primPath) # Returns: "/prim/path"
+print(ref.layerOffset) # Returns: Sdf.LayerOffset(offset=10, scale=1)
+try: 
+    ref.assetPath = "/some/other/file/path.usd"
+except Exception:
+    print("Read only Sdf.Reference!")
+#// ANCHOR_END: compositionArcReferenceClass
+
 #// ANCHOR: compositionArcReferenceInternal
 ### High Level ###
 from pxr import Sdf, Usd
@@ -279,6 +393,20 @@ reference_layer_offset = Sdf.LayerOffset(offset=10, scale=1)
 reference = Sdf.Reference("", cube_prim_path, reference_layer_offset)
 bicycle_prim_spec.referenceList.appendedItems = [reference]
 #// ANCHOR_END: compositionArcReferenceInternal
+
+#// ANCHOR: compositionArcPayloadClass
+from pxr import Sdf
+payload = Sdf.Payload("/file/path.usd", "/prim/path", Sdf.LayerOffset(offset=10, scale=1))
+# The reference object is a read only instance.
+print(payload.assetPath) # Returns: "/file/path.usd"
+print(payload.primPath) # Returns: "/prim/path"
+print(payload.layerOffset) # Returns: Sdf.LayerOffset(offset=10, scale=1)
+try: 
+    payload.assetPath = "/some/other/file/path.usd"
+except Exception:
+    print("Read only Sdf.Payload!")
+#// ANCHOR_END: compositionArcPayloadClass
+
 
 #// ANCHOR: compositionArcPayload
 ### High Level ###
