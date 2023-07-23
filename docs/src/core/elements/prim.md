@@ -245,6 +245,16 @@ We cover this in detail in our [Loading Data](./loading_mechanisms.md) section.
 ### Properties/Attributes/Relationships <a name="primProperties"></a>
 We cover properties in more detail in our [properties](./property.md) section.
 
+~~~admonish important title="Deep Dive | Properties"
+Technically properties are also stored as metadata on the `Sdf.PrimSpec`. So later on when we look at composition, keep in mind that the prim stack therefore also drives the property stack. That's why the prim index is on the `prim` level and not on the `property` level.
+```python
+...
+print(prim_spec.properties, prim_spec.attributes, prim_spec.relationships)
+print(prim_spec.GetInfo("properties"))
+...
+```
+~~~
+
 Here are the basics for both API levels:
 
 #### High Level API

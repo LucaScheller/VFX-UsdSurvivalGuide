@@ -28,6 +28,7 @@
         - [Standalone Utilities](./core/elements/standalone_utilities.md)
     - [Composition (Combining layers)](./core/composition/overview.md)
         - [Overview of Composition Arcs (LIVRPS)](./core/composition/livrps.md)
+        - [Composition Deep Dive](./core/composition/deepdive.md)
         - [List Editable Ops](./core/composition/listeditableops.md)
         - [Asset Paths](./core/composition/assetpath.md)
         - [Collections and other special relationships](./core/composition/relationships.md)
