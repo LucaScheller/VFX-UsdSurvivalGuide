@@ -77,5 +77,5 @@
             - [Volumes](./dcc/houdini/fx/volumes.md)
             - [Transform Space (Local/World Space)](./dcc/houdini/fx/transformspace/overview.md)
                 - [Large Scale Scenes - Precision Issues](./dcc/houdini/fx/transformspace/precision.md)
-        - [Performance Tips & Tricks](./dcc/houdini/profiling/overview.md)
+        - [Tips & Tricks](./dcc/houdini/faq/overview.md)
         - [Render Procedurals](./dcc/houdini/rendering/procedurals.md)

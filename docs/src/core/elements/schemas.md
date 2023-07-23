@@ -23,16 +23,16 @@ The examples on this page only talk about how to apply/remove schemas and how to
 ## TL;DR - Metadata In-A-Nutshell <a name="summary"></a>
 - Schemas are like classes in OOP that each prim in your hierarchy then instances. They provide properties (with fallback values) and metadata as well as methods (`Get<PropertName>`/`Set<PropertName>`/Utility functions) to manipulate your prim data.
 - There are two different base schema types (See the [overview](#overview) section for more info):
-    - Typed Schemas:
+    - **Typed Schemas**:
         - Define prim type name (OOP: The main class of your prim), like `Cube`/`Mesh`/`Xform`
         - Provide metadata/properties and methods to edit these
         - Checkable via `prim.IsA(<SchemaClassName>)`
-    - API Schemas (Class Naming Convention `<SchemaClassName>API`):
+    - **API Schemas (Class Naming Convention `<SchemaClassName>API`)**:
         - Do not define prim type name (OOP: A subclass that inherits to your main class)
         - Is divided in:
-            - Non-Applied API schemas:
+            - **Non-Applied API schemas**:
                 - Add convenience methods to manipulate common prim data like properties and core metadata (like `kind`/`clips`).
-            - Applied API schemas:
+            - **Applied API schemas**:
                 - Supplement typed schemas by adding additional metadata/properties and methods to edit these
                 - Checkable via `prim.HasAPI(<SchemaClassName>)`
 - A prims composed schema definition can be accessed via `prim.GetPrimDefinition()`. This defines a prim's full type signature, similar to how you can inherit from multiple classes in OOP `class (<TypedSchemaClass>, <AppliedAPISchemaA>, <AppliedAPISchemaA>)`.
