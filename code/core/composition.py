@@ -198,3 +198,158 @@ cube_prim_spec.specifier = Sdf.SpecifierDef
 cube_prim_spec.typeName = "Cube"
 bicycle_prim_spec.inheritPathList.appendedItems = [cube_prim_path]
 #// ANCHOR_END: compositionArcInherit
+
+
+#// ANCHOR: compositionArcReferenceExternal
+### High Level ###
+from pxr import Sdf, Usd
+stage = Usd.Stage.CreateInMemory()
+# Spawn temp layer
+reference_layer = Sdf.Layer.CreateAnonymous("ReferenceExample")
+reference_bicycle_prim_path = Sdf.Path("/bicycle")
+reference_bicycle_prim_spec = Sdf.CreatePrimInLayer(reference_layer, reference_bicycle_prim_path)
+reference_bicycle_prim_spec.specifier = Sdf.SpecifierDef
+reference_bicycle_prim_spec.typeName = "Cube"
+# Set the default prim to use when we specify no primpath. It can't be a prim path, it must be a root prim.
+reference_layer.defaultPrim = reference_bicycle_prim_path.name
+# Reference
+reference_layer_offset = Sdf.LayerOffset(offset=10, scale=1)
+reference = Sdf.Reference(reference_layer.identifier, reference_bicycle_prim_path, reference_layer_offset)
+# Or: If we don't specify a prim, the default prim will get used, as set above
+reference = Sdf.Reference(reference_layer.identifier, layerOffset=reference_layer_offset)
+bicycle_prim_path = Sdf.Path("/bicycle")
+bicycle_prim = stage.DefinePrim(bicycle_prim_path)
+references_api = bicycle_prim.GetReferences()
+references_api.AddReference(reference, position=Usd.ListPositionFrontOfAppendList)
+# references_api.SetReferences() # Clears the list editable ops and authors an Sdf.ReferenceListOp.CreateExplicit([])
+# references_api.RemoveReference(cube_prim_path)
+# references_api.ClearReferences() # Sdf.ReferenceListOp.Clear()
+### Low Level ###
+from pxr import Sdf
+# Spawn temp layer
+reference_layer = Sdf.Layer.CreateAnonymous("ReferenceExample")
+reference_bicycle_prim_path = Sdf.Path("/bicycle")
+reference_bicycle_prim_spec = Sdf.CreatePrimInLayer(reference_layer, reference_bicycle_prim_path)
+reference_bicycle_prim_spec.specifier = Sdf.SpecifierDef
+reference_bicycle_prim_spec.typeName = "Cube"
+reference_layer.defaultPrim = reference_bicycle_prim_path.name
+# In Houdini add, otherwise the layer will be garbage collected.
+# node.addHeldLayer(reference_layer.identifier)
+# Reference
+layer = Sdf.Layer.CreateAnonymous()
+bicycle_prim_path = Sdf.Path("/bicycle")
+bicycle_prim_spec = Sdf.CreatePrimInLayer(layer, bicycle_prim_path)
+bicycle_prim_spec.specifier = Sdf.SpecifierDef
+reference_layer_offset = Sdf.LayerOffset(offset=10, scale=1)
+reference = Sdf.Reference(reference_layer.identifier, reference_bicycle_prim_path, reference_layer_offset)
+# Or: If we don't specify a prim, the default prim will get used, as set above
+reference = Sdf.Reference(reference_layer.identifier, layerOffset=reference_layer_offset)
+bicycle_prim_spec.referenceList.appendedItems = [reference]
+#// ANCHOR_END: compositionArcReferenceExternal
+
+#// ANCHOR: compositionArcReferenceInternal
+### High Level ###
+from pxr import Sdf, Usd
+stage = Usd.Stage.CreateInMemory()
+# Spawn hierarchy
+cube_prim_path = Sdf.Path("/cube")
+cube_prim = stage.DefinePrim(cube_prim_path, "Cube")
+bicycle_prim_path = Sdf.Path("/bicycle")
+bicycle_prim = stage.DefinePrim(bicycle_prim_path)
+# Reference
+reference_layer_offset = Sdf.LayerOffset(offset=10, scale=1)
+reference = Sdf.Reference("", cube_prim_path, reference_layer_offset)
+references_api = bicycle_prim.GetReferences()
+references_api.AddReference(reference, position=Usd.ListPositionFrontOfAppendList)
+# Or:
+references_api.AddInternalReference(cube_prim_path, reference_layer_offset, position=Usd.ListPositionFrontOfAppendList)
+### Low Level ###
+from pxr import Sdf
+# Spawn hierarchy
+layer = Sdf.Layer.CreateAnonymous()
+cube_prim_path = Sdf.Path("/cube")
+cube_prim_spec = Sdf.CreatePrimInLayer(layer, cube_prim_path)
+cube_prim_spec.specifier = Sdf.SpecifierDef
+cube_prim_spec.typeName = "Cube"
+bicycle_prim_path = Sdf.Path("/bicycle")
+bicycle_prim_spec = Sdf.CreatePrimInLayer(layer, bicycle_prim_path)
+bicycle_prim_spec.specifier = Sdf.SpecifierDef
+# Reference
+reference_layer_offset = Sdf.LayerOffset(offset=10, scale=1)
+reference = Sdf.Reference("", cube_prim_path, reference_layer_offset)
+bicycle_prim_spec.referenceList.appendedItems = [reference]
+#// ANCHOR_END: compositionArcReferenceInternal
+
+#// ANCHOR: compositionArcPayload
+### High Level ###
+from pxr import Sdf, Usd
+stage = Usd.Stage.CreateInMemory()
+# Spawn temp layer
+payload_layer = Sdf.Layer.CreateAnonymous("PayloadExample")
+payload_bicycle_prim_path = Sdf.Path("/bicycle")
+payload_bicycle_prim_spec = Sdf.CreatePrimInLayer(payload_layer, payload_bicycle_prim_path)
+payload_bicycle_prim_spec.specifier = Sdf.SpecifierDef
+payload_bicycle_prim_spec.typeName = "Cube"
+# Set the default prim to use when we specify no primpath. It can't be a prim path, it must be a root prim.
+payload_layer.defaultPrim = payload_bicycle_prim_path.name
+# Payload
+payload_layer_offset = Sdf.LayerOffset(offset=10, scale=1)
+payload = Sdf.Payload(payload_layer.identifier, payload_bicycle_prim_path, payload_layer_offset)
+# Or: If we don't specify a prim, the default prim will get used, as set above
+payload = Sdf.Payload(payload_layer.identifier, layerOffset=payload_layer_offset)
+bicycle_prim_path = Sdf.Path("/bicycle")
+bicycle_prim = stage.DefinePrim(bicycle_prim_path)
+payloads_api = bicycle_prim.GetPayloads()
+payloads_api.AddPayload(payload, position=Usd.ListPositionFrontOfAppendList)
+# payloads_api.SetPayloads() # Clears the list editable ops and authors an Sdf.PayloadListOp.CreateExplicit([])
+# payloads_api.RemovePayload(cube_prim_path)
+# payloads_api.ClearPayloads() # Sdf.PayloadListOp.Clear()
+### Low Level ###
+from pxr import Sdf
+# Spawn temp layer
+payload_layer = Sdf.Layer.CreateAnonymous("PayLoadExample")
+payload_bicycle_prim_path = Sdf.Path("/bicycle")
+payload_bicycle_prim_spec = Sdf.CreatePrimInLayer(payload_layer, payload_bicycle_prim_path)
+payload_bicycle_prim_spec.specifier = Sdf.SpecifierDef
+payload_bicycle_prim_spec.typeName = "Cube"
+payload_layer.defaultPrim = payload_bicycle_prim_path.name
+# In Houdini add, otherwise the layer will be garbage collected.
+# node.addHeldLayer(payload_layer.identifier)
+# Payload
+layer = Sdf.Layer.CreateAnonymous()
+bicycle_prim_path = Sdf.Path("/bicycle")
+bicycle_prim_spec = Sdf.CreatePrimInLayer(layer, bicycle_prim_path)
+bicycle_prim_spec.specifier = Sdf.SpecifierDef
+payload_layer_offset = Sdf.LayerOffset(offset=10, scale=1)
+payload = Sdf.Payload(payload_layer.identifier, payload_bicycle_prim_path, payload_layer_offset)
+# Or: If we don't specify a prim, the default prim will get used, as set above
+payload = Sdf.Payload(payload_layer.identifier, layerOffset=payload_layer_offset)
+bicycle_prim_spec.payloadList.appendedItems = [payload]
+#// ANCHOR_END: compositionArcPayload
+
+
+#// ANCHOR: compositionArcSpecialize
+### High Level ###
+from pxr import Sdf, Usd
+stage = Usd.Stage.CreateInMemory()
+bicycle_prim_path = Sdf.Path("/bicycle")
+bicycle_prim = stage.DefinePrim(bicycle_prim_path)
+cube_prim_path = Sdf.Path("/cube")
+cube_prim = stage.DefinePrim(cube_prim_path, "Cube")
+specializes_api = bicycle_prim.GetSpecializes()
+specializes_api.AddSpecialize(cube_prim_path, position=Usd.ListPositionFrontOfAppendList)
+# inherits_api.SetSpecializes() # Clears the list editable ops and authors an Sdf.PathListOp.CreateExplicit([])
+# inherits_api.RemoveSpecialize(cube_prim_path)
+# inherits_api.ClearSpecializes() # Sdf.PathListOp.Clear()
+### Low Level ###
+from pxr import Sdf
+layer = Sdf.Layer.CreateAnonymous()
+bicycle_prim_path = Sdf.Path("/bicycle")
+bicycle_prim_spec = Sdf.CreatePrimInLayer(layer, bicycle_prim_path)
+bicycle_prim_spec.specifier = Sdf.SpecifierDef
+cube_prim_path = Sdf.Path("/cube")
+cube_prim_spec = Sdf.CreatePrimInLayer(layer, cube_prim_path)
+cube_prim_spec.specifier = Sdf.SpecifierDef
+cube_prim_spec.typeName = "Cube"
+bicycle_prim_spec.specializesList.appendedItems = [cube_prim_path]
+#// ANCHOR_END: compositionArcSpecialize

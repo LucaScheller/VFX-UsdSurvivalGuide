@@ -75,10 +75,12 @@ flowchart TD
 ## Composition Arcs
 All arcs that make use of [list-editable ops](./fundamentals.md#list-editable-operations-ops), take of of these tokens as an optional `position` keyword argument via the high level API.
 
-- Usd.ListPositionFrontOfAppendList: Prepend to `Sdf.<Type>ListOp`.appendedItems.insert(0, item)
-- Usd.ListPositionBackOfAppendList: Append to `Sdf.<Type>ListOp`.appendedItems.append(item)
-- Usd.ListPositionFrontOfPrependList: Prepend to `Sdf.<Type>ListOp`.appendedItems.insert(0, item)
-- Usd.ListPositionBackOfPrependList: Append to `Sdf.<Type>ListOp`.appendedItems.append(item)
+- `Usd.ListPositionFrontOfAppendList`: Prepend to append list, the same as `Sdf.<Type>ListOp`.appendedItems.insert(0, item)
+- `Usd.ListPositionBackOfAppendList`: Append to append list, the same as `Sdf.<Type>ListOp`.appendedItems.append(item)
+- `Usd.ListPositionFrontOfPrependList`: Prepend to prepend list, the same as `Sdf.<Type>ListOp`.appendedItems.insert(0, item)
+- `Usd.ListPositionBackOfPrependList`: Append to prepend list, the same as `Sdf.<Type>ListOp`.appendedItems.append(item)
+
+As we can see, all arc APIs, except for variants and sublayers, in the high level API, are thin wrappers around the [list editable op](./fundamentals.md#list-editable-operations-ops) of the arc.
 
 
 ### Sublayer / Local Opinion <a name="compositionArcSublayer"></a>
@@ -118,10 +120,34 @@ The write them via metadata entries as covered here in our [value clips](../elem
 
 ### Reference <a name="compositionArcReference"></a>
 
+
 #### Reference File <a name="compositionArcReferenceExternal"></a>
+
+~~~admonish tip title=""
+```python
+{{#include ../../../../code/core/composition.py:compositionArcReferenceExternal}}
+```
+~~~
+
 
 #### Reference Internal <a name="compositionArcReferenceInternal"></a>
 
+~~~admonish tip title=""
+```python
+{{#include ../../../../code/core/composition.py:compositionArcReferenceInternal}}
+```
+~~~
+
 ### Payload <a name="compositionArcPayload"></a>
+~~~admonish tip title=""
+```python
+{{#include ../../../../code/core/composition.py:compositionArcPayload}}
+```
+~~~
 
 ### Specialize <a name="compositionArcSpecialize"></a>
+~~~admonish tip title=""
+```python
+{{#include ../../../../code/core/composition.py:compositionArcSpecialize}}
+```
+~~~
