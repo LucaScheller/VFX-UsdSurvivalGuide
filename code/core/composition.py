@@ -590,3 +590,154 @@ result = result.ApplyOperations(path_list_op_layer_bottom)
 print(result, result.isExplicit) # Returns: SdfPathListOp(Explicit Items: [/disc]), True
 # Since it now was in the explicit list, it got removed.
 #// ANCHOR_END: listEditableOpsMerging
+
+#// ANCHOR: pcpPrimPropertyStack
+from pxr import Sdf, Usd
+# Create stage with two different layers
+stage = Usd.Stage.CreateInMemory()
+root_layer = stage.GetRootLayer()
+layer_top = Sdf.Layer.CreateAnonymous("exampleTopLayer")
+layer_bottom = Sdf.Layer.CreateAnonymous("exampleBottomLayer")
+root_layer.subLayerPaths.append(layer_top.identifier)
+root_layer.subLayerPaths.append(layer_bottom.identifier)
+# Define specs in two different layers
+prim_path = Sdf.Path("/cube")
+stage.SetEditTarget(layer_top)
+prim = stage.DefinePrim(prim_path, "Xform")
+prim.SetTypeName("Cube")
+stage.SetEditTarget(layer_bottom)
+prim = stage.DefinePrim(prim_path, "Xform")
+prim.SetTypeName("Cube")
+attr = prim.CreateAttribute("debug", Sdf.ValueTypeNames.Float)
+attr.Set(5, 10)
+# Print the stack (set of layers that contribute data to this prim)
+# For prims this returns all the Sdf.PrimSpec objects that contribute to the prim.
+print(prim.GetPrimStack()) # Returns: [Sdf.Find('anon:0x7f6e590dc300:exampleTopLayer', '/cube'), 
+                           #           Sdf.Find('anon:0x7f6e590dc580:exampleBottomLayer', '/cube')]
+# For attributes this returns all the Sdf.AttributeSpec objects that contribute to the attribute.
+# If we pass a non default time code value clips will be included in the result.
+# This type of function signature is very unique and can't be found anywhere else in USD.
+time_code = Usd.TimeCode.Default()
+print(attr.GetPropertyStack(1001)) # Returns: [Sdf.Find('anon:0x7f9eade0ae00:exampleBottomLayer', '/cube.debug')]
+print(attr.GetPropertyStack(time_code)) # Returns: [Sdf.Find('anon:0x7f9eade0ae00:exampleBottomLayer', '/cube.debug')]
+#// ANCHOR_END: pcpPrimPropertyStack
+
+
+#// ANCHOR: pcpPrimIndex
+import os
+from subprocess import call
+from pxr import Sdf, Usd
+stage = Usd.Stage.CreateInMemory()
+# Spawn temp layer
+reference_layer = Sdf.Layer.CreateAnonymous("ReferenceExample")
+reference_bicycle_prim_path = Sdf.Path("/bicycle")
+reference_bicycle_prim_spec = Sdf.CreatePrimInLayer(reference_layer, reference_bicycle_prim_path)
+reference_bicycle_prim_spec.specifier = Sdf.SpecifierDef
+reference_bicycle_prim_spec.typeName = "Cube"
+reference_layer_offset = Sdf.LayerOffset(offset=10, scale=1)
+reference = Sdf.Reference(reference_layer.identifier, reference_bicycle_prim_path, reference_layer_offset)
+bicycle_prim_path = Sdf.Path("/red_bicycle")
+bicycle_prim = stage.DefinePrim(bicycle_prim_path)
+references_api = bicycle_prim.GetReferences()
+references_api.AddReference(reference, position=Usd.ListPositionFrontOfAppendList)
+# You'll always want to use the expanded method,
+# otherwise you might miss some data sources!
+# This is also what the UIs use.
+prim = bicycle_prim
+print(prim.GetPrimIndex()) 
+print(prim.ComputeExpandedPrimIndex())
+# Dump the index representation to the dot format and render it to a .svg/.png image.
+prim_index = prim.ComputeExpandedPrimIndex()
+print(prim_index.DumpToString())
+graph_file_path = os.path.expanduser("~/Desktop/usdSurvivalGuide_prim_index.txt")
+graph_viz_png_file_path = graph_file_path.replace(".txt", ".png")
+graph_viz_svg_file_path = graph_file_path.replace(".txt", ".svg")
+prim_index.DumpToDotGraph(graph_file_path, includeMaps=False)
+call(["dot", "-Tpng", graph_file_path, "-o", graph_viz_png_file_path])
+call(["dot", "-Tsvg", graph_file_path, "-o", graph_viz_svg_file_path])
+
+def iterator_child_nodes(root_node):
+    yield root_node
+    for child_node in root_node.children:
+        for child_child_node in iterator_child_nodes(child_node):
+            yield child_child_node
+
+def iterator_parent_nodes(root_node):
+    iter_node = root_node
+    while iter_node:
+        yield iter_node
+        iter_node = iter_node.parent
+            
+print("Pcp Node Refs", dir(prim_index.rootNode))
+for child in list(iterator_child_nodes(prim_index.rootNode))[::1]:
+    print(child, child.arcType, child.path, child.mapToRoot.MapSourceToTarget(child.path))
+""" The arc type will one one of:
+Pcp.ArcTypeRoot
+Pcp.ArcTypeInherit
+Pcp.ArcTypeVariant
+Pcp.ArcTypeReference
+Pcp.ArcTypeRelocate
+Pcp.ArcTypePayload
+Pcp.ArcTypeSpecialize
+"""
+#// ANCHOR_END: pcpPrimIndex
+
+#// ANCHOR: pcpPrimCompositionQuery
+from pxr import Sdf, Usd
+stage = Usd.Stage.CreateInMemory()
+prim = stage.DefinePrim("/pig")
+refs_API = prim.GetReferences()
+refs_API.AddReference("/opt/hfs19.5/houdini/usd/assets/pig/pig.usd")
+print("----")
+def _repr(arc):
+    print(arc.GetArcType(), 
+          "| Introducing Prim Path", arc.GetIntroducingPrimPath() or "-",
+          "| Introducing Layer", arc.GetIntroducingLayer() or "-",
+          "| Is ancestral", arc.IsAncestral(),
+          "| In Root Layer Stack", arc.IsIntroducedInRootLayerStack())
+print(">-> Direct Root Layer Arcs")
+query = Usd.PrimCompositionQuery.GetDirectRootLayerArcs(prim)
+for arc in query.GetCompositionArcs():
+    _repr(arc)
+print(">-> Direct Inherits")
+query = Usd.PrimCompositionQuery.GetDirectInherits(prim)
+for arc in query.GetCompositionArcs():
+    _repr(arc)
+print(">-> Direct References")
+query = Usd.PrimCompositionQuery.GetDirectReferences(prim)
+for arc in query.GetCompositionArcs():
+    _repr(arc)
+"""Returns:
+>-> Direct Root Layer Arcs
+Pcp.ArcTypeRoot | Introducing Prim Path - | Introducing Layer - | Is ancestral False | In Root Layer Stack True
+Pcp.ArcTypeReference | Introducing Prim Path /pig | Introducing Layer Sdf.Find('anon:0x7f9b60d56b00:tmp.usda') | Is ancestral False | In Root Layer Stack True
+>-> Direct Inherits
+Pcp.ArcTypeInherit | Introducing Prim Path /pig | Introducing Layer Sdf.Find('/opt/hfs19.5/houdini/usd/assets/pig/pig.usd') | Is ancestral False | In Root Layer Stack False
+Pcp.ArcTypeInherit | Introducing Prim Path /pig | Introducing Layer Sdf.Find('/opt/hfs19.5/houdini/usd/assets/pig/pig.usd') | Is ancestral False | In Root Layer Stack False
+>-> Direct References
+Pcp.ArcTypeReference | Introducing Prim Path /pig | Introducing Layer Sdf.Find('anon:0x7f9b60d56b00:tmp.usda') | Is ancestral False | In Root Layer Stack True
+Pcp.ArcTypeReference | Introducing Prim Path /pig | Introducing Layer Sdf.Find('/opt/hfs19.5/houdini/usd/assets/pig/payload.usdc') | Is ancestral False | In Root Layer Stack False
+Pcp.ArcTypeReference | Introducing Prim Path /pig{geo=medium} | Introducing Layer Sdf.Find('/opt/hfs19.5/houdini/usd/assets/pig/mtl.usdc') | Is ancestral False | In Root Layer Stack False
+Pcp.ArcTypeReference | Introducing Prim Path /ASSET_geo_variant_1/ASSET | Introducing Layer Sdf.Find('/opt/hfs19.5/houdini/usd/assets/pig/mtl.usdc') | Is ancestral False | In Root Layer Stack False
+Pcp.ArcTypeReference | Introducing Prim Path /pig | Introducing Layer Sdf.Find('/opt/hfs19.5/houdini/usd/assets/pig/payload.usdc') | Is ancestral False | In Root Layer Stack False
+Pcp.ArcTypeReference | Introducing Prim Path /pig | Introducing Layer Sdf.Find('/opt/hfs19.5/houdini/usd/assets/pig/geo.usdc') | Is ancestral False | In Root Layer Stack False
+Pcp.ArcTypeReference | Introducing Prim Path /pig | Introducing Layer Sdf.Find('/opt/hfs19.5/houdini/usd/assets/pig/geo.usdc') | Is ancestral False | In Root Layer Stack False
+Pcp.ArcTypeReference | Introducing Prim Path /pig | Introducing Layer Sdf.Find('/opt/hfs19.5/houdini/usd/assets/pig/geo.usdc') | Is ancestral False | In Root Layer Stack False
+"""
+# Custom filter
+# For example let's get all direct payloads, that were not introduced in the active root layer stack.
+query_filter = Usd.PrimCompositionQuery.Filter()
+query_filter.arcTypeFilter = Usd.PrimCompositionQuery.ArcTypeFilter.Payload
+query_filter.dependencyTypeFilter = Usd.PrimCompositionQuery.DependencyTypeFilter.Direct
+query_filter.arcIntroducedFilter = Usd.PrimCompositionQuery.ArcIntroducedFilter.All
+query_filter.hasSpecsFilter = Usd.PrimCompositionQuery.HasSpecsFilter.HasSpecs
+print(">-> Custom Query (Direct payloads not in root layer that have specs)")
+query = Usd.PrimCompositionQuery(prim)
+query.filter = query_filter
+for arc in query.GetCompositionArcs():
+    _repr(arc)
+"""Returns:
+>-> Custom Query (Direct payloads not in root layer that have specs)
+Pcp.ArcTypePayload | Introducing Prim Path /pig | Introducing Layer Sdf.Find('/opt/hfs19.5/houdini/usd/assets/pig/pig.usd') | Is ancestral False | In Root Layer Stack False
+"""
+#// ANCHOR_END: pcpPrimCompositionQuery

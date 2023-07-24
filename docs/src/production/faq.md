@@ -17,7 +17,7 @@ Keep hierarchies as small as possible at all times, only start creating separate
 - you need separate materials (We can also use `UsdGeom.Subset`s, which are face selections per mesh, to assign materials, to workaround this)
 ~~~
 
-At the end of the day it is a balancing act of `What do I need to be able to access separately in the hierarchy` vs `I have a prim that is super heavy (100 Gbs of data) and takes forever to load`.
+At the end of the day it is a balancing act of *What do I need to be able to access separately in the hierarchy* vs *I have a prim that is super heavy (100 Gbs of data) and takes forever to load*.
 A good viewpoint is the one of a lighting/render artist, as they are the ones that need to often work on individual (sub-)hierarchies and can say how it should be segmented.
 
 ## How is "frames per second" (FPS) handled in USD?

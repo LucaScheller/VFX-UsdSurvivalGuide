@@ -13,7 +13,7 @@ When clients (like hydra delegates or C++/Python attribute queries) request data
 This way hierarchies can load blazingly fast, without actually loading the heavy attribute data.
 
 ~~~admonish tip
-To summarize: Composition (the process of calculating the value sources) is cached, value resolution is not, to allow random access to data.
+To summarize: Composition (the process of calculating the value sources) is cached, value resolution is not, to allow random access data loading.
 ~~~
 
 For a detailed explanation, checkout the [Value Resolution](https://openusd.org/release/glossary.html#usdglossary-valueresolution) docs page.
@@ -23,7 +23,10 @@ For a detailed explanation, checkout the [Value Resolution](https://openusd.org/
 1. [What should I use it for?](#usage)
 1. [Resources](#resources)
 1. [Overview](#overview)
-1. [Inspecting Composition Internals](#pcpInspect)
+1. [Inspecting Composition](#pcpInspect)
+    1. [Prim/Property Stack](#pcpPrimPropertyStack)
+    1. [Prim Index](#pcpPrimPropertyIndex)
+    1. [Prim Composition Query](#pcpPrimCompositionQuery)
 
 ## TL;DR - <Topic> In-A-Nutshell <a name="summary"></a>
 - The **Prim Cache Population** module in USD computes and caches the composition (how different layers are combined) by building an index of value sources per prim called **prim index**.
@@ -47,93 +50,181 @@ For example if a composition query detects a variant, we must also author at lea
 - [Prim Index](https://openusd.org/release/glossary.html#usdglossary-index)
 - [Pcp.PrimIndex](https://openusd.org/release/api/class_pcp_prim_index.html)
 - [Pcp.Cache](https://openusd.org/dev/api/class_pcp_cache.html)
+- [Usd.CompositionArc](https://openusd.org/dev/api/class_usd_prim_composition_query_arc.html)
+- [Usd.CompositionArcQuery](https://openusd.org/dev/api/class_usd_prim_composition_query.html)
 - [Value Resolution](https://openusd.org/release/glossary.html#usdglossary-valueresolution)
 - [USD binary crate file format](https://openusd.org/release/glossary.html#crate-file-format)
 
 ## Overview <a name="overview"></a>
-This page currently focuses on the practical usage of the `Pcp` module, it doesn't aim to explain how the composition engine works under the hood. (As the author(s) of this guide also don't know 😉, if you know more in-depth knowledge, please feel free to share!)
+This page currently focuses on the practical usage of the `Pcp` module, it doesn't aim to explain how the composition engine works under the hood. (As the author(s) of this guide also don't know the details 😉, if you know more in-depth knowledge, please feel free to share!)
 
 There is a really cool plugin for the [UsdView](../elements/standalone_utilities.md) by [chrizzftd](https://github.com/chrizzFTD) called [The Grill](https://grill.readthedocs.io/en/latest/views.html), that renders out the dot graph representation interactively based on the selected prim.
 
 In the examples below, we'll look at how to do this ourselves via Python.
 
-## Inspecting Composition Internals <a name="pcpInspect"></a>
-To query data about composition, we have to go through the high level Usd API first, as the Sdf low level API is not aware of composition related data.
+## Inspecting Composition <a name="pcpInspect"></a>
+To query data about composition, we have to go through the high level Usd API first, as the `Sdf` low level API is not aware of composition related data.
 The high level Usd API then queries into the low level Pcp (Prim cache population) API, which tracks all composition related data and builds a value source index called **prim index**. 
-In simple terms: A stack of layers per prim (and therefore also property) that knows about all the value sources (layers) a value can come from. Once a value is requested, the highest layer in the stack wins and returns the value for attributes. For metadata and relationships the value resolution can consult multiple layers, depending on how it was authored (see [list editable ops](../composition/listeditableops.md)).
 
-Let's go through some examples in Houdini with Houdini's standard pig test asset.
+The prim stack in simple terms: A stack of layers per prim (and therefore also properties) that knows about all the value sources (layers) a value can come from. Once a value is requested, the highest layer in the stack wins and returns the value for attributes. For metadata and relationships the value resolution can consult multiple layers, depending on how it was authored (see [list editable ops](../composition/listeditableops.md) as an example for a multiple layer averaged value).
 
+### Prim/Property Stack <a name="pcpPrimPropertyStack"></a>
+Let's first have a look at the prim and property stacks with a simple stage with a cubes that has written values in two different layers.
+These return us all value sources for a prim or attribute.
 
+~~~admonish tip title=""
 ```python
-from pxr import Sdf, Usd
-# Create stage with two different layers
-stage = Usd.Stage.CreateInMemory()
-root_layer = stage.GetRootLayer()
-layer_top = Sdf.Layer.CreateAnonymous("exampleTopLayer")
-layer_bottom = Sdf.Layer.CreateAnonymous("exampleBottomLayer")
-root_layer.subLayerPaths.append(layer_top.identifier)
-root_layer.subLayerPaths.append(layer_bottom.identifier)
-# Define specs in two different layers
-prim_path = Sdf.Path("/cube")
-stage.SetEditTarget(layer_top)
-prim = stage.DefinePrim(prim_path, "Xform")
-prim.SetTypeName("Cube")
-stage.SetEditTarget(layer_bottom)
-prim = stage.DefinePrim(prim_path, "Xform")
-prim.SetTypeName("Cube")
-# Print the stack (set of layers that contribute data to this prim)
-print(prim.GetPrimStack()) # Returns: [Sdf.Find('anon:0x7f6e590dc300:exampleTopLayer', '/cube'), Sdf.Find('anon:0x7f6e590dc580:exampleBottomLayer', '/cube')]
-print(prim.GetPrimIndex()) # More on this in our [Pcp section]()
-print(prim.ComputeExpandedPrimIndex()) # More on this in our [Pcp section](). you'll always want to use the expanded version, otherwise you might miss some data sources!
+{{#include ../../../../code/core/composition.py:pcpPrimPropertyStack}}
 ```
+~~~
+
+In Houdini/USD view we can also view these stacks in the UI.
+
+![Houdini Prim/Property Stack](houdiniPrimPropertyStack.gif)
+
+### Prim Index <a name="pcpPrimIndex"></a>
+Next let's look at the prim index.
+
+~~~admonish tip title=""
+```python
+{{#include ../../../../code/core/composition.py:pcpPrimIndex}}
+```
+~~~
+
+The prim index class can dump our prim index graph to the *dot* file format. The *dot* commandline tool ships with the most operating systems, we can then use it to visualize our graph as a .svg/.png file.
+
+~~~admonish tip title="Result of: `print(prim_index.DumpToString())` | Click to view content" collapsible=true
+```txt
+Node 0:
+    Parent node:              NONE
+    Type:                     root
+    DependencyType:           root
+    Source path:              </bicycle>
+    Source layer stack:       @anon:0x7f9eae9f2400:tmp.usda@,@anon:0x7f9eae9f1000:tmp-session.usda@
+    Target path:              <NONE>
+    Target layer stack:       NONE
+    Map to parent:
+        / -> /
+    Map to root:
+        / -> /
+    Namespace depth:          0
+    Depth below introduction: 0
+    Permission:               Public
+    Is restricted:            FALSE
+    Is inert:                 FALSE
+    Contribute specs:         TRUE
+    Has specs:                TRUE
+    Has symmetry:             FALSE
+    Prim stack:
+      </bicycle> anon:0x7f9eae9f2400:tmp.usda - @anon:0x7f9eae9f2400:tmp.usda@
+Node 1:
+    Parent node:              0
+    Type:                     reference
+    DependencyType:           non-virtual, purely-direct
+    Source path:              </bicycle>
+    Source layer stack:       @anon:0x7f9eae9f2b80:ReferenceExample@
+    Target path:              </bicycle>
+    Target layer stack:       @anon:0x7f9eae9f2400:tmp.usda@,@anon:0x7f9eae9f1000:tmp-session.usda@
+    Map to parent:
+        SdfLayerOffset(10, 1)
+        /bicycle -> /bicycle
+    Map to root:
+        SdfLayerOffset(10, 1)
+        /bicycle -> /bicycle
+    Namespace depth:          1
+    Depth below introduction: 0
+    Permission:               Public
+    Is restricted:            FALSE
+    Is inert:                 FALSE
+    Contribute specs:         TRUE
+    Has specs:                TRUE
+    Has symmetry:             FALSE
+    Prim stack:
+      </bicycle> anon:0x7f9eae9f2b80:ReferenceExample - @anon:0x7f9eae9f2b80:ReferenceExample@
+```
+~~~
 
 
+~~~admonish tip title="Result of writing the graph to a dot .txt file | Click to view content" collapsible=true
+```txt
+{{#include pcpPrimIndex.txt}}
+```
+~~~
 
+For example if we run it on a more advanced composition, in this case Houdini's pig asset:
 
-from subprocess import call
+~~~admonish tip title="Python print output for Houdini's pig asset | Click to view content" collapsible=true
+```python
+Pcp Node Ref
+<pxr.Pcp.NodeRef object at 0x7f9ed3ad19e0> Pcp.ArcTypeRoot /pig /pig
+<pxr.Pcp.NodeRef object at 0x7f9ed3ad17b0> Pcp.ArcTypeInherit /__class__/pig /pig
+<pxr.Pcp.NodeRef object at 0x7f9ed3ad1cf0> Pcp.ArcTypeReference /pig /pig
+<pxr.Pcp.NodeRef object at 0x7f9ed3ad1970> Pcp.ArcTypeInherit /__class__/pig /pig
+<pxr.Pcp.NodeRef object at 0x7f9ed3ad1890> Pcp.ArcTypeVariant /pig{geo=medium} /pig{geo=medium}
+<pxr.Pcp.NodeRef object at 0x7f9ed3ad1270> Pcp.ArcTypePayload /pig /pig
+<pxr.Pcp.NodeRef object at 0x7f9ed3ad1660> Pcp.ArcTypeReference /pig /pig
+<pxr.Pcp.NodeRef object at 0x7f9ed3ad1510> Pcp.ArcTypeVariant /pig{geo=medium} /pig{geo=medium}
+<pxr.Pcp.NodeRef object at 0x7f9ed3ad13c0> Pcp.ArcTypeReference /ASSET_geo_variant_1/ASSET /pig
+<pxr.Pcp.NodeRef object at 0x7f9ed3abbd60> Pcp.ArcTypeVariant /ASSET_geo_variant_1/ASSET{mtl=default} /pig{mtl=default}
+<pxr.Pcp.NodeRef object at 0x7f9ed3abb6d0> Pcp.ArcTypeReference /ASSET_geo_variant_1/ASSET_mtl_default /pig
+<pxr.Pcp.NodeRef object at 0x7f9ed3ad1a50> Pcp.ArcTypeReference /pig /pig
+<pxr.Pcp.NodeRef object at 0x7f9ed3ad15f0> Pcp.ArcTypeReference /ASSET_geo_variant_2/ASSET /pig
+<pxr.Pcp.NodeRef object at 0x7f9ed3abbe40> Pcp.ArcTypeVariant /ASSET_geo_variant_2/ASSET{geo=medium} /pig{geo=medium}
+<pxr.Pcp.NodeRef object at 0x7f9ed3ad1ac0> Pcp.ArcTypeReference /ASSET_geo_variant_1/ASSET /pig
+<pxr.Pcp.NodeRef object at 0x7f9ed3abbf90> Pcp.ArcTypeVariant /ASSET_geo_variant_1/ASSET{geo=medium} /pig{geo=medium}
+<pxr.Pcp.NodeRef object at 0x7f9ed3abb430> Pcp.ArcTypeReference /ASSET_geo_variant_0/ASSET /pig
+<pxr.Pcp.NodeRef object at 0x7f9ed3abb9e0> Pcp.ArcTypeVariant /ASSET_geo_variant_0/ASSET{geo=medium} /pig{geo=medium}
+```
+~~~
 
-print("-----")
+~~~admonish tip title="Result of writing the graph to a dot .txt file for Houdini's pig asset | Click to view content" collapsible=true
+```txt
+{{#include pcpPrimIndexPig.txt}}
+```
+~~~
 
-prim = stage.GetPrimAtPath("/workspace/asset")
-#print(prim.GetPrimStack())
+![Alt text](pcpPrimIndexPig.png)
 
-#print(dir(prim))
-#print(prim.GetPrimTypeInfo())
-#print(prim.GetPrimDefinition())
+### Prim Composition Query <a name="pcpPrimCompositionQuery"></a>
+Next let's look at prim composition queries. Instead of having to filter the prim index ourselves, we can use the `Usd.PrimCompositionQuery` to do it for us. More info in the [USD API docs](https://openusd.org/dev/api/class_usd_prim_composition_query.html).
 
+The query works by specifying a filter and then calling `GetCompositionArcs`.
 
-prim_index = prim.GetPrimIndex()
+USD provides these convenience filters, it returns a new `Usd.PrimCompositionQuery` instance with the filter applied:
+- `Usd.PrimCompositionQuery.GetDirectInherits(prim)`: Returns all non ancestral inherit arcs
+- `Usd.PrimCompositionQuery.GetDirectReferences(prim)`: Returns all non ancestral reference arcs
+- `Usd.PrimCompositionQuery.GetDirectRootLayerArcs(prim)`: Returns arcs that were defined in the active layer stack.
 
-prim_index = prim.ComputeExpandedPrimIndex()
-print("Pcp Prim Index", dir(prim_index))
-# print(prim_index.DumpToString())
-graph_file_path = "/mnt/data/WORKSPACE/test.txt"
-graph_viz_png_file_path = graph_file_path.replace(".txt", ".png")
-graph_viz_svg_file_path = graph_file_path.replace(".txt", ".svg")
-prim_index.DumpToDotGraph(graph_file_path, includeMaps=False)
-call(["dot", "-Tpng", graph_file_path, "-o", graph_viz_png_file_path])
-call(["dot", "-Tsvg", graph_file_path, "-o", graph_viz_svg_file_path])
-#dot -Tpng test.txt -o test.png
+These are the sub-filters that can be set. We can only set a single token value per filter:
+- **ArcTypeFilter**: 
+    - `Usd.PrimCompositionQuery.ArcTypeFilter.All`
+    - `Usd.PrimCompositionQuery.ArcTypeFilter.Inherit`
+    - `Usd.PrimCompositionQuery.ArcTypeFilter.Variant`
+    - `Usd.PrimCompositionQuery.ArcTypeFilter.NotVariant`
+    - `Usd.PrimCompositionQuery.ArcTypeFilter.Reference`
+    - `Usd.PrimCompositionQuery.ArcTypeFilter.Payload`
+    - `Usd.PrimCompositionQuery.ArcTypeFilter.NotReferenceOrPayload`
+    - `Usd.PrimCompositionQuery.ArcTypeFilter.ReferenceOrPayload`
+    - `Usd.PrimCompositionQuery.ArcTypeFilter.InheritOrSpecialize` 
+    - `Usd.PrimCompositionQuery.ArcTypeFilter.NotInheritOrSpecialize` 
+    - `Usd.PrimCompositionQuery.ArcTypeFilter.Specialize`
+- **DependencyTypeFilter**: Filter based on if the arc was introduced on a parent prim or on the prim itself.
+    - `Usd.PrimCompositionQuery.DependencyTypeFilter.All`
+    - `Usd.PrimCompositionQuery.DependencyTypeFilter.Direct`
+    - `Usd.PrimCompositionQuery.DependencyTypeFilter.Ancestral`
+- **ArcIntroducedFilter**: Filter based on where the arc was introduced.
+    - `Usd.PrimCompositionQuery.ArcIntroducedFilter.All`
+    - `Usd.PrimCompositionQuery.ArcIntroducedFilter.IntroducedInRootLayerStack`
+    - `Usd.PrimCompositionQuery.ArcIntroducedFilter.IntroducedInRootLayerPrimSpec`
+- **HasSpecsFilter**: Filter based if the arc has any specs (For example an inherit might not find any in the active layer stack)
+    - `Usd.PrimCompositionQuery.HasSpecsFilter.All`
+    - `Usd.PrimCompositionQuery.HasSpecsFilter.HasSpecs`
+    - `Usd.PrimCompositionQuery.HasSpecsFilter.HasNoSpecs`
 
-def iterater_child_nodes(root_node):
-    yield root_node
-    for child_node in root_node.children:
-        for child_child_node in iterater_child_nodes(child_node):
-            yield child_child_node
+~~~admonish tip title=""
+```python
+{{#include ../../../../code/core/composition.py:pcpPrimCompositionQuery}}
+```
+~~~
 
-def iterater_parent_nodes(root_node):
-    iter_node = root_node
-    while iter_node:
-        yield iter_node
-        iter_node = iter_node.parent
-            
-print("Pcp Node Ref", dir(prim_index.rootNode))
-#print(prim_index.primStack)
-print("Children")
-
-for child in list(iterater_child_nodes(prim_index.rootNode))[::1]:
-    print(child, child.arcType, child.path, child.mapToRoot.MapSourceToTarget(child.path))
-
-
-
+The returned filtered `Usd.CompositionArc` objects, allow us to inspect various things about the arc. You can find more info in the [API docs](https://openusd.org/dev/api/class_usd_prim_composition_query_arc.html)

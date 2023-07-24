@@ -1,0 +1,38 @@
+digraph PcpPrimIndex {
+	140319730187168 [label="@anon:0x7f9ec9290900:LOP:rootlayer@,@anon:0x7f9ec906e680:LOP:rootlayer-session.usda@</pig> (0)\n\ndepth: 0", shape="box", style="solid"];
+	140319730187272 [label="@anon:0x7f9ec9290900:LOP:rootlayer@,@anon:0x7f9ec906e680:LOP:rootlayer-session.usda@</__class__/pig> (1)\n\ndepth: 1", shape="box", style="dotted"];
+	140319730187168 -> 140319730187272 [color=green, label="inherit", style=dashed];
+	140319730187272 -> 140319730187480 [style=dotted label="origin" constraint="false"];
+	140319730187376 [label="@pig.usd@</pig> (2)\n\ndepth: 1", shape="box", style="solid"];
+	140319730187168 -> 140319730187376 [color=red, label="reference"];
+	140319730187480 [label="@pig.usd@</__class__/pig> (3)\n\ndepth: 1", shape="box", style="solid"];
+	140319730187376 -> 140319730187480 [color=green, label="inherit"];
+	140319730187584 [label="@pig.usd@</pig{geo=medium}> (4)\n\ndepth: 1", shape="box", style="solid"];
+	140319730187376 -> 140319730187584 [color=orange, label="variant"];
+	140319730187688 [label="@payload.usdc@</pig> (5)\n\ndepth: 1", shape="box", style="solid"];
+	140319730187376 -> 140319730187688 [color=indigo, label="payload"];
+	140319730187792 [label="@mtl.usdc@</pig> (6)\n\ndepth: 1", shape="box", style="solid"];
+	140319730187688 -> 140319730187792 [color=red, label="reference"];
+	140319730187896 [label="@mtl.usdc@</pig{geo=medium}> (7)\n\ndepth: 1", shape="box", style="solid"];
+	140319730187792 -> 140319730187896 [color=orange, label="variant"];
+	140319730188000 [label="@mtl.usdc@</ASSET_geo_variant_1/ASSET> (8)\n\ndepth: 1", shape="box", style="solid"];
+	140319730187896 -> 140319730188000 [color=red, label="reference"];
+	140319730188104 [label="@mtl.usdc@</ASSET_geo_variant_1/ASSET{mtl=default}> (9)\n\ndepth: 2", shape="box", style="solid"];
+	140319730188000 -> 140319730188104 [color=orange, label="variant"];
+	140319730188208 [label="@mtl.usdc@</ASSET_geo_variant_1/ASSET_mtl_default> (10)\n\ndepth: 2", shape="box", style="solid"];
+	140319730188000 -> 140319730188208 [color=red, label="reference"];
+	140319730188312 [label="@geo.usdc@</pig> (11)\n\ndepth: 1", shape="box", style="solid"];
+	140319730187688 -> 140319730188312 [color=red, label="reference"];
+	140319730188416 [label="@geo.usdc@</ASSET_geo_variant_2/ASSET> (12)\n\ndepth: 1", shape="box", style="solid"];
+	140319730188312 -> 140319730188416 [color=red, label="reference"];
+	140319730188520 [label="@geo.usdc@</ASSET_geo_variant_2/ASSET{geo=medium}> (13)\n\ndepth: 2", shape="box", style="dotted"];
+	140319730188416 -> 140319730188520 [color=orange, label="variant"];
+	140319730188624 [label="@geo.usdc@</ASSET_geo_variant_1/ASSET> (14)\n\ndepth: 1", shape="box", style="solid"];
+	140319730188312 -> 140319730188624 [color=red, label="reference"];
+	140319730188728 [label="@geo.usdc@</ASSET_geo_variant_1/ASSET{geo=medium}> (15)\n\ndepth: 2", shape="box", style="solid"];
+	140319730188624 -> 140319730188728 [color=orange, label="variant"];
+	140319730188832 [label="@geo.usdc@</ASSET_geo_variant_0/ASSET> (16)\n\ndepth: 1", shape="box", style="solid"];
+	140319730188312 -> 140319730188832 [color=red, label="reference"];
+	140319730188936 [label="@geo.usdc@</ASSET_geo_variant_0/ASSET{geo=medium}> (17)\n\ndepth: 2", shape="box", style="dotted"];
+	140319730188832 -> 140319730188936 [color=orange, label="variant"];
+}

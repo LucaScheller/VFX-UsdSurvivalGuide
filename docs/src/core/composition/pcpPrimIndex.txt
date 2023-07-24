@@ -1,0 +1,5 @@
+digraph PcpPrimIndex {
+	140321959801344 [label="@anon:0x7f9ec906e400:tmp.usda@,@anon:0x7f9ec8f85a00:tmp-session.usda@</red_bicycle> (0)\n\ndepth: 0", shape="box", style="solid"];
+	140321959801448 [label="@anon:0x7f9ec906e900:ReferenceExample@</bicycle> (1)\n\ndepth: 1", shape="box", style="solid"];
+	140321959801344 -> 140321959801448 [color=red, label="reference"];
+}
