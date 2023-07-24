@@ -2225,6 +2225,30 @@ schemas.Complex.CreateIntAttrAttr()
 #// ANCHOR_END: schemasPluginCompiledTest
 
 
+#// ANCHOR: metadataPlugin
+from pxr import Usd, Sdf
+# To see all the globally registered fields for the metadata on prim specs:
+print(Sdf.PrimSpec.GetMetaDataInfoKeys(prim_spec))
+# Here we test it in an example stage:
+stage = Usd.Stage.CreateInMemory()
+layer = stage.GetEditTarget().GetLayer()
+prim = stage.DefinePrim("/prim")
+prim_spec = layer.GetPrimAtPath(prim.GetPath())
+# Float field
+metadata_name = "usdSurvivalGuideFloat"
+print(prim.GetMetadata(metadata_name)) # Returns: None
+print(prim_spec.GetFallbackForInfo(metadata_name)) # Returns: 5
+prim.SetMetadata(metadata_name, 10)
+print(prim.GetMetadata(metadata_name)) # Returns: 10
+# String List Editable Op
+metadata_name = "usdSurvivalGuideAssetDependencies"
+string_list_op = Sdf.StringListOp.Create(appendedItems=["motor.usd", "tire.usd"])
+print(prim.GetMetadata(metadata_name))
+prim.SetMetadata(metadata_name, string_list_op)
+print(prim.GetMetadata(metadata_name))
+#// ANCHOR_END: metadataPlugin
+
+
 #// ANCHOR: propertyOverview
 # Methods & Attributes of interest:
 # 'IsDefined', 'IsAuthored'

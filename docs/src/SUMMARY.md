@@ -34,6 +34,7 @@
         - [Prim Cache Population (PCP) - Cache for value resolution](./core/composition/pcp.md)
     - [Plugin System](./core/plugins/overview.md)
         - [Kinds](./core/plugins/kind.md)
+        - [Metadata](./core/plugins/metadata.md)
         - [Schemas](./core/plugins/schemas.md)
         - [Asset Resolver](./core/plugins/assetresolver.md)
     - [Debugging & Performance Profiling](./core/profiling/overview.md)

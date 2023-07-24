@@ -3,12 +3,12 @@ The [kind](https://openusd.org/release/glossary.html#usdglossary-kind) metadata 
 
 # Table of contents
 1. [Kinds In-A-Nutshell](#summary)
-2. [What should I use it for?](#usage)
-3. [Resources](#resources)
-4. [Overview](#overview)
+1. [What should I use it for?](#usage)
+1. [Resources](#resources)
+1. [Overview](#overview)
     1. [Reading and Writing Kinds](#kindAuthoring)
-    2. [Kind Registry](#kindRegistry)
-    3. [Kind IsA Checks/Travesal](#kindTraversal)
+    1. [Kind Registry](#kindRegistry)
+    1. [Kind IsA Checks/Travesal](#kindTraversal)
 
 ## TL;DR - Kinds In-A-Nutshell <a name="summary"></a>
 ~~~admonish tip
@@ -57,6 +57,7 @@ Kinds can be easily set via the high and low level APIs:
 ~~~
 
 An example Usd file could look likes this
+~~~admonish info title=""
 ```python
 def Xform "set" (
     kind = "set"
@@ -85,45 +86,16 @@ def Xform "set" (
     }
 }
 ```
-
+~~~
 
 ### Creating own kinds <a name="kindPlugin"></a>
 We can register kinds via the [plugin system](./overview.md).
 
+~~~admonish info title=""
 ```python
-{
-   "Plugins":[
-      {
-      	"Type": "python",
-      	"Name": "usdSurvivalGuideKinds", 
-        "Info":{
-            "Kinds":{
-               "character":{
-                  "baseKind":"component",
-                  "description":"A (hero) character"
-               },
-               "prop":{
-                  "baseKind":"component",
-                  "description":"A generic prop asset"
-               },
-               "fx":{
-                  "baseKind":"component",
-                  "description":"A FX asset"
-               },
-               "environment":{
-                  "baseKind":"assembly",
-                  "description":"A large scale environment like a city."
-               },
-               "set":{
-                  "baseKind":"assembly",
-                  "description":"A individual section of an environment, typically a movie set placed in an environment."
-               }
-            }
-         }
-      }
-   ]
-}
+{{#include ../../../../files/plugins/kinds/plugInfo.json}}
 ```
+~~~
 
 To register the above kinds, copy the contents into a file called `plugInfo.json`. Then set your `PXR_PLUGINPATH_NAME` environment variable to the folder containing the `plugInfo.json` file.
 
@@ -131,6 +103,8 @@ For Linux this can be done for the active shell as follows:
 ```bash
 export PXR_PLUGINPATH_NAME=/my/cool/plugin/resources:${PXR_PLUGINPATH_NAME}
 ```
+
+If you downloaded this repo, we provide an example kind plugin [here](https://github.com/LucaScheller/VFX-UsdSurvivalGuide/tree/main/files/plugins/kinds). All you need to do is point the environment variable there and launch a USD capable application.
 
 ### Kind Registry <a name="kindRegistry"></a>
 We can also check if a plugin with kind data was registered via Python.
