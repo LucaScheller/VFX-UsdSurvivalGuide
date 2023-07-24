@@ -11,6 +11,7 @@ Metadata is the smallest building block in Usd. It is part of the base class fro
     1. [Basics (High level API)](#metadataBasics)
     1. [Validation of dict content](#metadataValidateDict)
     1. [Nested key path syntax](#metadataNestedKeyPath)
+    1. [Creating custom metadata fields via plugins](#metadataPlugin)
     1. [Reading metadata documentation strings (High level API)](#metadataDocs)
     1. [Authored vs fallback metadata values (High level API)](#metadataAuthored)
     1. [Reading/writing metadata via prim/property specs(Low level API)](#metadataPrimPropertySpec)
@@ -130,6 +131,9 @@ To access nested dict keys, we use the `:` symbol as the path separator.
 
 The `Get`/`Set` methods without the `ByKey`/`ByDictKey` allow you to set root dict keys, e.g. `SetMetadata("typeName", "Xform")`
 The `ByKey`/`ByDictKey` take a root key and a key path (with `:` if nested), e.g. `SetMetadataByDictKey('assetInfo', "data:version", 1)` which will result in `{"assetInfo": {"data": "version": 1}}`
+
+### Creating custom metadata fields via plugins <a name="metadataPlugin"></a>
+We can easily extend metadata fields via plugins. We cover this in detail in out [metadata plugin](../plugins/metadata.md) section.
 
 ### Reading metadata documentation strings (High level API) <a name="metadataDocs"></a>
 This is quite useful if you need to expose docs in UIs.
