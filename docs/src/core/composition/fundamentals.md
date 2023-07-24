@@ -22,7 +22,7 @@ In the near future, we'll add examples for:
 
 ## TL;DR - Composition Fundamentals In-A-Nutshell <a name="summary"></a>
 - Composition editing works in the active [layer stack](#compositionFundamentalsLayerStack) via [list editable ops](#compositionFundamentalsListEditableOps). 
-- When loading a layer (stack) from disk via `Reference` and `Payload` arcs, the contained composition structure is immutable (USD speak [encapsulated](#compositionFundamentalsEncapsulation)). The arcs themselves still target the "live" composed stage and therefore still reflect changes from the encapsulated arcs.
+- When loading a layer (stack) from disk via `Reference` and `Payload` arcs, the contained composition structure is immutable (USD speak [encapsulated](#compositionFundamentalsEncapsulation)). This means you can't remove the arcs within the loaded files. As for what the arcs can use for value resolutin: The `Inherit` and `Specialize` arcs still target the "live" composed stage and therefore still reflect changes on top of the encapsulated arcs, the `Reference` arc is limited to seeing the encapsulated layer stack.
 
 ## Why should I understand the editing fundamentals? <a name="usage"></a>
 ~~~admonish tip
@@ -117,7 +117,7 @@ You can see, as soon as we have our reference list editable op on different laye
 Also a hint on terminology: In the USD docs/glossary the `Reference` arc often refers to all composition arcs other than `sublayer`, I guess this is a relic, as this was probably the first arc. That's why Houdini uses a similar terminology.
 
 ### Encapsulation <a name="compositionFundamentalsEncapsulation"></a>
-When you start digging through the API docs, you'll read the word "encapsulation" a few times. (IMHO not enough times 😉). Here is what it means and why it is crucial to understand.
+When you start digging through the API docs, you'll read the word "encapsulation" a few times. Here is what it means and why it is crucial to understand.
 
 ~~~admonish danger title="Encapsulation | Why are layers loaded via references/payloads composition arc locked?"
 To make USD composition fast and more understandable, the content of what is loaded from an external file via the **`Reference`** and **`Payload`** composition arcs, is **composition locked** or as USD calls it **encapsulated**. This means that you can't remove any of the composition arcs in the layer stack, that is being loaded, via the list editable ops `deletedItems` list or via the `explicitItems`.
@@ -126,7 +126,13 @@ To make USD composition fast and more understandable, the content of what is loa
 The only way to get rid of a `payload`/`reference` is by putting it behind a `variant` in the first place and then changing the `variant` selection. This can have some unwanted side effects though. You can find a detailed explanation with an example here: [USD FAQ - When can you delete a reference?](https://openusd.org/release/usdfaq.html#when-can-you-delete-a-reference-or-other-deletable-thing)
 
 ~~~admonish important title="Encapsulation | Are my loaded layers then self contained?"
-You might be wondering now, if encapsulation forces the content of `Reference`/`Payload` to be self contained, in the sense that the composition arcs within that file do not "look" outside the file. The answer is no: For `Inherits`, `Internal References` and `Specializes` the arcs still evaluate relative to the composed scene. E.g. that means if you have internal reference some where in a referenced in layer stack, that `internal reference` will still be live. So if you edit a property in the active stage, that referenced in the file, it will still propagate all the changes from the internal reference source to all the internal reference targets. The only thing that is "locked" is the composition arcs structure, not the way the composition arc evaluates.
+You might be wondering now, if encapsulation forces the content of `Reference`/`Payload` to be self contained, in the sense that the composition arcs within that file do not "look" outside the file. The answer is: It depends on the composition arc.
+
+For `Inherits` and `Specializes` the arcs still evaluate relative to the composed scene. E.g. that means if you have an inherit somewhere in a referenced in layer stack, that `inherit` will still be live. So if you edit a property in the active stage, that gets inherited somewhere in the file, it will still propagate all the changes from the inherit source to all the inherit targets. The only thing that is "locked" is the composition arcs structure, not the way the composition arc evaluates. This extra "live" lookup has a performance penalty, so be careful with using `Inherits` and `Specializes` when nesting layers stacks via `References` and `Payloads`.
+
+For `Internal References` this does not work though. They can only see the encapsulated layer stack and not the "live" composed stage. This makes composition faster for internal references.
+
+We show some interactive examples in Houdini in our [LIVRPS](../composition/livrps.md) section, as this is hard to describe in words.
 ~~~
 
 ### Layer Stack <a name="compositionFundamentalsLayerStack"></a>

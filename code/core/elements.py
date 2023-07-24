@@ -2297,7 +2297,7 @@ attr.Set(10)
 print(attr.GetTypeName()) # Returns: Sdf.ValueTypeNames.Float
 # Non-base data types
 attr = prim.CreateAttribute("someArray", Sdf.ValueTypeNames.Half3Array)
-attr.Set([Gf.Vec3h()]  *3)
+attr.Set([Gf.Vec3h()] * 3)
 attr = prim.CreateAttribute("someAssetPathArray", Sdf.ValueTypeNames.AssetArray)
 attr.Set(Sdf.AssetPathArray(["testA.usd", "testB.usd"]))
 
