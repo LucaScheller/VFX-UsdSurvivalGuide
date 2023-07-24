@@ -15,6 +15,7 @@ As mentioned in our [fundamentals](./fundamentals.md#compositionFundamentalsList
 1. [Metadata](#listOpMetadata)
 
 ## TL;DR List Editable Ops - <Topic> In-A-Nutshell <a name="summary"></a>
+- USD has the concept of list editable operations. Instead of having a "flat" array (`[Sdf.Path("/cube"), Sdf.Path("/sphere")]`) that stores data, we have wrapper array class that stores multiple sub-arrays (`prependedItems`, `appendedItems`, `deletedItems`, `explicitItems`). When flattening the list op, it merges the prepended and appended items and also removes items in deletedItems as well as duplicates, so that the end result is like an ordered Python `set()`. When in explicit mode, it only keeps the elements in explicitItems and ignores previous layers. This merging is done per layer, so that for example an `appendedItems` op in a higher layer, gets added to an `explicitItems` from a lower layer. This allows us to average the array data over multiple layers.
 - List editable ops behave differently based on the type:
     - **Composition**: When using list editable ops to define composition arcs, we can only edit them in the [active layer stack](./fundamentals.md#compositionFundamentalsLayerStack). Once referenced or payloaded, they become [encapsulated](./fundamentals.md#compositionFundamentalsEncapsulation).
     - **Relationships/Metadata**: When making use of list editable ops when defining relationships and metadata, we do not have encapsulation. This means that any layer stack can add/delete/set explicit the list editable type. See the examples below for more info.
@@ -44,7 +45,7 @@ These are the list editable ops that are available to us:
     - `Sdf.UIntListOp`
     - `Sdf.UInt64ListOp`
 
-USD has the concept of list editable operations. Instead of having a "flat" array (`[Sdf.Path("/cube"), Sdf.Path("/sphere")]`) that stores data, we have wrapper array class that stores multiple sub-arrays. When flattening the list op, USD removes duplicates, so that the end result is like an ordered Python `set()`.
+USD has the concept of list editable operations. Instead of having a "flat" array (`[Sdf.Path("/cube"), Sdf.Path("/sphere")]`) that stores data, we have wrapper array class that stores multiple sub-arrays (`prependedItems`, `appendedItems`, `deletedItems`, `explicitItems`). When flattening the list op, it merges the prepended and appended items and also removes items in deletedItems as well as duplicates, so that the end result is like an ordered Python `set()`. When in explicit mode, it only keeps the elements in explicitItems and ignores previous layers. This merging is done per layer, so that for example an `appendedItems` op in a higher layer, gets added to an `explicitItems` from a lower layer. This allows us to average the array data over multiple layers.
 
 All list editable ops work the same way, the only difference is what data they can hold.
 
