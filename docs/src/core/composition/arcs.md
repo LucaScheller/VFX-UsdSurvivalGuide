@@ -165,7 +165,7 @@ When editing variants, we can also move layer content into a variant very easily
 
 ### References <a name="compositionArcReference"></a>
 
-The `Sdf.Reference` class create a read-only reference description object:
+The `Sdf.Reference` class creates a read-only reference description object:
 ~~~admonish tip title=""
 ```python
 {{#include ../../../../code/core/composition.py:compositionArcReferenceClass}}
@@ -190,7 +190,7 @@ Here is how we add internal references (references that load data from another p
 ~~~
 
 ### Payloads <a name="compositionArcPayload"></a>
-The `Sdf.Payload` class create a read-only payload description object:
+The `Sdf.Payload` class creates a read-only payload description object:
 ~~~admonish tip title=""
 ```python
 {{#include ../../../../code/core/composition.py:compositionArcPayloadClass}}

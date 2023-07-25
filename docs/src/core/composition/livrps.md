@@ -26,6 +26,7 @@ We have a supplementary Houdini scene, that you can follow along with, available
         1. [References Internal](#compositionArcReferenceInternal)
     1. [Payloads](#compositionArcPayload)
     1. [Specializes](#compositionArcSpecialize)
+1. [Instancing in USD](#compositionInstance)
 
 ## TL;DR - Composition Arcs In-A-Nutshell <a name="summary"></a>
 - ToDo
@@ -33,6 +34,8 @@ We have a supplementary Houdini scene, that you can follow along with, available
 ## What should I use it for? <a name="usage"></a>
 ~~~admonish tip
 We'll be using composition arcs to load data from different files and hierarchy locations. This is the core mechanism that makes USD powerful, as we can layer/combine our layers in meaningful ways.
+
+For USD to be able to scale well, we can also "lock" the composition on prims with the same arcs, so that they can use the same data source. This allows us to create instances, which keep our memory footprint low.
 ~~~
 
 ## Resources <a name="resources"></a>
@@ -65,8 +68,7 @@ USD refers to this with the acronym `L(V)IVRPS(F)`:
 - **S**pecializes: Search for payloads affecting the path. This searches in the (nested) layer stack by recursively applying full *LIVRPS* evaluation. This causes the specialize opinions to always be last.
 - **(F)** allback value: Look for [schema](../elements/schemas.md) fallbacks.
 
-
-Now if you just didn't understand any of that, don't worry! We'll have a look where what are is typically used in the examples below.
+Now if you just didn't understand any of that, don't worry! We'll have a look where what arc is typically used in the examples below.
 
 ~~~admonish important title="Important | Nested Composition Arc Resolve Order"
 When resolving nested composition arcs and value clips, the arc/value clip metadata, that is authored on the closest ancestor parent prim or the prim itself, wins. In short to quote from the USD glossary `“ancestral arcs” are weaker than “direct arcs”`. To make our lives easier, we recommend having predefined locations where you author composition arcs. A typical location is your asset root prim and a set/assembly root prim.
@@ -197,5 +199,192 @@ flowchart TD
 ~~~
 
 
-## Composition Arcs
-ToDo
+## Composition Arcs <a name="compositionArcs"></a>
+Let's gets practical! Below will go through every arc individually and highlight what is important.
+
+### Sublayers / Local Opinions <a name="compositionArcSublayer"></a>
+
+~~~admonish tip title=""
+```python
+{{#include ../../../../code/core/composition.py:compositionArcSublayer}}
+```
+~~~
+
+When working in Houdini, we can't directly sublayer onto the root layer as with native USD, due to Houdini's layer caching mechanism, that makes node based stage editing possible. Layering on the active layer works as usual though.
+
+~~~admonish tip title=""
+```python
+{{#include ../../../../code/core/composition.py:compositionArcSublayerHoudini}}
+```
+~~~
+
+Here is the result:
+
+![Alt text](houdiniCompositionSublayerPython.jpg)
+
+#### Value Clips <a name="compositionArcValueClips"></a>
+We cover value clips in our [animation section](../elements/animation.md). Their opinion strength is lower than direct (sublayer) opinions, but higher than anything else.
+
+The write them via metadata entries as covered here in our [value clips](../elements/animation.md#value-clips-loading-time-samples-from-multiple-files) section.
+
+### Inherits <a name="compositionArcInherit"></a>
+Inherits, like specializes, don't have a object representation, they directly edit the list-editable op list.
+
+~~~admonish tip title=""
+```python
+{{#include ../../../../code/core/composition.py:compositionArcInherit}}
+```
+~~~
+
+### Variants <a name="compositionArcVariant"></a>
+Variant sets (the variant set->variant name mapping) are also managed via list editable ops.
+The actual variant set data is not though. It is written "in-line" into the prim spec via the `Sdf.VariantSetSpec`/`Sdf.VariantSpec` specs, so that's why we have dedicated specs.
+
+This means we can add variant data, but hide it by not adding the variant set name to the `variantSets`metadata.
+
+For example here we added it:
+
+```python
+def Xform "car" (
+    variants = {
+        string color = "colorA"
+    }
+    prepend variantSets = "color"
+)
+{
+    variantSet "color" = {
+        "colorA" {
+            def Cube "cube"
+            {
+            }
+        }
+        "colorB" {
+            def Sphere "sphere"
+            {
+            }
+        }
+    }
+}
+```
+Here we skipped it, by commenting out the:
+`car_prim_spec.SetInfo("variantSetNames", Sdf.StringListOp.Create(prependedItems=["color"]))` line in the below code.
+This will make it not appear in UIs for variant selections.
+
+```python
+def Xform "car" (
+    variants = {
+        string color = "colorA"
+    }
+)
+{
+    variantSet "color" = {
+        "colorA" {
+            def Cube "cube"
+            {
+            }
+        }
+        "colorB" {
+            def Sphere "sphere"
+            {
+            }
+        }
+    }
+}
+```
+
+~~~admonish tip title=""
+```python
+{{#include ../../../../code/core/composition.py:compositionArcVariant}}
+```
+~~~
+
+<a name="compositionArcVariantCopySpec"></a>
+~~~admonish tip title="Pro Tip | Copying layer content into a variant"
+When editing variants, we can also move layer content into a variant very easily via the `Sdf.CopySpec` command. This is a very powerful feature!
+
+```python
+{{#include ../../../../code/core/composition.py:compositionArcVariantCopySpec}}
+```
+~~~
+
+### References <a name="compositionArcReference"></a>
+
+The `Sdf.Reference` class creates a read-only reference description object:
+~~~admonish tip title=""
+```python
+{{#include ../../../../code/core/composition.py:compositionArcReferenceClass}}
+```
+~~~
+
+#### References File <a name="compositionArcReferenceExternal"></a>
+Here is how we add external references (references that load data from other files):
+~~~admonish tip title=""
+```python
+{{#include ../../../../code/core/composition.py:compositionArcReferenceExternal}}
+```
+~~~
+
+
+#### References Internal <a name="compositionArcReferenceInternal"></a>
+Here is how we add internal references (references that load data from another part of the hierarchy) :
+~~~admonish tip title=""
+```python
+{{#include ../../../../code/core/composition.py:compositionArcReferenceInternal}}
+```
+~~~
+
+### Payloads <a name="compositionArcPayload"></a>
+The `Sdf.Payload` class creates a read-only payload description object:
+~~~admonish tip title=""
+```python
+{{#include ../../../../code/core/composition.py:compositionArcPayloadClass}}
+```
+~~~
+
+Here is how we add payloads. Payloads always load data from other files:
+~~~admonish tip title=""
+```python
+{{#include ../../../../code/core/composition.py:compositionArcPayload}}
+```
+~~~
+
+### Specializes <a name="compositionArcSpecialize"></a>
+Specializes, like inherits, don't have a object representation, they directly edit the list-editable op list.
+
+~~~admonish tip title=""
+```python
+{{#include ../../../../code/core/composition.py:compositionArcSpecialize}}
+```
+~~~
+
+
+## Instancing in USD <a name="compositionInstance"></a>
+You might be wondering: "Huh, why are we talking about instancing in the section about composition?". The answer is: The two are actually related.
+
+Let's first define what instancing is:
+~~~admonish tip title=""
+Instancing is the multi re-use of a part of the hierarchy, so that we don't have to load it into memory multiple times. In USD speak the term for the "base" copy, all instances refer to, is **Prototype**.
+~~~
+
+~~~admonish danger title=""
+Instancing is what keeps things fast as your stage content grows, and it should be one of the main factors of how you design your composition setup.
+~~~
+
+USD has two ways of handling data instancing:
+- **Explicit**: Explicit data instancing via [`UsdGeom.PointInstancer`](https://openusd.org/dev/api/class_usd_geom_point_instancer.html) prims. The idea is simple: Given a set of array attributes made up of positions, orientations, scales (and velocity) data, copy a `Prototype` to each point. In this case prototype refers to any prim (and its sub-hierarchy) in your stage. We usually group them under the point instancer prims for readability. 
+- **Implicit**: Implicit instances are instances that are marked with the `instanceable` metadata. Now we can't just mark any hierarchy prim with this data. (Well we can but it would have no effect.) This metadata has to be set on prims that have composition arcs written. Our usual case is an asset that was brought in via a reference. What USD then does is "lock" the composition and create on the fly `/__Prototype_<index>` prim as the base copy. Any prim in your hierarchy that has the exact same let's call it **composition hash** (exact same composition arcs), will then re-use this base copy. This also means that we can't edit any prim beneath the `instanceable` marked prim.
+
+In Houdini we can show the implicit prototypes by enabling the "Show Implicit Prototype Primitives" option in the sunglasses menu in our scene graph tree panel.
+
+![Houdini Instanceable](houdiniCompositionInstanceable.jpg)
+
+~~~admonish danger title="Pro Tip | Prototype Count"
+We should always keep an eye on the prototype count, as it is a good performance indicator of if our composition structure is well setup.
+
+We can also access the implicit prototypes via Python. They are not editable and on the fly re-spawned every time you edit your stage, so don't count on their naming/path/content to be the same. 
+
+We often do use them though to find the prims they are the prototype of. That way we can add arcs (for example an inherit) and still keep the prototype count the same, as the overall unique compositions structures stay the same.
+```python
+print("Prototype Count", len(stage.GetPrototypes()))
+```
+~~~

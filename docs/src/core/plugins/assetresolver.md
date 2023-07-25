@@ -25,11 +25,24 @@ def "bicycle" (
 }
 
 ```
-All composition arcs use [asset paths](https://openusd.org/dev/api/class_sdf_path.html) as well as any metadata (especially `assetInfo`) and any (custom) attributes of type `Asset`/`AssetArray`. In Usd files the naming convention for asset paths is `Asset`, in the API it is `pxr.Sdf.AssetPath`. So any time you see the `@...@` syntax, just remember it is an asset path.
+All file based composition arcs use [asset paths](https://openusd.org/dev/api/class_sdf_path.html) as well as any metadata (especially `assetInfo`) and any (custom) attributes of type `Asset`/`AssetArray`. In Usd files the naming convention for asset paths is `Asset`, in the API it is `pxr.Sdf.AssetPath`. So any time you see the `@...@` syntax, just remember it is an asset path.
 
 An important thing to note is that asset resolvers only go in one direction (at least in the Usd API): From asset identifier to resolved asset path. I assume this is because you can have multiple asset identifiers that point the the same resolved asset path. Depending on your asset resolver implementation, you can also make it bidirectional.
 
-## TL;DR - Asset Resolvers In-A-Nutshell
+# Table of contents
+1. [Asset Resolvers In-A-Nutshell](#summary)
+1. [What should I use it for?](#usage)
+1. [Resources](#resources)
+1. [Asset Resolver](#assetResolver)
+1. [Asset Resolver Contexts](#assetResolverContext)
+1. [Common Resolver Code Examples](#assetResolverAPI)
+    1. [Initialization](#assetResolverAPIInitialization)
+    1. [Scoped resolver caches](#assetResolverAPIScopedResolverCaches)
+    1. [Creating/Opening a stage with a resolver context](#assetResolverAPIStageContext)
+    1. [Resolving a path with a given bound context](#assetResolverAPIContextResolve)
+    1. [Asset Paths vs Resolved Paths](#assetResolverAPIAssetPathVsResolvedPaths)
+
+## TL;DR - Asset Resolvers In-A-Nutshell <a name="summary"></a>
 Asset resolvers resolve asset identifiers (encoded in Usd with the `@...@` syntax) to loadable file paths/URIs.
 ~~~admonish tip title=""
 ```mermaid
@@ -83,13 +96,20 @@ All the implementation details and examples can be found in the below resources 
 Most DCCs ship with a customized USD build, where most vendors adhere to the [VFX Reference Platform](https://vfxplatform.com/) and only change USD with major version software releases. They do backport important production patches though from time to time. That's why we recommend using the USD build from the DCC instead of trying to self compile and link it to the DCC, as this guarantees the most stability. This does mean though, that you have to compile all plugins against each (major version) releases of each individual DCC.
 ~~~
 
-## Resources
+## What should I use it for? <a name="usage"></a>
+~~~admonish tip
+We'll be using the asset resolver to redirect file paths for different reasons, mainly:
+- Pinning: As USD pipelines are often based on "the latest asset/shot gets automatically refreshed/loaded" principle, we use the asset resolver to pin a USD stage to a specific version/state, so that it doesn't receive any asset/shot updates anymore.
+- Redirecting the path from a custom identifier to an actual data resource. You'll only be using this aspect, if your resolver is not file based and instead URI (`myCustomURIPrefix:<identifier>`) based.
+~~~
+
+## Resources <a name="resources"></a>
 - [Asset Resolver API Docs](https://openusd.org/dev/api/class_ar_resolver.html)
 - [Asset Resolver Context API Docs](https://openusd.org/dev/api/class_ar_resolver_context.html)
-- [GitHub Repository](https://github.com/LucaScheller/VFX-UsdAssetResolver)
-- [Documentation](https://lucascheller.github.io/VFX-UsdAssetResolver/)
+- [Usd Asset Resolver - Reference Implementations - GitHub Repository](https://github.com/LucaScheller/VFX-UsdAssetResolver)
+- [Usd Asset Resolver - Reference Implementations - Documentation](https://lucascheller.github.io/VFX-UsdAssetResolver/)
 
-## Asset Resolver
+## Asset Resolver <a name="assetResolver"></a>
 You can register multiple asset resolvers via the plugin system:
 - There must be one primary resolver that is not URI based. As a fallback the default resolver will be used
 - Any number of URI based resolvers: These resolvers will be called when they find a path prefixed with the scheme name syntax `"<scheme>:..."` for example `http://usdSurvivalGuide/assets/bicycle.usd`)
@@ -148,7 +168,7 @@ paths. This allows us to save the pinned state of a Usd file. For example if we 
 An asset identifier can be a string with any characters except `[]` brackets, as these are used for reading .usdz package files.
 ~~~
 
-## Asset Resolver Contexts
+## Asset Resolver Contexts <a name="assetResolverContext"></a>
 To assist the resolver with processing asset paths, Usd adds the option of passing in an `Asset Resolver Context`. The context is just a very simple class, that your resolver can use to aid path resolution. A simple context only needs to implement:
 ```
 - Default and copy constructors
@@ -184,10 +204,10 @@ See for more info: [Usd Interest Forum Thread](https://groups.google.com/g/usd-i
 ~~~
 
 
-## Common Resolver Code Examples
+## Common Resolver Code Examples <a name="assetResolverAPI"></a>
 Let's look at some practical examples that you'll use in the day to day work, we'll discuss Houdini specifics in the Houdini section of this guide:
 
-#### Initialization
+#### Initialization <a name="assetResolverAPIInitialization"></a>
 To see if your resolver is being loaded you can set the `TF_DEBUG` environment variable to `AR_RESOLVER_INIT`:
 ~~~admonish tip title=""
 ```bash
@@ -221,7 +241,7 @@ To check what the active primary resolver is, you can also run:
 ~~~
 It is important that you import the Python module of your resolver first, otherwise you won't get your Python object when calling `Ar.GetUnderlyingResolver()`.
 
-#### Scoped resolver caches
+#### Scoped resolver caches <a name="assetResolverAPIScopedResolverCaches"></a>
 To ensure that we always get the same resolved paths, you can use a scoped resolver cache. When working in DCCs, you don't have to worry about this as the DCC should handle this for you.
 ~~~admonish tip title=""
 ```python
@@ -229,14 +249,14 @@ To ensure that we always get the same resolved paths, you can use a scoped resol
 ```
 ~~~
 
-#### Creating/Opening a stage with a resolver context
+#### Creating/Opening a stage with a resolver context <a name="assetResolverAPIStageContext"></a>
 ~~~admonish tip title=""
 ```python
 {{#include ../../../../code/core/elements.py:assetResolverContextCreation}}
 ```
 ~~~
 
-#### Resolving a path with a given bound context.
+#### Resolving a path with a given bound context <a name="assetResolverAPIContextResolve"></a>
 This is probably most used resolved method you'll use. It resolves the asset identifier using the active stage's context.
 ~~~admonish tip title=""
 ```python
@@ -251,7 +271,7 @@ If you don't want to use any context you can call:
 ```
 ~~~
 
-#### Asset Paths vs Resolved Paths
+#### Asset Paths vs Resolved Paths <a name="assetResolverAPIAssetPathVsResolvedPaths"></a>
 One important thing to not confuse is the `Ar.ResolvedPath` and the `Sdf.AssetPath` classes.
 The `Sdf.AssetPath` is the class you instantiate when you set any asset path related field/property/composition arc when writing to your layer/stage. It does not resolve anything, it only has dummy properties which just reflect what you pass to the constructor.
 
