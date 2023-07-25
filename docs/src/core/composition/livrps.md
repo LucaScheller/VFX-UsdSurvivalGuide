@@ -39,6 +39,7 @@ For USD to be able to scale well, we can also "lock" the composition on prims wi
 
 ## Resources <a name="resources"></a>
 - [Example]()
+- [USD Instancing](https://openusd.org/release/api/_usd__page__scenegraph_instancing.html)
 
 ## Overview <a name="overview"></a>
 USD's composition arcs each fulfill a different purpose. As we can attach attach all arcs (except sublayers) to any part of the hierarchy other than the pseudo root prim. When loading our data, we have a pre-defined load order of how arcs prioritize against each other. Each prim (and property) in our hierarchy then gets resolved (see our [Inspecting Compositon](./pcp.md) section) based on this order rule set and the outcome is a (or multiple) value sources, that answer data queries into our hierarchy.
@@ -251,21 +252,70 @@ Houdini's "Load Layer For Editing", simply does a `active_layer.TransferContent(
 ![Houdini Sublayer Value Clip](houdiniCompositionSublayerValueClip.gif)
 
 ### Inherits <a name="compositionArcInherit"></a>
-The inherit arc is used to add overrides to an existing prim hierarchy, that is made up of weaker arcs.
-It does **not** support adding a time offset via `Sdf.LayerOffset`.
-
+The inherit arc is used to add overrides to existing (instanceable) prims. The typical use case is to apply an edit to a bunch of referenced in assets that were loaded as instanceable without losing instance-ability and without increasing the prototype count. It does **not** support adding a time offset via `Sdf.LayerOffset`.
 
 ~~~admonish tip title="Pro Tip | What do we use inherits for?"
-Typically we'll be using inherits for:
-- As a mechanism to separate data when working in your DCCs. On file write we usually flatten layers to a single flattened output(s)(if you have multiple save paths set). Why not put everything on the same layer? We can use the layer order as a form of control to A. allow/block edits (or rather seeing them have an effect because of weaker opinion strength) B. Sort data from temporary data. 
-- To load in references and payloads. That way all the heavy lifting is not done (and should not be done) by the sublayer arc.
-- In shot workflows to load different shot layers. Why don't we do this via references or payloads you might be asking yourself? As covered in our [fundamentals](./fundamentals.md#compositionFundamentalsEncapsulation) section, anything your reference or payload in will be encapsulated. In shot workflows we want to keep having access to list editable ops. For example if we have a layout and a lighting layer, the lighting layer should still be able to remove a reference, that was created in the layout layer.
+- We use inherit arcs as a "broadcast" operator: When we want to apply an edit to our hierarchy in multiple places, we typically create a class prim, whose child prims contain the properties we want to modify. After that we create an inherit arc on all prims that should receive the edit. As it is the second highest arc behind direct opinions, it will always have the highest composition strength, when applied to instanceable prims, as instanceable prims can't have direct opinions.
+- The inherit arc is never [encapsulated](./fundamentals.md#compositionFundamentalsEncapsulation). This means that any layer stack, that re-creates the prims that that the inherit targets, gets used by the inherit. This does come at a performance cost, as the composition engine needs to check all layers from where the arc was authored and higher for the hierarchy that the inherit targets.
+- The inherit arc commonly gets used together with the [class prim specifier](../elements/prim.md#primSpecifier). The class prim specifier is specifically there to get ignored by default traversals and to provide template hierarchies that can then get inherited (or internally referenced/specialized) to have a "single source to multiple targets" effect.  
+- There are two common practices:
+    - Assets: When creating assets, we can author a `/__CLASS__/<assetName>` inherit. When we use the asset in shots, we can then easily add overrides to all assets of this type, by creating prims and properties under that specific class prim hierarchy. While this sounds great in theory, artists often want to only selectively apply an override to an asset. Therefore having the additional performance cost of this arc in assets is something might not worth doing. See the next bullet point.
+    - Shots: This is where inherits shine! We usually create inherits to:
+        - Batch apply render geometry settings to (instanceable) prims. This is a great way of having a single control point to editing render settings per different areas of interest in your scene.
+        - Batch apply activation/visibility to instanceable prims. This way we don't increase the prototype count.
 ~~~
 
-~~~admonish tip title=""
+In the accompanying [Houdini file](https://github.com/LucaScheller/VFX-UsdSurvivalGuide/tree/main/files/composition) you can find the inherit example from the [USD Glossary - Inherit](https://openusd.org/release/glossary.html#usdglossary-inherits) section.
+
+~~~admonish tip title="Pro Tip | Add inherits to instanceable prims"
+Here is a typical code pattern we'll use when creating inherits:
 ```python
-{{#include ../../../../code/core/composition.py:compositionArcInherit}}
+from pxr import Sdf
+...
+# Inspect prototype and collect what to override
+prototype = prim.GetPrototype()
+...
+# Create overrides
+class_prim = stage.CreateClassPrim(Sdf.Path("/__CLASS__/myCoolIdentifier"))
+edit_prim = stage.DefinePrim(class_prim.GetPath().AppendChild("leaf_prim"))
+edit_prim.CreateAttribute("size", Sdf.ValueTypeNames.Float).Set(5)
+...
+# Add inherits
+instance_prims = prototype.GetInstances()
+for instance_prim in instance_prims:
+    inherits_api = instance_prim.GetInherits()
+    inherits_api.AddInherit(class_prim.GetPath(), position=Usd.ListPositionFrontOfAppendList)    
 ```
+~~~
+
+Let's look at some more examples.
+
+~~~admonish danger title="Pro Tip | Inherit Performance Cost"
+As mentioned above, an inherit "only" searches the active layer stack and layer stacks the reference/payload the active layer stack. That means if we create an inherit in a "final" stage (A stage that never gets referenced or payloaded), there is little performance cost to using inherits.
+~~~
+
+![Houdini Composition Inherit Styles](houdiniCompositionInheritStyles.jpg)
+
+Here is the composition result for the left node stream. (For how to log this, see our [Inspecting composition](./pcp.md) section).
+
+![Houdini Composition Inherit - Classical Asset](houdiniCompositionInheritStyleClassicalAsset.svg)
+
+Vs the righ node stream:
+
+![Houdini Composition Inherit - Shot Asset](houdiniCompositionInheritStyleShot.svg)
+
+If we actually switch to an reference arc for the "shot style" inherit stream, we won't see a difference. So why use inherits here? As inherits are higher than variants, you should prefer inherits, for these kind of "broadcast" operations. As inherits also don't support time offsetting, they are the "simplest" arc in this scenario that does the job 100% of the time.
+
+~~~admonish tip title="Pro Tip | Advanced Inherits - Making USD simple again!"
+When you've worked a while in USD, you sometimes wonder why we need all these different layering rules. Why can't life be simple for once? An interesting design pattern can therefore also be the following:
+
+We create a `/__CLASS__/assets` and a `/__CLASS__/shots/<layer_name>` hierarchy. All shot layers first load assets via references and shot (fx) caches via payloads into their respective class hierarchy. We then inherit this into the actual "final" hierarchy. This has one huge benefit: 
+
+The class hierarchy is a kind of "API" to your scene hierarchy. For example if we want to time shift (in USD speak layer offset) an asset that has multiple occurrences in our scene, we have a single point of control where we have to change the offset. Same goes for any other kind of edit. 
+
+It also solves composition "problems": When we want to payload something over an asset reference, we can't because the payload arc is weaker than the reference arc. By "proxying" it to a class prim and then inheriting it, we guarantee that it always has the strongest opinion. This makes it easier to think about composition, as it is then just a single list-editable op rather than multiple arcs coming from different sources.
+
+The downside to this approach is that we (as pipeline devs) need to restructure all imports to always work this way. The cache files themselves can still write the "final" hierarchy, we just have to reference/payload it all in to the class hierarchy and then inherit it. This may sound like a lot of work, but it definitely helps us/artists keep organized with larger scenes. 
 ~~~
 
 ### Variants <a name="compositionArcVariant"></a>
@@ -405,6 +455,8 @@ Instancing is what keeps things fast as your stage content grows. It should be o
 USD has two ways of handling data instancing:
 - **Explicit**: Explicit data instancing via [`UsdGeom.PointInstancer`](https://openusd.org/dev/api/class_usd_geom_point_instancer.html) prims. The idea is simple: Given a set of array attributes made up of positions, orientations, scales (and velocity) data, copy a `Prototype` to each point. In this case prototype refers to any prim (and its sub-hierarchy) in your stage. We usually group them under the point instancer prims for readability. 
 - **Implicit**: Implicit instances are instances that are marked with the `instanceable` metadata. Now we can't just mark any hierarchy prim with this data. (Well we can but it would have no effect.) This metadata has to be set on prims that have composition arcs written. Our usual case is an asset that was brought in via a reference. What USD then does is "lock" the composition and create on the fly `/__Prototype_<index>` prim as the base copy. Any prim in your hierarchy that has the exact same let's call it **composition hash** (exact same composition arcs), will then re-use this base copy. This also means that we can't edit any prim beneath the `instanceable` marked prim.
+
+See the official docs [here](https://openusd.org/release/api/_usd__page__scenegraph_instancing.html) for a lengthy explanation.
 
 ~~~admonish danger title="Pro Tip | Prototype Count"
 We should always keep an eye on the prototype count, as it is a good performance indicator of if our composition structure is well setup.

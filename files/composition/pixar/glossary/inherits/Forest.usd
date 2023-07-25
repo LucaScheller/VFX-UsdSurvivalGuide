@@ -1,0 +1,20 @@
+#usda 1.0
+
+# A new prim, of the same name as the original inherits target, providing new overrides
+class "_class_Tree"
+{
+    token size = "small"
+
+    # It's autumn in California
+    over "Leaves"
+    {
+        color3f[] primvars:displayColor = [(1.0, .1, .1)]
+    }
+}
+
+# TreeB_1 still inherits from _class_Tree because its referent does
+def "TreeB_1" (
+    references = @./Trees.usd@</TreeB>
+)
+{
+}
