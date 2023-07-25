@@ -101,7 +101,7 @@ This specifier is used to specify a prim in a hierarchy, so that is it always vi
 Prims defined with `over` only get loaded if the prim in another layer has been specified with a `def`specified. It gets used when you want to add data to an existing hierarchy, for example layering only position and normals data onto a character model, where the base model has all the static attributes like topology or UVs.
 
 ~~~admonish important
-By default stage traversals will skip over `over` only prims.
+By default stage traversals will skip over `over` only prims. Prims that only have an `over` also do not get forwarded to Hydra render delegates.
 ~~~
 
 ~~~admonish info title=""

@@ -1,0 +1,21 @@
+#usda 1.0
+(
+    defaultPrim = "World"
+)
+
+def Xform "World"
+{
+    def "ShapeFactory" (
+        references = @assembly_with_all_variants.usda@
+    )
+    {
+        over "Model_1" (
+
+            variants = {
+                string dressingVariant = "shotOverride_1"
+            }
+        )
+        {
+        }
+    }
+}

@@ -393,7 +393,6 @@ For the default and proxy purpose (without render):
 
 As you can see the order is `UsdGeom.Tokens.default_`, `UsdGeom.Tokens.render`,`UsdGeom.Tokens.proxy`, `UsdGeom.Tokens.guide`. It a purpose is not authored, it will be sliced off (it it is at the end of the array).
 
-
 #### Xform (Transform) Ops <a name="attributeXformOps"></a>
 Per prim transforms are also encoded via attributes. As this is a bigger topic, we have a dedicated [Transforms](./transform.md) section for it.
 

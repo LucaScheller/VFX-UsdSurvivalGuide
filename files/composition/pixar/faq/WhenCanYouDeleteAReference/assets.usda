@@ -1,0 +1,19 @@
+#usda 1.0
+
+def Xform "CubeModel"
+{
+    custom int levelOfNesting = 0
+
+    def Cube "Gprim"
+    {
+    }
+}
+
+def Xform "SphereModel"
+{
+    custom int levelOfNesting = 0
+
+    def Sphere "Gprim"
+    {
+    }
+}

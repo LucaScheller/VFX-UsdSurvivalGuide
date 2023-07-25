@@ -1,0 +1,28 @@
+#usda 1.0
+(
+    defaultPrim = "World"
+)
+
+def Xform "World"
+{
+    def "ShapeFactory" (
+        references = @assembly.usda@
+    )
+    {
+        over "Model_1" (
+            prepend variantSets = "dressingVariant"
+            variants = {
+                string dressingVariant = "shotOverride_1"
+            }
+        )
+        {
+            variantSet "dressingVariant" = {
+                "shotOverride_1" (
+                    references = @assets.usda@</SphereModel>
+                )
+                {
+                }
+            }
+        }
+    }
+}

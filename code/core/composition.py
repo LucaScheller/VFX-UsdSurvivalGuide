@@ -682,6 +682,7 @@ Pcp.ArcTypeSpecialize
 """
 #// ANCHOR_END: pcpPrimIndex
 
+
 #// ANCHOR: pcpPrimCompositionQuery
 from pxr import Sdf, Usd
 stage = Usd.Stage.CreateInMemory()

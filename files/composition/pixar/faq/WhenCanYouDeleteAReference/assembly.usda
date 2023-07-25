@@ -1,0 +1,26 @@
+#usda 1.0
+(
+    defaultPrim = "FlexibleSet"
+)
+
+def Xform "FlexibleSet"
+{
+    def "Model_1" (
+        prepend variantSets = "dressingVariant"
+        variants = {
+            string dressingVariant = "default"
+        }
+    )
+    {
+        variantSet "dressingVariant" = {
+            "default" (
+                references = @assets.usda@</CubeModel>
+            )
+            {
+            }
+        }
+
+        # Anything added at the set level has nesting level 1
+        custom int levelOfNesting = 1
+    }
+}

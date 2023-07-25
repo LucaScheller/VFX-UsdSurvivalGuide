@@ -1,4 +1,7 @@
 # Composition Fundamentals
+
+In this section will talk about fundamental concepts that we need to know before we look at individual composition arcs.
+
 ~~~admonish question title="Still under construction!"
 As composition is USD's most complicated topic, this section will be enhanced with more examples in the future.
 If you detect an error or have useful production examples, please [submit a ticket](https://github.com/LucaScheller/VFX-UsdSurvivalGuide/issues/new), so we can improve the guide!

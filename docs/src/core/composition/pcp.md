@@ -1,8 +1,4 @@
 # Prim Cache Population (PCP) - Composition Cache
-~~~admonish question title="Still under construction!"
-This section is still under development, it is subject to change and needs extra validation.
-~~~
-
 The **Prim Cache Population** module is the backend of what makes USD composition work. You could call it the `composition core`, that builds the prim index.
 The prim index is like an ordered list per prim, that defines where values can be loaded from. For example when we call `Usd.Prim.GetPrimStack`, the `pcp` gives us a list of value sources as an ordered list, with the "winning" value source as the first entry.
 
@@ -184,6 +180,10 @@ Pcp Node Ref
 ~~~
 
 ![Alt text](pcpPrimIndexPig.png)
+
+~~~admonish tip
+We can also access the `Pcp.Cache` of the stage via: `pcp_cache = stage._GetPcpCache()`
+~~~
 
 ### Prim Composition Query <a name="pcpPrimCompositionQuery"></a>
 Next let's look at prim composition queries. Instead of having to filter the prim index ourselves, we can use the `Usd.PrimCompositionQuery` to do it for us. More info in the [USD API docs](https://openusd.org/dev/api/class_usd_prim_composition_query.html).

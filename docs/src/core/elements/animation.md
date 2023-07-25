@@ -13,7 +13,7 @@ Usd encodes time related data in a very simple format:
 4. [Overview](#overview)
     1. [Time Code](#animationTimeCode)
     2. [Layer Offset (A Non-Animateable Time Offset/Scale for Composition Arcs)](#animationLayerOffset)
-    3. [Reading & Writing time samples](#animationReadWrite)
+    3. [Reading & Writing default values and time samples](#animationReadWrite)
     4. [Frames Per Second](#animationMetadata)
     5. [Stitching/Combining time samples](#animationStitch)
     6. [Value Clips (Loading time samples from multiple files)](#animationValueClips)
@@ -146,7 +146,7 @@ Instead you have to create new ones and re-write the arc/assign the new layer of
 
 If you are interested on how to author composition in the low level API, checkout our [composition](../composition/overview.md) section.
 
-### Reading & Writing time samples <a name="animationReadWrite"></a>
+### Reading & Writing default values and time samples <a name="animationReadWrite"></a>
 
 #### Writing data
 
@@ -190,7 +190,7 @@ is fine, as it doesn't have t open any files.
 ~~~
 
 #### Special Values
-You can also tell a time sample to block a value. Blocking means that the attribute at that frame will act as if it doesn't have any value written ("Not authored" in USD speak) to scene/render delegates.
+You can also tell a time sample to block a value. Blocking means that the attribute at that frame will act as if it doesn't have any value written ("Not authored" in USD speak) to stage queries and render delegates.
 
 ~~~admonish info title=""
 ```python

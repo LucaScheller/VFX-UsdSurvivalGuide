@@ -45,41 +45,7 @@ We'll be using the below code, whenever we write composition arcs in USD.
 - [Usd.Specializes](https://openusd.org/dev/api/class_usd_specializes.html)
 
 ## Overview <a name="overview"></a>
-Here is a comparison between arcs that can target external layers (files) and arcs that target another part of the hierarchy:
-```mermaid
-flowchart TD
-    compositionArcSublayer(["Sublayers (Direct Opinions)"])
-    compositionArcValueClip(["Value Clips (Lower than Direct Opinions)"])
-    compositionArcInherit(["Inherits"])
-    compositionArcVariant(["Variants"])
-    compositionArcReferenceFile(["References"])
-    compositionArcReferenceInternal(["References"])
-    compositionArcPayload(["Payloads"])
-    compositionArcSpecialize(["Specialize"])
-    compositionArcInternal(["Internal Arcs (Target Hierarchy)"])
-    compositionArcExternal(["File Arcs (Target File (+ Hierarchy))"])
-    
-    compositionArcInternal --> compositionArcInherit
-    compositionArcInternal --> compositionArcVariant
-    compositionArcInternal --> compositionArcReferenceInternal
-    compositionArcInternal --> compositionArcSpecialize
-    compositionArcExternal --> compositionArcSublayer
-    compositionArcExternal --> compositionArcReferenceFile
-    compositionArcExternal --> compositionArcPayload
-    compositionArcSublayer --> compositionArcValueClip
-```
-
-Some arcs can specify a time offset/scale via a`Sdf.LayerOffset`: 
-```mermaid
-flowchart TD
-    compositionArcLayerOffset(["Sdf.LayerOffset"])
-    compositionArcSublayer(["Sublayers"])
-    compositionArcReference(["References (External/Internal)"])
-    compositionArcPayload(["Payloads"])
-    compositionArcLayerOffset --> compositionArcSublayer
-    compositionArcLayerOffset --> compositionArcReference
-    compositionArcLayerOffset --> compositionArcPayload
-```
+This section will focus on how to create each composition arc via the high and low level API.
 
 ## Composition Arcs
 All arcs that make use of [list-editable ops](./fundamentals.md#list-editable-operations-ops), take of of these tokens as an optional `position` keyword argument via the high level API.
