@@ -11,10 +11,11 @@ We have a supplementary Houdini scene, that you can follow along with, available
 1. [What should I use it for?](#usage)
 1. [Resources](#resources)
 1. [Overview](#overview)
-    1. [Composition Arc Categories](#compositionArcCategory)
-        1. [Composition Arc By Use Case](#compositionArcCategoryByUseCase)
-        1. [Composition Arc By Time Offset/Scale Capability](#compositionArcCategoryByTimeOffset)
-        1. [Composition Arc By Target Type (File/Hierarchy)](#compositionArcCategoryByTargetType)
+1. [Composition Strength Ordering](#compositionStrengthOrdering)
+1. [Composition Arc Categories](#compositionArcCategory)
+    1. [Composition Arc By Use Case](#compositionArcCategoryByUseCase)
+    1. [Composition Arc By Time Offset/Scale Capability](#compositionArcCategoryByTimeOffset)
+    1. [Composition Arc By Target Type (File/Hierarchy)](#compositionArcCategoryByTargetType)
 1. [Composition Arcs](#compositionArcs)
     1. [Sublayers / Local Opinions](#compositionArcSublayer)
         1. [Value Clips](#compositionArcValueClips)
@@ -42,7 +43,7 @@ USD's composition arcs each fulfill a different purpose. As we can attach attach
 
 All arcs, except the `sublayer` arc, target (load) a specific prim of a layer (stack). This allows us to rename the prim, where the arc is created on, to something different, than what the arc's source hierarchy prim is named. An essential task that USD performs for us, is mapping paths from the target layer to the source layer (stack).
 
-### Composition Strength Ordering <a name="compositionStrengthOrdering"></a>
+## Composition Strength Ordering <a name="compositionStrengthOrdering"></a>
 To prioritize how different arcs evaluate against each other, we have `composition strength ordering`. This is a fancy word for "what layer (file) provides the actual value for my prim/property/metadata based on all available composition arcs". (I think we'll stick to using `composition strength ordering` 😉).
 
 All arcs, except sublayers, make use of list editing, see our [fundamentals](./fundamentals.md#compositionFundamentalsListEditableOps) for a detailed explanation. We highly recommend reading it first before continuing.
@@ -54,15 +55,27 @@ Let's look at the order:
 All credits for this info graphic go to [Remedy-Entertainment - Book Of USD](https://remedy-entertainment.github.io/USDBook/terminology/LIVRPS.html). Check out their site, it is another great value source for USD.
 ~~~
 
+USD refers to this with the acronym `L(V)IVRPS(F)`:
+- **L**ocal: Search for [direct opinions](https://openusd.org/release/glossary.html#direct-opinion) in the active root layer stack. 
+    - **V**alue Clips: Search for [direct opinions](https://openusd.org/release/glossary.html#direct-opinion) from value clips. These are weaker than direct opinions on layers.
+- **I**nherits: Search for inherits affecting the path. This searches in the (nested) layer stack by recursively applying *LIVRP* (No specializes) evaluation.
+- **V**ariant Sets: Search for variants affecting the path. This searches in the (nested) layer stack by recursively applying *LIVRP* (No specializes) evaluation.
+- **R**eferences: Search for references affecting the path. This searches in the (nested) layer stack by recursively applying *LIVRP* (No specializes) evaluation.
+- **P**ayloads: Search for payloads affecting the path. This searches in the (nested) layer stack by recursively applying *LIVRP* (No specializes) evaluation.
+- **S**pecializes: Search for payloads affecting the path. This searches in the (nested) layer stack by recursively applying full *LIVRPS* evaluation. This causes the specialize opinions to always be last.
+- **(F)** allback value: Look for [schema](../elements/schemas.md) fallbacks.
+
+
+Now if you just didn't understand any of that, don't worry! We'll have a look where what are is typically used in the examples below.
+
 ~~~admonish important title="Important | Nested Composition Arc Resolve Order"
-When resolving nested composition arcs and value clips, the arc/value clip metadata, that is authored on the closest ancestor parent prim, wins. To make our lives easier, we recommend having predefined locations where you author composition arcs. A typical location is your asset root prim and a set/assembly root prim.
+When resolving nested composition arcs and value clips, the arc/value clip metadata, that is authored on the closest ancestor parent prim or the prim itself, wins. In short to quote from the USD glossary `“ancestral arcs” are weaker than “direct arcs”`. To make our lives easier, we recommend having predefined locations where you author composition arcs. A typical location is your asset root prim and a set/assembly root prim.
 ~~~
 
+## Composition Arc Categories <a name="compositionArcCategory"></a>
+Let's try looking at arcs from a use case perspective. Depending on what we want to achieve, we usually end up with a specific arc designed to fill our needs.
 
-### Composition Arc Categories <a name="compositionArcCategory"></a>
-Let's first look at some ways we can categorize different arcs. Depending on what we want to achieve, we usually end up with a specific arc designed to fill our needs.
-
-#### Composition Arc By Use Case <a name="compositionArcCategoryByUseCase"></a>
+### Composition Arc By Use Case <a name="compositionArcCategoryByUseCase"></a>
 Here is a comparison between arcs by use case. Note that this is only a very "rough" overview, there are a few more things to pay attention to when picking the correct arc. It does help to first understand what the different arcs try to achieve though.
 
 ~~~admonish tip title=""
@@ -115,7 +128,7 @@ flowchart LR
 ```
 ~~~
 
-#### Composition Arc By Time Offset/Scale Capability <a name="compositionArcCategoryByTimeOffset"></a>
+### Composition Arc By Time Offset/Scale Capability <a name="compositionArcCategoryByTimeOffset"></a>
 Some arcs can specify a time offset/scale via a`Sdf.LayerOffset`.
 ~~~admonish tip title=""
 ```mermaid
@@ -148,7 +161,7 @@ flowchart LR
 ```
 ~~~
 
-#### Composition Arc By Target Type (File/Hierarchy) <a name="compositionArcCategoryByTargetType"></a>
+### Composition Arc By Target Type (File/Hierarchy) <a name="compositionArcCategoryByTargetType"></a>
 Here is a comparison between arcs that can target external layers (files) and arcs that target another part of the hierarchy.
 
 ~~~admonish tip title=""
