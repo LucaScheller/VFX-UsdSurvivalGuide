@@ -2,8 +2,7 @@
 In this section we'll cover how composition arcs work and interact with each other. We cover how to create composition arcs via code in our [composition arcs](./arcs.md) section. This section will also have code examples, but with the focus on practical usage instead of API structure.
 
 ~~~admonish tip
-We have a supplementary Houdini scene, that you can follow along with, available in this [site's repository]().
-
+We have a supplementary Houdini scene, that you can follow along with, available in this [site's repository](https://github.com/LucaScheller/VFX-UsdSurvivalGuide/tree/main/files/composition). All the examples below will walk through this file as it easier to prototype and showcase arcs in Houdini via nodes, than writing it all in code.
 ~~~
 
 # Table of contents
@@ -202,33 +201,66 @@ flowchart TD
 ## Composition Arcs <a name="compositionArcs"></a>
 Let's gets practical! Below will go through every arc individually and highlight what is important.
 
+~~~admonish tip
+We have a supplementary Houdini scene, that you can follow along with, available in this [site's repository](https://github.com/LucaScheller/VFX-UsdSurvivalGuide/tree/main/files/composition). All the examples below will walk through this file as it easier to prototype and showcase arcs in Houdini via nodes, than writing it all in code.
+~~~
+
 ### Sublayers / Local Opinions <a name="compositionArcSublayer"></a>
+The sublayer arc is used to build up your stage [root layer stack](./fundamentals.md#compositionFundamentalsLayerStack). They can be time offset/scaled via a `Sdf.LayerOffset`, see our [code examples](./arcs.md#compositionArcSublayer).
 
-~~~admonish tip title=""
-```python
-{{#include ../../../../code/core/composition.py:compositionArcSublayer}}
-```
+~~~admonish tip title="Pro Tip | What do we use sublayers for?"
+Typically we'll be using sublayers for mainly these things:
+- As a mechanism to separate data when working in your DCCs. On file write we usually flatten layers to a single flattened output(s)(if you have multiple save paths set). Why not put everything on the same layer? We can use the layer order as a form of control to A. allow/block edits (or rather seeing them have an effect because of weaker opinion strength) B. Sort data from temporary data. 
+- To load in references and payloads. That way all the heavy lifting is not done (and should not be done) by the sublayer arc.
+- In shot workflows to load different shot layers. Why don't we do this via references or payloads you might be asking yourself? As covered in our [fundamentals](./fundamentals.md#compositionFundamentalsEncapsulation) section, anything your reference or payload in will be encapsulated. In shot workflows we want to keep having access to list editable ops. For example if we have a layout and a lighting layer, the lighting layer should still be able to remove a reference, that was created in the layout layer.
 ~~~
 
-When working in Houdini, we can't directly sublayer onto the root layer as with native USD, due to Houdini's layer caching mechanism, that makes node based stage editing possible. Layering on the active layer works as usual though.
+Let's look at how sublayers are used in native USD:
 
-~~~admonish tip title=""
-```python
-{{#include ../../../../code/core/composition.py:compositionArcSublayerHoudini}}
-```
-~~~
+When creating a stage we have two layers by default:
+- **Session Layer**: This is a temp layer than doesn't get applied on disk save. Here we usually put things like viewport overrides.
+- **Root Layer**: This is the base layer all edits target by default. We can add sublayers based on what we need to it. When calling `stage.Save()`, all sublayers that are dirty and not anonymous, will be saved. 
 
-Here is the result:
+How are sublayers setup in Houdini?
 
-![Alt text](houdiniCompositionSublayerPython.jpg)
+In Houdini every node always edits the top most root layer sublayer (in USD speak the layer to edit is called the **edit target**). This way we don't have to worry about what our layer, we want to write to, is.
+
+To summarize how Houdini makes node editing a layer based system possible (at least from what we can gather from reverse engineering): 
+
+Every node stashes a copy of the top most layer (Houdini calls it the **active layer**), that way, when we switch from node to node, it transfers back the content as soon as it needs to be displayed/cooked. This does have a performance hit (as covered in our [Houdini performance](../../dcc/houdini/performance/overview.md)) section. It also spawns a new stage per node when necessary, for example when a python LOP node or python parm expression accesses the previous node's stage. This mechanism gives the user the control to spawn new layers when needed. By default your network is color coded by what the active layer is.
+
+![Houdini Layer Stack](houdiniCompositionSublayerRootLayerStack.jpg)
+
+Houdini writes all your scene graph panel viewport overrides into session layer sublayers. By default these are not shown in the UI, you can view them by looking at the layer content though.
+
+![Alt text](houdiniCompositionSublayerSessionLayer.jpg)
+
+Instead of using layers non-anonymous save paths (layer identifiers) directly, all layers created in your session are anonymous layers (with Houdini specific metadata that tracks the save path). We're guessing that this is because all layers without a save path get merged into the next available layer with a save path on file save. If no layer has a save path, all content gets flattened into the layer file path you put on the USD rop.
+![Alt text](houdiniCompositionSublayerSessionLayer.jpg)
 
 #### Value Clips <a name="compositionArcValueClips"></a>
-We cover value clips in our [animation section](../elements/animation.md). Their opinion strength is lower than direct (sublayer) opinions, but higher than anything else.
+We cover value clips in our [animation section](../elements/animation.md). Value clips are USD's mechanism for loading per frame (or per chunk) files, so that we don't have a single gigantic file for large caches.
+
+Their opinion strength is lower than direct (sublayer) opinions, but higher than anything else. This of course is only relevant if we author time samples and value clips in the same layer. If we have multiple layers, then it behaves as expected, so the highest layers wins.
 
 The write them via metadata entries as covered here in our [value clips](../elements/animation.md#value-clips-loading-time-samples-from-multiple-files) section.
 
+Here is a comparison between a layer with value clip metadata and time samples vs separate layers with each.
+Houdini's "Load Layer For Editing", simply does a `active_layer.TransferContent(Sdf.Layer.FindOrOpen("/Disk/Layer.usd"))`, in case you are wondering, so it fakes it as if we created the value clip metadata in the active layer.
+
+![Houdini Sublayer Value Clip](houdiniCompositionSublayerValueClip.gif)
+
 ### Inherits <a name="compositionArcInherit"></a>
-Inherits, like specializes, don't have a object representation, they directly edit the list-editable op list.
+The inherit arc is used to add overrides to an existing prim hierarchy, that is made up of weaker arcs.
+It does **not** support adding a time offset via `Sdf.LayerOffset`.
+
+
+~~~admonish tip title="Pro Tip | What do we use inherits for?"
+Typically we'll be using inherits for:
+- As a mechanism to separate data when working in your DCCs. On file write we usually flatten layers to a single flattened output(s)(if you have multiple save paths set). Why not put everything on the same layer? We can use the layer order as a form of control to A. allow/block edits (or rather seeing them have an effect because of weaker opinion strength) B. Sort data from temporary data. 
+- To load in references and payloads. That way all the heavy lifting is not done (and should not be done) by the sublayer arc.
+- In shot workflows to load different shot layers. Why don't we do this via references or payloads you might be asking yourself? As covered in our [fundamentals](./fundamentals.md#compositionFundamentalsEncapsulation) section, anything your reference or payload in will be encapsulated. In shot workflows we want to keep having access to list editable ops. For example if we have a layout and a lighting layer, the lighting layer should still be able to remove a reference, that was created in the layout layer.
+~~~
 
 ~~~admonish tip title=""
 ```python
@@ -367,16 +399,12 @@ Instancing is the multi re-use of a part of the hierarchy, so that we don't have
 ~~~
 
 ~~~admonish danger title=""
-Instancing is what keeps things fast as your stage content grows, and it should be one of the main factors of how you design your composition setup.
+Instancing is what keeps things fast as your stage content grows. It should be one of the main factors of how you design your composition setup.
 ~~~
 
 USD has two ways of handling data instancing:
 - **Explicit**: Explicit data instancing via [`UsdGeom.PointInstancer`](https://openusd.org/dev/api/class_usd_geom_point_instancer.html) prims. The idea is simple: Given a set of array attributes made up of positions, orientations, scales (and velocity) data, copy a `Prototype` to each point. In this case prototype refers to any prim (and its sub-hierarchy) in your stage. We usually group them under the point instancer prims for readability. 
 - **Implicit**: Implicit instances are instances that are marked with the `instanceable` metadata. Now we can't just mark any hierarchy prim with this data. (Well we can but it would have no effect.) This metadata has to be set on prims that have composition arcs written. Our usual case is an asset that was brought in via a reference. What USD then does is "lock" the composition and create on the fly `/__Prototype_<index>` prim as the base copy. Any prim in your hierarchy that has the exact same let's call it **composition hash** (exact same composition arcs), will then re-use this base copy. This also means that we can't edit any prim beneath the `instanceable` marked prim.
-
-In Houdini we can show the implicit prototypes by enabling the "Show Implicit Prototype Primitives" option in the sunglasses menu in our scene graph tree panel.
-
-![Houdini Instanceable](houdiniCompositionInstanceable.jpg)
 
 ~~~admonish danger title="Pro Tip | Prototype Count"
 We should always keep an eye on the prototype count, as it is a good performance indicator of if our composition structure is well setup.
@@ -388,3 +416,7 @@ We often do use them though to find the prims they are the prototype of. That wa
 print("Prototype Count", len(stage.GetPrototypes()))
 ```
 ~~~
+
+In Houdini we can show the implicit prototypes by enabling the "Show Implicit Prototype Primitives" option in the sunglasses menu in our scene graph tree panel.
+
+![Houdini Instanceable](houdiniCompositionInstanceable.jpg)
