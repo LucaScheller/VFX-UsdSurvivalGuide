@@ -16,10 +16,14 @@ We have a supplementary Houdini scene, that you can follow along with, available
     1. [Composition Arc By Time Offset/Scale Capability](#compositionArcCategoryByTimeOffset)
     1. [Composition Arc By Target Type (File/Hierarchy)](#compositionArcCategoryByTargetType)
 1. [Composition Arcs](#compositionArcs)
-    1. [Sublayers / Local Opinions](#compositionArcSublayer)
+    1. [Sublayers / Local Direct Opinions](#compositionArcSublayer)
         1. [Value Clips](#compositionArcValueClips)
     1. [Inherits](#compositionArcInherit)
     1. [Variants](#compositionArcVariant)
+        1. [Nested Variants](#compositionArcVariantNested)
+        1. [Variant Data Lofting](#compositionArcVariantLofting)
+        1. [Sharing data among variants](#compositionArcVariantSharing)
+        1. [Efficiently re-writing existing data as variants](#compositionArcVariantReauthor)
     1. [References](#compositionArcReference)
         1. [References File](#compositionArcReferenceExternal)
         1. [References Internal](#compositionArcReferenceInternal)
@@ -44,7 +48,12 @@ For USD to be able to scale well, we can also "lock" the composition on prims wi
 ## Overview <a name="overview"></a>
 USD's composition arcs each fulfill a different purpose. As we can attach attach all arcs (except sublayers) to any part of the hierarchy other than the pseudo root prim. When loading our data, we have a pre-defined load order of how arcs prioritize against each other. Each prim (and property) in our hierarchy then gets resolved (see our [Inspecting Compositon](./pcp.md) section) based on this order rule set and the outcome is a (or multiple) value sources, that answer data queries into our hierarchy.
 
-All arcs, except the `sublayer` arc, target (load) a specific prim of a layer (stack). This allows us to rename the prim, where the arc is created on, to something different, than what the arc's source hierarchy prim is named. An essential task that USD performs for us, is mapping paths from the target layer to the source layer (stack).
+All arcs, except the `sublayer` arc, target (load) a specific prim of a layer stack (**NOT layer**). This allows us to rename the prim, where the arc is created on, to something different, than what the arc's source hierarchy prim is named. An essential task that USD performs for us, is mapping paths from the target layer to the source layer (stack).
+
+~~~admonish important title="Important | Good-To-Knows"
+- Composition arcs target layer stacks, not individual layers. This just means that they recursively load what is in a layer.
+- When arcs target a non root prim, they do **not** receive parent data that usually "flows" down the hierarchy. This means that primvars, material bindings or transforms from ancestor prims do not get "inherited" (we don't mean the inherited arc here). They **do** see the composition result though. So for example if your file reference targets a prim inside a variant, it can't change the variant as the variant is not in the stage it was referenced into to.
+~~~
 
 ## Composition Strength Ordering <a name="compositionStrengthOrdering"></a>
 To prioritize how different arcs evaluate against each other, we have `composition strength ordering`. This is a fancy word for "what layer (file) provides the actual value for my prim/property/metadata based on all available composition arcs". (I think we'll stick to using `composition strength ordering` 😉).
@@ -206,7 +215,7 @@ Let's gets practical! Below will go through every arc individually and highlight
 We have a supplementary Houdini scene, that you can follow along with, available in this [site's repository](https://github.com/LucaScheller/VFX-UsdSurvivalGuide/tree/main/files/composition). All the examples below will walk through this file as it easier to prototype and showcase arcs in Houdini via nodes, than writing it all in code.
 ~~~
 
-### Sublayers / Local Opinions <a name="compositionArcSublayer"></a>
+### Sublayers / Local Direct Opinions <a name="compositionArcSublayer"></a>
 The sublayer arc is used to build up your stage [root layer stack](./fundamentals.md#compositionFundamentalsLayerStack). They can be time offset/scaled via a `Sdf.LayerOffset`, see our [code examples](./arcs.md#compositionArcSublayer).
 
 ~~~admonish tip title="Pro Tip | What do we use sublayers for?"
@@ -224,7 +233,7 @@ When creating a stage we have two layers by default:
 
 How are sublayers setup in Houdini?
 
-In Houdini every node always edits the top most root layer sublayer (in USD speak the layer to edit is called the **edit target**). This way we don't have to worry about what our layer, we want to write to, is.
+In Houdini every node always edits the top most root layer sublayer (in USD speak the layer to edit is called the **edit target**). This way we don't have to worry about what our layer, we want to write to, is. In the scene graph panel the session layer is displayed under the root layer, it is actually over (higher) than the root layer.
 
 To summarize how Houdini makes node editing a layer based system possible (at least from what we can gather from reverse engineering): 
 
@@ -237,7 +246,8 @@ Houdini writes all your scene graph panel viewport overrides into session layer 
 ![Alt text](houdiniCompositionSublayerSessionLayer.jpg)
 
 Instead of using layers non-anonymous save paths (layer identifiers) directly, all layers created in your session are anonymous layers (with Houdini specific metadata that tracks the save path). We're guessing that this is because all layers without a save path get merged into the next available layer with a save path on file save. If no layer has a save path, all content gets flattened into the layer file path you put on the USD rop.
-![Alt text](houdiniCompositionSublayerSessionLayer.jpg)
+
+![Alt text](houdiniCompositionSublayerSavePath.jpg)
 
 #### Value Clips <a name="compositionArcValueClips"></a>
 We cover value clips in our [animation section](../elements/animation.md). Value clips are USD's mechanism for loading per frame (or per chunk) files, so that we don't have a single gigantic file for large caches.
@@ -256,11 +266,11 @@ The inherit arc is used to add overrides to existing (instanceable) prims. The t
 
 ~~~admonish tip title="Pro Tip | What do we use inherits for?"
 - We use inherit arcs as a "broadcast" operator: When we want to apply an edit to our hierarchy in multiple places, we typically create a class prim, whose child prims contain the properties we want to modify. After that we create an inherit arc on all prims that should receive the edit. As it is the second highest arc behind direct opinions, it will always have the highest composition strength, when applied to instanceable prims, as instanceable prims can't have direct opinions.
-- The inherit arc is never [encapsulated](./fundamentals.md#compositionFundamentalsEncapsulation). This means that any layer stack, that re-creates the prims that that the inherit targets, gets used by the inherit. This does come at a performance cost, as the composition engine needs to check all layers from where the arc was authored and higher for the hierarchy that the inherit targets.
+- The inherit arc is never [encapsulated](./fundamentals.md#compositionFundamentalsEncapsulation). This means that any layer stack, that re-creates the prims that that the inherit targets, gets used by the inherit. This does come at a performance cost, as the composition engine needs to check all layer stacks from where the arc was authored and higher for the hierarchy that the inherit targets.
 - The inherit arc commonly gets used together with the [class prim specifier](../elements/prim.md#primSpecifier). The class prim specifier is specifically there to get ignored by default traversals and to provide template hierarchies that can then get inherited (or internally referenced/specialized) to have a "single source to multiple targets" effect.  
 - There are two common practices:
-    - Assets: When creating assets, we can author a `/__CLASS__/<assetName>` inherit. When we use the asset in shots, we can then easily add overrides to all assets of this type, by creating prims and properties under that specific class prim hierarchy. While this sounds great in theory, artists often want to only selectively apply an override to an asset. Therefore having the additional performance cost of this arc in assets is something might not worth doing. See the next bullet point.
-    - Shots: This is where inherits shine! We usually create inherits to:
+    - **Assets**: When creating assets, we can author a `/__CLASS__/<assetName>` inherit. When we use the asset in shots, we can then easily add overrides to all assets of this type, by creating prims and properties under that specific class prim hierarchy. While this sounds great in theory, artists often want to only selectively apply an override to an asset. Therefore having the additional performance cost of this arc in assets is something might not worth doing. See the next bullet point.
+    - **Shots**: This is where inherits shine! We usually create inherits to:
         - Batch apply render geometry settings to (instanceable) prims. This is a great way of having a single control point to editing render settings per different areas of interest in your scene.
         - Batch apply activation/visibility to instanceable prims. This way we don't increase the prototype count.
 ~~~
@@ -316,16 +326,31 @@ The class hierarchy is a kind of "API" to your scene hierarchy. For example if w
 It also solves composition "problems": When we want to payload something over an asset reference, we can't because the payload arc is weaker than the reference arc. By "proxying" it to a class prim and then inheriting it, we guarantee that it always has the strongest opinion. This makes it easier to think about composition, as it is then just a single list-editable op rather than multiple arcs coming from different sources.
 
 The downside to this approach is that we (as pipeline devs) need to restructure all imports to always work this way. The cache files themselves can still write the "final" hierarchy, we just have to reference/payload it all in to the class hierarchy and then inherit it. This may sound like a lot of work, but it definitely helps us/artists keep organized with larger scenes. 
+
+Head over to our [Composition in production](../../production/composition.md) section for more production related views on composition.
 ~~~
 
 ### Variants <a name="compositionArcVariant"></a>
-Variant sets (the variant set->variant name mapping) are also managed via list editable ops.
-The actual variant set data is not though. It is written "in-line" into the prim spec via the `Sdf.VariantSetSpec`/`Sdf.VariantSpec` specs, so that's why we have dedicated specs.
+The variant arc is used to allow users to switch through different variations of sub-hierarchies. It does **not** support adding any time offsets via `Sdf.LayerOffset`s.
 
-This means we can add variant data, but hide it by not adding the variant set name to the `variantSets`metadata.
+~~~admonish tip title="Pro Tip | What do we use variants for?"
+- We use it as a mechanism to swap between (wait for it ...) variations of a hierarchy. The main applications are:
+    - **Assets**: Instead of having multiple assets with variations based of off a single base asset, we can store one asset and add variants. That way it is cleaner to track throughout the pipeline.
+    - **Shots**: Variants in shots are typically used when a sequence based hierarchy needs to be replaced by a per shot variation. While you could also solve this by just deactivating the prims your need per shot or via sublayer ordering (if you overwrite the same prims), variants offer a cleaner workflow. This way we can keep the hierarchy at the same place and all our lighting department needs to do is target the same hierarchy, when picking what to render. Since variants swap out a whole sub section of a hierarchy, we also ensure that the geometry is not getting any unwanted attributes from other layers.
+- We can have any number of nested variants. A typical example is having multiple model variants, which each in return have different LOD (level of detail) variants.
+- We can also use it as a mechanism to share mesh data. For example if we have a car asset, we can write the car without a variant and then add all car accessories (which don't overlap hierarchy-wise with the car meshes) as variants. That way the artists can swap through what they need on top of the "base" model.
+- We don't need to have a variant selection. If we block or unset the selection, no variant will be selected/loaded, which results in an empty hierarchy. Fallbacks for variant set selections can be configured via the USD API or a USD plugin ([API Docs](https://openusd.org/dev/api/class_usd_stage.html), search for 'Variant Management')
+- How are variants structured? Variants are written "inline", unlike the inherit/reference/payload/specialize arcs, they do not point to another hierarchy path. Instead they are more similar to child prims (specs). We usually then write other arcs, like payloads, into the variants, that do the actual heavy data loading.
+- We can also use variants as the mechanism to "variant away" arcs that have been encapsulated. More info in our [fundamentals section](./fundamentals.md#compositionFundamentalsEncapsulation).
+~~~
 
-For example here we added it:
+Let's talk about technical details:
+Variant sets (the variant set to variant name mapping) is managed via list editable ops.
+The actual variant data is not though. It is written "in-line" into the prim spec via the `Sdf.VariantSetSpec`/`Sdf.VariantSpec` specs, so that's why we have dedicated specs. This means we can add variant data, but hide it by not adding the variant set name to the `variantSets` metadata.
 
+Let's first look at a simple variant.
+
+~~~admonish tip title=""
 ```python
 def Xform "car" (
     variants = {
@@ -348,15 +373,16 @@ def Xform "car" (
     }
 }
 ```
-Here we skipped it, by commenting out the:
-`car_prim_spec.SetInfo("variantSetNames", Sdf.StringListOp.Create(prependedItems=["color"]))` line in the below code.
-This will make it not appear in UIs for variant selections.
+~~~
 
+We can also block a selection, so that nothing gets loaded:
+~~~admonish tip title=""
 ```python
 def Xform "car" (
     variants = {
-        string color = "colorA"
+        string color = ""
     }
+    prepend variantSets = "color"
 )
 {
     variantSet "color" = {
@@ -373,21 +399,158 @@ def Xform "car" (
     }
 }
 ```
+~~~
 
+See our [variant composition arc authoring](./arcs.md#compositionArcVariant) section on how to create this via code. 
+
+#### Nested Variants <a name="compositionArcVariantNested"></a>
+When we write nested variants, we can also write the selections into the nested variants. Here is an example, have a look at the `variants = {string LOD = "lowRes"}` dict.
+
+~~~admonish danger title="Pro Tip | Nested Variant Selections"
+When we have nested variants the selection is still driven through the highest layer that has a variant selection value (USD speak `opinion`) for each variant selection set. If we don't provide a selection, it will fallback to using the (nested) selection, if one is written. In the example below, if we remove the `string LOD = "lowRes"` entry on the bicycle prim, the selection will fallback to "highRes" as it will get the selection from the nested variant selection.
+```python
+def Xform "bicycle" (
+    variants = {
+        string LOD = "lowRes"
+        string model = "old"
+    }
+    prepend variantSets = "model"
+)
+{
+    variantSet "model" = {
+        "new" (
+            variants = {
+                string LOD = "lowRes"
+            }
+            prepend variantSets = "LOD"
+        ) {
+            variantSet "LOD" = {
+                "lowRes" {
+                    def Cylinder "cube"
+                    {
+                    }
+
+                }
+            }
+
+        }
+        "old" (
+            variants = {
+                string LOD = "highRes"
+            }
+            prepend variantSets = "LOD"
+        ) {
+            variantSet "LOD" = {
+                "highRes" {
+                    def Cube "cube"
+                    {
+                    }
+
+                }
+                "lowRes" {
+                    def Sphere "sphere"
+                    {
+                    }
+
+                }
+            }
+
+        }
+    }
+}
+```
+~~~
+
+~~~admonish tip title="Pro Tip | Nested Variant Naming Conventions"
+When working with nested variants in production, we recommend locking down the naming convention for the variant set names as well as the nested order. We also recommend **not** creating nested variants that only exists for a specific parent variant. This way, variant sets don't "randomly" come into existence based on other nested variant selections.
+
+That way all your code knows where to look when authoring variants and authoring variants can be automated.
+~~~
+
+#### Variant Data Lofting <a name="compositionArcVariantLofting"></a>
+In production we usually create variants in our asset layer stack. The common practice is to put your whole asset content behind a single payload (or to load individual asset layers behind a payload) that contain the variants. When unloading payloads, we still want to be able to make variant selections (or at least see what is available). In order for us to do this, we can "loft" the payload structure to the asset prim. Lofting in this case means, re-creating all variants, but without content. That way UIs can still pick up on the variant composition, but not load any of the data.
+
+One key problem of lofting the info is, that we have to dive into any nested variant to actually see the nested content. Since this is a one-off operation that can be done on publish, it is fine.
+
+~~~admonish question title="Still under construction!"
+It is on our to do list to build a code example for this.
+~~~
+
+~~~admonish danger title=""
+```python
+def Xform "root_grp" (
+    prepend payload = @asset_data@</root_grp>
+    variants = {
+        string LOD = "highRes"
+        string model = "old"
+    }
+    prepend variantSets = "model"
+)
+{
+    variantSet "model" = {
+        "new" (
+            prepend variantSets = "LOD"
+        ) {
+            variantSet "LOD" = {
+                "lowRes" {
+
+                }
+            }
+
+        }
+        "old" (
+            prepend variantSets = "LOD"
+        ) {
+            variantSet "LOD" = {
+                "highRes" {
+
+                }
+                "lowRes" {
+
+                }
+            }
+
+        }
+    }
+}
+```
+~~~
+
+Here is a comparison in Houdini with unloaded/loaded payloads with lofted variant data.
+
+![Houdini Composition Variant Loft](houdiniCompositionVariantLoft.gif)
+
+
+#### Sharing data among variants <a name="compositionArcVariantSharing"></a>
+To share data among variants, we can either payload/reference the same data into each variant. We can also write our data that should be shared outside of the variant and then only add hierarchy overrides/additions via the variants.
+
+Here is how it can be setup in Houdini:
+
+![Houdini Composition Variant Share](houdiniCompositionVariantShare.gif)
+
+#### Efficiently re-writing existing data as variants <a name="compositionArcVariantReauthor"></a>
+Via the low level API we can also copy or move content on a layer into a variant. This is super powerful to easily create variants from caches.
+
+Here is how it can be setup in Houdini:
+![Houdini Composition Variant Reauthor](houdiniCompositionVariantCopyMove.gif)
+
+Here is the code for moving variants:
 ~~~admonish tip title=""
 ```python
-{{#include ../../../../code/core/composition.py:compositionArcVariant}}
+{{#include ../../../../code/core/composition.py:compositionArcVariantMoveHoudini}}
 ```
 ~~~
 
-<a name="compositionArcVariantCopySpec"></a>
-~~~admonish tip title="Pro Tip | Copying layer content into a variant"
-When editing variants, we can also move layer content into a variant very easily via the `Sdf.CopySpec` command. This is a very powerful feature!
-
+And for copying:
+~~~admonish tip title=""
 ```python
-{{#include ../../../../code/core/composition.py:compositionArcVariantCopySpec}}
+{{#include ../../../../code/core/composition.py:compositionArcVariantCopyHoudini}}
 ```
 ~~~
+
+
+
+
 
 ### References <a name="compositionArcReference"></a>
 

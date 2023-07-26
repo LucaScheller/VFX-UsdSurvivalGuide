@@ -100,6 +100,7 @@ This means we can add variant data, but hide it by not adding the variant set na
 
 For example here we added it:
 
+~~~admonish tip title=""
 ```python
 def Xform "car" (
     variants = {
@@ -122,10 +123,13 @@ def Xform "car" (
     }
 }
 ```
+~~~
+
 Here we skipped it, by commenting out the:
 `car_prim_spec.SetInfo("variantSetNames", Sdf.StringListOp.Create(prependedItems=["color"]))` line in the below code.
 This will make it not appear in UIs for variant selections.
 
+~~~admonish tip title=""
 ```python
 def Xform "car" (
     variants = {
@@ -147,6 +151,7 @@ def Xform "car" (
     }
 }
 ```
+~~~
 
 ~~~admonish tip title=""
 ```python
@@ -156,12 +161,21 @@ def Xform "car" (
 
 <a name="compositionArcVariantCopySpec"></a>
 ~~~admonish tip title="Pro Tip | Copying layer content into a variant"
-When editing variants, we can also move layer content into a variant very easily via the `Sdf.CopySpec` command. This is a very powerful feature!
+When editing variants, we can also move layer content into a (nested) variant very easily via the `Sdf.CopySpec` command. This is a very powerful feature!
 
 ```python
 {{#include ../../../../code/core/composition.py:compositionArcVariantCopySpec}}
 ```
 ~~~
+
+Here is how we can created nested variant sets via the high level and low level API. As you can see it is quite a bit easier with the low level API.
+
+~~~admonish tip title=""
+```python
+{{#include ../../../../code/core/composition.py:compositionArcVariantNested}}
+```
+~~~
+
 
 ### References <a name="compositionArcReference"></a>
 

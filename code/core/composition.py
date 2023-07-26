@@ -295,10 +295,182 @@ variant_set_spec = Sdf.VariantSetSpec(bicycle_prim_spec, "color")
 variant_spec = Sdf.VariantSpec(variant_set_spec, "colorA")
 variant_prim_path = bicycle_prim_path.AppendVariantSelection("color", "colorA")
 Sdf.CopySpec(some_other_layer, root_prim_path, layer, variant_prim_path)
-# Variant Selection
+# Variant selection
 bicycle_prim_spec.SetInfo("variantSetNames", Sdf.StringListOp.Create(prependedItems=["color"]))
 bicycle_prim_spec.variantSelections["color"] = "colorA"
 #// ANCHOR_END: compositionArcVariantCopySpec
+
+#// ANCHOR: compositionArcVariantCopyHoudini
+from pxr import Sdf, Usd
+
+node = hou.pwd()
+layer = node.editableLayer()
+
+source_node = node.parm("spare_input0").evalAsNode()
+source_stage = source_node.stage()
+source_layer = source_node.activeLayer()
+
+with Sdf.ChangeBlock():
+    iterator = iter(Usd.PrimRange(source_stage.GetPseudoRoot()))
+    for prim in iterator:
+        if "GEO" not in prim.GetChildrenNames():
+            continue
+        iterator.PruneChildren()
+        prim_path = prim.GetPath()
+        prim_spec = Sdf.CreatePrimInLayer(layer, prim_path)
+        prim_spec.specifier = Sdf.SpecifierDef
+        prim_spec.typeName = "Xform"
+        parent_prim_spec = prim_spec.nameParent
+        while parent_prim_spec:
+            parent_prim_spec.specifier = Sdf.SpecifierDef
+            parent_prim_spec.typeName = "Xform"
+            parent_prim_spec = parent_prim_spec.nameParent
+                    
+        # Copy content into variant
+        variant_set_spec = Sdf.VariantSetSpec(prim_spec, "model")
+        variant_spec = Sdf.VariantSpec(variant_set_spec, "myCoolVariant")
+        variant_prim_path = prim_path.AppendVariantSelection("model", "myCoolVariant")
+        Sdf.CopySpec(source_layer, prim_path, layer, variant_prim_path)
+        # Variant selection
+        prim_spec.SetInfo("variantSetNames", Sdf.StringListOp.Create(prependedItems=["model"]))
+        prim_spec.variantSelections["model"] = "myCoolVariant"
+#// ANCHOR_END: compositionArcVariantCopyHoudini
+
+#// ANCHOR: compositionArcVariantMoveHoudini
+from pxr import Sdf, Usd
+
+node = hou.pwd()
+layer = node.editableLayer()
+
+source_node = node.parm("spare_input0").evalAsNode()
+source_stage = source_node.stage()
+source_layer = source_node.activeLayer()
+
+with Sdf.ChangeBlock():
+    iterator = iter(Usd.PrimRange(source_stage.GetPseudoRoot()))
+    for prim in iterator:
+        if "GEO" not in prim.GetChildrenNames():
+            continue
+        iterator.PruneChildren()
+        prim_path = prim.GetPath()
+        prim_spec = Sdf.CreatePrimInLayer(layer, prim_path)
+        prim_spec.specifier = Sdf.SpecifierDef
+        prim_spec.typeName = "Xform"
+        parent_prim_spec = prim_spec.nameParent
+        while parent_prim_spec:
+            parent_prim_spec.specifier = Sdf.SpecifierDef
+            parent_prim_spec.typeName = "Xform"
+            parent_prim_spec = parent_prim_spec.nameParent
+                    
+        # Copy content into variant
+        variant_set_spec = Sdf.VariantSetSpec(prim_spec, "model")
+        variant_spec = Sdf.VariantSpec(variant_set_spec, "myCoolVariant")
+        variant_prim_path = prim_path.AppendVariantSelection("model", "myCoolVariant")
+        Sdf.CopySpec(source_layer, prim_path, layer, variant_prim_path)
+        # Variant selection
+        prim_spec.SetInfo("variantSetNames", Sdf.StringListOp.Create(prependedItems=["model"]))
+        prim_spec.variantSelections["model"] = "myCoolVariant"
+#// ANCHOR_END: compositionArcVariantMoveHoudini
+
+
+#// ANCHOR: compositionArcVariantNested
+### High Level ###
+from pxr import Sdf, Usd
+stage = Usd.Stage.CreateInMemory()
+
+def variant_nested_edit_context(prim, variant_selections, position=Usd.ListPositionBackOfPrependList):
+    """Author nested variants
+    Args:
+        prim (Usd.Prim): The prim to author on.
+        variant_selections (list): A list of tuples with [('variant_set_name', 'variant_name')] data.
+        position (Usd.ListPosition): The list position of the variant set.
+    Returns:
+        Usd.EditContext: An edit context manager.
+    """
+    
+    if not variant_selections:
+        raise Exception("No valid variant selections defined!")
+        
+    def _recursive_variant_context(prim, variant_selections, position):
+        variant_sets_api = bicycle_prim.GetVariantSets()
+        
+        variant_selection = variant_selections.pop(-1)
+        variant_set_name, variant_name = variant_selection
+        
+        variant_set_api = variant_sets_api.AddVariantSet(variant_set_name, position=position)
+        variant_set_api.AddVariant(variant_name)
+        # Be aware, this authors the selection in the variant
+        # ToDo make this a context manager that cleans up the selection authoring.
+        variant_set_api.SetVariantSelection(variant_name)
+        
+        if not variant_selections:
+            return variant_set_api.GetVariantEditContext()
+        else:
+            with variant_set_api.GetVariantEditContext():
+                return _recursive_variant_context(prim, variant_selections, position)
+    
+    variant_selections = variant_selections[::-1]
+    return _recursive_variant_context(prim, variant_selections, position)
+
+bicycle_prim_path = Sdf.Path("/bicycle")
+bicycle_prim = stage.DefinePrim(bicycle_prim_path, "Xform")
+# Variants
+variant_selections = [("model", "old"), ("LOD", "lowRes")]
+edit_context = variant_nested_edit_context(bicycle_prim, variant_selections)
+with edit_context as ctx:
+    sphere_prim_path = bicycle_prim_path.AppendChild("sphere")
+    sphere_prim = stage.DefinePrim("/bicycle/sphere", "Sphere")
+variant_selections = [("model", "old"), ("LOD", "highRes")]
+edit_context = variant_nested_edit_context(bicycle_prim, variant_selections)
+with edit_context as ctx:
+    sphere_prim_path = bicycle_prim_path.AppendChild("cube")
+    sphere_prim = stage.DefinePrim("/bicycle/cube", "Cube")
+variant_selections = [("model", "new"), ("LOD", "lowRes")]
+edit_context = variant_nested_edit_context(bicycle_prim, variant_selections)
+with edit_context as ctx:
+    sphere_prim_path = bicycle_prim_path.AppendChild("cylinder")
+    sphere_prim = stage.DefinePrim("/bicycle/cube", "Cylinder")
+# Variant selections
+# Be sure to explicitly set the overall selection, otherwise if will derive from,
+# the nested variant selections.
+variant_sets_api = bicycle_prim.GetVariantSets()
+variant_sets_api.SetSelection("model", "old")
+variant_sets_api.SetSelection("LOD", "lowRes")
+
+### Low Level ###
+from pxr import Sdf
+layer = Sdf.Layer.CreateAnonymous()
+def variant_nested_prim_path(prim_path, variant_selections):
+    variant_prim_path = prim_path
+    for variant_set_name, variant_name in variant_selections:
+        variant_prim_path = variant_prim_path.AppendVariantSelection(variant_set_name, variant_name)
+    return variant_prim_path
+    
+def define_prim_spec(layer, prim_path, type_name):
+    prim_spec = Sdf.CreatePrimInLayer(layer, prim_path)
+    prim_spec.specifier = Sdf.SpecifierDef
+    prim_spec.typeName = type_name
+
+bicycle_prim_path = Sdf.Path("/bicycle")
+bicycle_prim_spec = Sdf.CreatePrimInLayer(layer, bicycle_prim_path)
+bicycle_prim_spec.specifier = Sdf.SpecifierDef
+bicycle_prim_spec.typeName = "Xform"
+# Variants
+variant_selections = [("model", "old"), ("LOD", "lowRes")]
+variant_prim_path = variant_nested_prim_path(bicycle_prim_path, variant_selections)
+define_prim_spec(layer, variant_prim_path.AppendChild("sphere"), "Sphere")
+variant_selections = [("model", "old"), ("LOD", "highRes")]
+variant_prim_path = variant_nested_prim_path(bicycle_prim_path, variant_selections)
+define_prim_spec(layer, variant_prim_path.AppendChild("cube"), "Cube")
+variant_selections = [("model", "new"), ("LOD", "lowRes")]
+variant_prim_path = variant_nested_prim_path(bicycle_prim_path, variant_selections)
+define_prim_spec(layer, variant_prim_path.AppendChild("cylinder"), "Cylinder")
+# Variant selections
+# The low level API has the benefit of not setting variant selections
+# in the nested variants.
+bicycle_prim_spec.variantSelections["model"] = "old"
+bicycle_prim_spec.variantSelections["LOD"] = "highRes"
+#// ANCHOR_END: compositionArcVariantNested
 
 
 #// ANCHOR: compositionArcReferenceExternal
