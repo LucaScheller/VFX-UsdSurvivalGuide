@@ -196,7 +196,7 @@ USD provides these convenience filters, it returns a new `Usd.PrimCompositionQue
 - `Usd.PrimCompositionQuery.GetDirectRootLayerArcs(prim)`: Returns arcs that were defined in the active layer stack.
 
 These are the sub-filters that can be set. We can only set a single token value per filter:
-- **ArcTypeFilter**: 
+- **ArcTypeFilter**: Filter based on different arc(s).
     - `Usd.PrimCompositionQuery.ArcTypeFilter.All`
     - `Usd.PrimCompositionQuery.ArcTypeFilter.Inherit`
     - `Usd.PrimCompositionQuery.ArcTypeFilter.Variant`

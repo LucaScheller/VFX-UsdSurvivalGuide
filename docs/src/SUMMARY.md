@@ -74,4 +74,3 @@
                 - [Large Scale Scenes - Precision Issues](./dcc/houdini/fx/transformspace/precision.md)
         - [Tips & Tricks](./dcc/houdini/faq/overview.md)
         - [Performance Optimizations](./dcc/houdini/performance/overview.md)
-        - [Render Procedurals](./dcc/houdini/rendering/procedurals.md)

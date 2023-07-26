@@ -25,8 +25,6 @@ We have a supplementary Houdini scene, that you can follow along with, available
         1. [Sharing data among variants](#compositionArcVariantSharing)
         1. [Efficiently re-writing existing data as variants](#compositionArcVariantReauthor)
     1. [References](#compositionArcReference)
-        1. [References File](#compositionArcReferenceExternal)
-        1. [References Internal](#compositionArcReferenceInternal)
     1. [Payloads](#compositionArcPayload)
     1. [Specializes](#compositionArcSpecialize)
 1. [Instancing in USD](#compositionInstance)
@@ -548,50 +546,41 @@ And for copying:
 ```
 ~~~
 
-
-
-
-
 ### References <a name="compositionArcReference"></a>
+The reference arc is one of the most used arcs. Its main purpose is to aggregate scene description data from other files or sub-hierarchies. It is the only arc that has both file loading and internal hierarchy linking/loading possibilities. It does support adding time offsets via `Sdf.LayerOffset`s.
 
-The `Sdf.Reference` class creates a read-only reference description object:
-~~~admonish tip title=""
-```python
-{{#include ../../../../code/core/composition.py:compositionArcReferenceClass}}
-```
+~~~admonish tip title="Pro Tip | What do we use references for?"
+- The reference arc is one of the most used arcs in USD: Its main use case is to combine smaller pieces of scene description into larger aggregates. Its main applications are:
+	- **Assets**: For assets we mainly stick to payloading in the individual layers (model/fx/materials) or we create a single payload that then references all the individual layers. So depending on how you build your asset structure, you might end up not using references, except for when building assembly type assets. Assemblies are USD files that reference other USD files for a logical grouping of assets, for example a film set or city.
+	- **Shots**: This is the most common place of usage for references. We use references to bring in our assets or assemblies. We also use it to time offset assets or existing hierarchies, as the reference arc can point to another prim path in the active layer stack. This makes it a powerful tool to drive (time) variations of assets in shots.
+- As written in the previous bullet point, the reference arc should aggregate data. That means the files it is loading should not be heavy, but contain only (lofted) metadata and references/payloads to other files.
+- The reference arc targets a specific prim in the hierarchy. When using references to load a file, we either point to a specific prim we want to load from that file or we don't specify a prim and then the value of the "defaultPrim" layer metadata gets used. The default prim has to be a direct child prim of the pseudo root prim "/".
+- The reference arc (as the payload arc) uses the principle of encapsulation. This means once a file is referenced in, the composition arcs in the file can't be list-edited any more.
 ~~~
 
-#### References File <a name="compositionArcReferenceExternal"></a>
-Here is how we add external references (references that load data from other files):
-~~~admonish tip title=""
-```python
-{{#include ../../../../code/core/composition.py:compositionArcReferenceExternal}}
-```
-~~~
+Let's have a look at encapsulation
 
 
-#### References Internal <a name="compositionArcReferenceInternal"></a>
-Here is how we add internal references (references that load data from another part of the hierarchy) :
-~~~admonish tip title=""
-```python
-{{#include ../../../../code/core/composition.py:compositionArcReferenceInternal}}
-```
-~~~
+<video width="100%" height="100%" controls>
+  <source src="houdiniCompositionReferenceEncapsulate.webm" type="video/mp4" alt="Houdini Reference Encapsulation">
+</video>
+
+
+
 
 ### Payloads <a name="compositionArcPayload"></a>
-The `Sdf.Payload` class creates a read-only payload description object:
-~~~admonish tip title=""
-```python
-{{#include ../../../../code/core/composition.py:compositionArcPayloadClass}}
-```
+The payload arc is also one of the most used arcs. Its main purpose is to load heavy data. This means it is the arc that you'll use when loading any type of renderable geometry. It does support adding time offsets via `Sdf.LayerOffset`s.
+
+~~~admonish tip title="Pro Tip | What do we use payloads for?"
+- You might be wondering why we should use payloads when we have references? The answer is USD's hierarchy loading mechanisms. Payloads are special, in that we can tell USD to not load any payloads or only specific hierarchies with payloads when working with stages. We cover it in more detail in our [Loading Mechanisms](../elements/loading_mechanisms.md) section. This makes payload's main purpose loading heavy data.
+- The payload arc is therefore also one of the most used arcs in USD, its main applications are:
+	- **Assets**: Any layer in your asset, that contains geometry/renderable data, should be behind a payload. We can also first aggregate different files via references and then load this aggregated file via a payload. The important thing is that when we load the asset into the shot, we can opt-out of having to load the heavy data directly.
+	- **Shots**: In shots we use payloads to bring in shot relevant caches, most importantly animation and FX caches. Now you might have noticed that payloads are lower than references. This means if we want to load an fx cache over an asset that was brought in as a reference, we either have to first import the payload somewhere else and then link to it via an inherit or variant, or we don't load it as a payload and bring it in as a reference. More on how this affects performance below.
+- The payload arc targets a specific prim in the hierarchy. When using payloads to load a file, we either point to a specific prim we want to load from that file or we don't specify a prim and then the value of the "defaultPrim" layer metadata gets used. The default prim has to be a direct child prim of the pseudo root prim "/".
+- The payload arc (as the reference arc) uses the principle of encapsulation. This means once a file is payloaded in, the composition arcs in the file can't be list-edited any more. See the reference section above for more info. Now with payloads this isn't an issue that much, because typically we use payloads to point to a cache file that carries the raw data and not other cache files.
+- Payloads can also be time offset via an `Sdf.LayerOffset`.
 ~~~
 
-Here is how we add payloads. Payloads always load data from other files:
-~~~admonish tip title=""
-```python
-{{#include ../../../../code/core/composition.py:compositionArcPayload}}
-```
-~~~
 
 ### Specializes <a name="compositionArcSpecialize"></a>
 Specializes, like inherits, don't have a object representation, they directly edit the list-editable op list.

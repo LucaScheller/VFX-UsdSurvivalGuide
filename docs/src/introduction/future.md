@@ -5,3 +5,4 @@ We do not cover the following topics yet:
 - Render related schemas
 - USD C++
 - OCIO
+- Render Procedurals

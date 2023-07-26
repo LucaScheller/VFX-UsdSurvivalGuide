@@ -1,0 +1,27 @@
+#usda 1.0
+
+def Xform "MarbleCollection" (
+    kind = "assembly"
+)
+{
+    def "Marble_Green" (
+            references = @Marble.usd@
+        )
+    {
+        double3 xformOp:translate = (-10, 0, 0)
+        uniform token[] xformOpOrder = [ "xformOp:translate" ]
+    }
+
+    def "Marble_Red" (
+        references = @Marble.usd@
+    )
+    {
+        double3 xformOp:translate = (5, 0, 0)
+        uniform token[] xformOpOrder = [ "xformOp:translate" ]
+
+        over "marble_geom"
+        {
+            color3f[] primvars:displayColor = [ (1, 0, 0) ]
+        }
+    }
+}

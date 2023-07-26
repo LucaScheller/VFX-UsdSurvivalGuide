@@ -1,7 +1,26 @@
 # Tips & Tricks
 
 
- 
+
+## Efficiently re-writing existing data as variants <a name="compositionArcVariantReauthor"></a>
+Via the low level API we can also copy or move content on a layer into a variant. This is super powerful to easily create variants from caches.
+
+Here is how it can be setup in Houdini:
+![Houdini Composition Variant Reauthor](../../../core/composition/houdiniCompositionVariantCopyMove.gif)
+
+Here is the code for moving variants:
+~~~admonish tip title=""
+```python
+{{#include ../../../../../code/core/composition.py:compositionArcVariantMoveHoudini}}
+```
+~~~
+
+And for copying:
+~~~admonish tip title=""
+```python
+{{#include ../../../../../code/core/composition.py:compositionArcVariantCopyHoudini}}
+```
+~~~
 
 ## Where are Houdini's internal lop utils stored?
 You can find Houdini's internal loputils under the following path:

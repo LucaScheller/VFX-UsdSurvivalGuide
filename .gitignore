@@ -8,7 +8,5 @@ examples
 geo
 *.code-workspace
 *.vscode
-*.usdnc
 *.so
-*.webm
 __pycache__

@@ -1,5 +1,11 @@
 # Advanced Concepts
 
+## Sdf.CopySpec
+
+## Sdf.ChangeBlock
+- Verify with notice
+
+## Sdf.
 
 ## Relationships
 - xform space rel
