@@ -33,7 +33,16 @@ We have a supplementary Houdini scene, that you can follow along with, available
 1. [Instancing in USD](#compositionInstance)
 
 ## TL;DR - Composition Arcs In-A-Nutshell <a name="summary"></a>
-- ToDo
+Here are the arcs in their composition strength order and their main intent:
+- **L**ocal Opinions/Sublayers**: The sublayer arc is used to build up your stage root layer stack. They can be time offset/scaled via a Sdf.LayerOffset, see our code examples.
+- **I**nherits: The inherit arc is used to add overrides to existing (instanceable) prims. The typical use case is to apply an edit to a bunch of referenced in assets that were loaded as instanceable without losing instance-ability and without increasing the prototype count. It does not support adding a time offset via Sdf.LayerOffset.
+- **V**ariants: The variant arc is used to allow users to switch through different variations of sub-hierarchies. It does not support adding any time offsets via Sdf.LayerOffsets.
+- **R**eferences: The reference arc is one of the most used arcs. Its main purpose is to aggregate scene description data from other files or sub-hierarchies. It is the only arc that has both file loading and internal hierarchy linking/loading possibilities. It does support adding time offsets via Sdf.LayerOffsets.
+- **P**ayloads: The payload arc is also one of the most used arcs. Its main purpose is to load heavy data. This means it is the arc that you'll use when loading any type of renderable geometry. It does support adding time offsets via Sdf.LayerOffsets.
+- **S**pecializes: The specialize arc is used to supply "template" like values to your prim hierarchy. Any other arc can then overrides these. If we update the "template", all overrides from other arcs are kept. It does not support adding a time offset via Sdf.LayerOffset.
+- **(F)** allback value: If no value is found, [schemas](../elements/schemas.md) can provide fallback values.
+
+This is a very nuanced topic, therefore we recommend working through this section to fully understand it.
 
 ## What should I use it for? <a name="usage"></a>
 ~~~admonish tip
@@ -43,7 +52,13 @@ For USD to be able to scale well, we can also "lock" the composition on prims wi
 ~~~
 
 ## Resources <a name="resources"></a>
-- [Example]()
+- [USD Glossary - LIVRPS Composition Strength Ordering](https://openusd.org/release/glossary.html#livrps-strength-ordering)
+- [USD Glossary - Direct Opinions](https://openusd.org/release/glossary.html#direct-opinion)
+- [USD Glossary - Inherits](https://openusd.org/release/glossary.html#usdglossary-inherits)
+- [USD Glossary - Variants](https://openusd.org/release/glossary.html#usdglossary-variant)
+- [USD Glossary - References](https://openusd.org/release/glossary.html#usdglossary-references)
+- [USD Glossary - Payloads](https://openusd.org/release/glossary.html#usdglossary-payload)
+- [USD Glossary - Specializes](https://openusd.org/release/glossary.html#usdglossary-specializes)
 - [USD Instancing](https://openusd.org/release/api/_usd__page__scenegraph_instancing.html)
 
 ## Overview <a name="overview"></a>
@@ -264,6 +279,14 @@ Houdini's "Load Layer For Editing", simply does a `active_layer.TransferContent(
 
 ![Houdini Sublayer Value Clip](houdiniCompositionSublayerValueClip.gif)
 
+~~~admonish tip title="Pro Tip | How do we load value clipped files?"
+We cover a production based example of how to load value clips in our [Composition for production](../../production/composition.md) section. Here are some import things to keep in mind:
+- When making prims instanceable, the value clip metadata has to be under the instanceable prim, as the value clip metadata can't be read from outside of the instance (as it would then mean each instance could load different clips, which would defeat the purpose of instanceable prims).
+- Value clip metadata can't be inherited/internally referenced/specialized in. It must reside on the prim as a direct opinion.
+
+See the production examples for how to best load value clips.
+~~~
+
 ### Inherits <a name="compositionArcInherit"></a>
 The inherit arc is used to add overrides to existing (instanceable) prims. The typical use case is to apply an edit to a bunch of referenced in assets that were loaded as instanceable without losing instance-ability and without increasing the prototype count. It does **not** support adding a time offset via `Sdf.LayerOffset`.
 
@@ -319,20 +342,11 @@ Vs the right node stream:
 
 If we actually switch to an reference arc for the "shot style" inherit stream, we won't see a difference. So why use inherits here? As inherits are higher than variants, you should prefer inherits, for these kind of "broadcast" operations. As inherits also don't support time offsetting, they are the "simplest" arc in this scenario that does the job 100% of the time.
 
-<a name="compositionArcInheritShotWorkflow"></a>
+
 ~~~admonish tip title="Pro Tip | Advanced Inherits - Making USD simple again!"
-When you've worked a while in USD, you sometimes wonder why we need all these different layering rules. Why can't life be simple for once? An interesting design pattern can therefore also be the following:
+When you've worked a while in USD, you sometimes wonder why we need all these different layering rules. Why can't life be simple for once? 
 
-We create a `/__CLASS__/assets` and a `/__CLASS__/shots/<layer_name>` hierarchy. All shot layers first load assets via references and shot (fx) caches via payloads into their respective class hierarchy. We then inherit this into the actual "final" hierarchy. This has one huge benefit: 
-
-The class hierarchy is a kind of "API" to your scene hierarchy. For example if we want to time shift (in USD speak layer offset) an asset that has multiple occurrences in our scene, we have a single point of control where we have to change the offset. Same goes for any other kind of edit. 
-
-It also solves composition "problems": When we want to payload something over an asset reference, we can't because the payload arc is weaker than the reference arc. By "proxying" it to a class prim and then inheriting it, we guarantee that it always has the strongest opinion. This makes it easier to think about composition, as it is then just a single list-editable op rather than multiple arcs coming from different sources.
-
-The downside to this approach is that we (as pipeline devs) need to restructure all imports to always work this way. The cache files themselves can still write the "final" hierarchy, we just have to reference/payload it all in to the class hierarchy and then inherit it. This may sound like a lot of work, but it definitely helps us/artists keep organized with larger scenes. 
-
-Head over to our [Composition in production](../../production/composition.md) section for more production related views on composition.
-We also show an example below in our [Payloads section](#compositionArcPayloadLoadWorkflow).
+Head over to our [Composition in production](../../production/composition.md) section for a more production related view on composition. There we discuss how to get the best out of each arc, without making it overly complicated.
 ~~~
 
 ### Variants <a name="compositionArcVariant"></a>
@@ -626,8 +640,7 @@ Let's take a look at how we can bring in payloads in shots:
 
 As you can see, we could bring it in as a reference, when it "collides" with an existing asset reference, so that the shot data wins (the color and updated position in this case). When we unload the asset payload, you'll notice that we still have reference shot data. Remember when we talked about how composition builds a value source index (prim/property index) in our [fundamentals section](./fundamentals.md)? In theory, USD doesn't load the actual values of attributes until a render delegate queries for it. So as long as we don't access the attributes (via UI panels/code), the hierarchy is still loaded, but the heavy data is not pulled yet. Now there are still downsides: USD still has to build the hierarchy, so there is a file read (USD is smart enough to only read the hierarchy structure and not load the full data). It also depends if your hydra delegate is smart enough to filter out prims, that can't be rendered. So in summary: We don't recommend doing this, but the option is there, and it will not impact performance as much as you think in small to midsize hierarchies.
 
-The inherit worflow shown above is also the one we reference to in our [inherit section](#compositionArcInheritShotWorkflow) in this page.
-
+For an production view on composition, check out our [Composition in Production](../../production/composition.md) section, where we look at this in detail.
 
 ### Specializes <a name="compositionArcSpecialize"></a>
 The specialize arc is used to supply a base set of values to prims. You might be thinking, isn't that similar to what a schema should be doing? Well yes, but a specialize arc targets a whole hierarchy vs schemas only affect a single prim(type) at a time. The specialize arc is usually something we only want to use in assets (mostly materials) or in shots when we create new hierarchies that have nothing to do with any existing hierarchies. You can think of the specialize arc as the counter part to the inherit arc, as it does the same thing but only with the guaranteed lowest value opinion strength vs highest opinion strength. It does **not** support adding a time offset via `Sdf.LayerOffset`.
