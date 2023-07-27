@@ -55,6 +55,7 @@ All arcs, except the `sublayer` arc, target (load) a specific prim of a layer st
 - Composition arcs target layer stacks, not individual layers. This just means that they recursively load what is in a layer.
 - When arcs target a non root prim, they do **not** receive parent data that usually "flows" down the hierarchy. This means that primvars, material bindings or transforms from ancestor prims do not get "inherited" (we don't mean the inherited arc here). They **do** see the composition result though. So for example if your file reference targets a prim inside a variant, it can't change the variant as the variant is not in the stage it was referenced into to.
 - Internal composition arcs (inherit/internal references/specialize) cannot target ancestor or child arcs. We can only target sibling prims or prims that are at/under a different "/" stage root prim.
+- Composition arcs only look in the active layer stack and in "higher" layer stacks (layer stacks that reference/payload the active layer stack).
 ~~~
 
 ## Composition Strength Ordering <a name="compositionStrengthOrdering"></a>
@@ -267,10 +268,10 @@ Houdini's "Load Layer For Editing", simply does a `active_layer.TransferContent(
 The inherit arc is used to add overrides to existing (instanceable) prims. The typical use case is to apply an edit to a bunch of referenced in assets that were loaded as instanceable without losing instance-ability and without increasing the prototype count. It does **not** support adding a time offset via `Sdf.LayerOffset`.
 
 ~~~admonish tip title="Pro Tip | What do we use inherits for?"
-- We use inherit arcs as a "broadcast" operator: When we want to apply an edit to our hierarchy in multiple places, we typically create a class prim, whose child prims contain the properties we want to modify. After that we create an inherit arc on all prims that should receive the edit. As it is the second highest arc behind direct opinions, it will always have the highest composition strength, when applied to instanceable prims, as instanceable prims can't have direct opinions.
-- The inherit arc is never [encapsulated](./fundamentals.md#compositionFundamentalsEncapsulation). This means that any layer stack, that re-creates the prims that that the inherit targets, gets used by the inherit. This does come at a performance cost, as the composition engine needs to check all layer stacks from where the arc was authored and higher for the hierarchy that the inherit targets.
+- We use inherit arcs as a "broadcast" operator for overrides: When we want to apply an edit to our hierarchy in multiple places, we typically create a class prim, whose child prims contain the properties we want to modify. After that we create an inherit arc on all prims that should receive the edit. As it is the second highest arc behind direct opinions, it will always have the highest composition strength, when applied to instanceable prims, as instanceable prims can't have direct opinions.
+- The inherit arc lookup is never [encapsulated](./fundamentals.md#compositionFundamentalsEncapsulation), the inherit arc list-editable op is. This means that any layer stack, that re-creates the prims that that the inherit targets, gets used by the inherit. This does come at a performance cost, as the composition engine needs to check all layer stacks from where the arc was authored and higher for the hierarchy that the inherit targets.
 - The inherit arc commonly gets used together with the [class prim specifier](../elements/prim.md#primSpecifier). The class prim specifier is specifically there to get ignored by default traversals and to provide template hierarchies that can then get inherited (or internally referenced/specialized) to have a "single source to multiple targets" effect.  
-- There are two common practices:
+- Depending on if we are working on shots or assets are common practices:
     - **Assets**: When creating assets, we can author a `/__CLASS__/<assetName>` inherit. When we use the asset in shots, we can then easily add overrides to all assets of this type, by creating prims and properties under that specific class prim hierarchy. While this sounds great in theory, artists often want to only selectively apply an override to an asset. Therefore having the additional performance cost of this arc in assets is something might not worth doing. See the next bullet point.
     - **Shots**: This is where inherits shine! We usually create inherits to:
         - Batch apply render geometry settings to (instanceable) prims. This is a great way of having a single control point to editing render settings per different areas of interest in your scene.
@@ -312,12 +313,13 @@ Here is the composition result for the left node stream. (For how to log this, s
 
 ![Houdini Composition Inherit - Classical Asset](houdiniCompositionInheritStyleClassicalAsset.svg)
 
-Vs the righ node stream:
+Vs the right node stream:
 
 ![Houdini Composition Inherit - Shot Asset](houdiniCompositionInheritStyleShot.svg)
 
 If we actually switch to an reference arc for the "shot style" inherit stream, we won't see a difference. So why use inherits here? As inherits are higher than variants, you should prefer inherits, for these kind of "broadcast" operations. As inherits also don't support time offsetting, they are the "simplest" arc in this scenario that does the job 100% of the time.
 
+<a name="compositionArcInheritShotWorkflow"></a>
 ~~~admonish tip title="Pro Tip | Advanced Inherits - Making USD simple again!"
 When you've worked a while in USD, you sometimes wonder why we need all these different layering rules. Why can't life be simple for once? An interesting design pattern can therefore also be the following:
 
@@ -330,6 +332,7 @@ It also solves composition "problems": When we want to payload something over an
 The downside to this approach is that we (as pipeline devs) need to restructure all imports to always work this way. The cache files themselves can still write the "final" hierarchy, we just have to reference/payload it all in to the class hierarchy and then inherit it. This may sound like a lot of work, but it definitely helps us/artists keep organized with larger scenes. 
 
 Head over to our [Composition in production](../../production/composition.md) section for more production related views on composition.
+We also show an example below in our [Payloads section](#compositionArcPayloadLoadWorkflow).
 ~~~
 
 ### Variants <a name="compositionArcVariant"></a>
@@ -563,7 +566,7 @@ The reference arc is one of the most used arcs. Its main purpose is to aggregate
 ~~~
 
 #### Composition encapsulation for references (and payloads) <a name="compositionArcReferencePayloadEncapsulation"></a>
-Let's have a look at encapsulation:
+Let's have a look at encapsulation of the list-editable ops of composition arcs:
 
 <video width="100%" height="100%" controls autoplay muted loop>
   <source src="houdiniCompositionReferenceEncapsulate.webm" type="video/mp4" alt="Houdini Reference Encapsulation">
@@ -578,6 +581,17 @@ Let's compare this to other list-editable ops, like relationships:
 </video>
 
 As you can see they don't have the same restrictions as composition arc list-editable ops.
+
+Encapsulation also affects what referenced (payload) content "sees". Inherits and specialized do not have this restriction, only their arc structure is encapsulated/"locked", but they remain live in the sense that they still look at the live composed prims that they target.
+
+As mentioned in our [fundamentals section](./fundamentals.md), encapsulation affects the list-editable op. It also affects what payloads/references "see" when they load their content. Inherit and specialize arcs are kept "live", they always look at the current layer stack for what to load. Internal references do not, they only look at the active layer stack. As soon as the internally referenced content is loaded via a payload/reference into another layer stack, it only sees the layer stack where it came from. Let's look at an example:
+
+<video width="100%" height="100%" controls autoplay muted loop>
+  <source src="houdiniCompositionReferenceInheritSpecializeEncapsulate.mp4" type="video/mp4" alt="Houdini Reference/Inherit/Specialize Encapsulation">
+</video>
+
+As you can see in the live layer stack, the edit to the radius has the same result on all internal arcs. As soon as we reference it though (same with if we payload it), "only" the inherit and specialize arc are kept live.
+
 
 #### Nested composition and list editable op order <a name="compositionArcReferenceStrongWeakerListOrder"></a>
 Remember how with list editable ops we can specify if we want to pre-/append to the list op? Let's take a look how that works, when working with nested references, for example in assemblies:
@@ -612,15 +626,70 @@ Let's take a look at how we can bring in payloads in shots:
 
 As you can see, we could bring it in as a reference, when it "collides" with an existing asset reference, so that the shot data wins (the color and updated position in this case). When we unload the asset payload, you'll notice that we still have reference shot data. Remember when we talked about how composition builds a value source index (prim/property index) in our [fundamentals section](./fundamentals.md)? In theory, USD doesn't load the actual values of attributes until a render delegate queries for it. So as long as we don't access the attributes (via UI panels/code), the hierarchy is still loaded, but the heavy data is not pulled yet. Now there are still downsides: USD still has to build the hierarchy, so there is a file read (USD is smart enough to only read the hierarchy structure and not load the full data). It also depends if your hydra delegate is smart enough to filter out prims, that can't be rendered. So in summary: We don't recommend doing this, but the option is there, and it will not impact performance as much as you think in small to midsize hierarchies.
 
+The inherit worflow shown above is also the one we reference to in our [inherit section](#compositionArcInheritShotWorkflow) in this page.
+
 
 ### Specializes <a name="compositionArcSpecialize"></a>
-Specializes, like inherits, don't have a object representation, they directly edit the list-editable op list.
+The specialize arc is used to supply a base set of values to prims. You might be thinking, isn't that similar to what a schema should be doing? Well yes, but a specialize arc targets a whole hierarchy vs schemas only affect a single prim(type) at a time. The specialize arc is usually something we only want to use in assets (mostly materials) or in shots when we create new hierarchies that have nothing to do with any existing hierarchies. You can think of the specialize arc as the counter part to the inherit arc, as it does the same thing but only with the guaranteed lowest value opinion strength vs highest opinion strength. It does **not** support adding a time offset via `Sdf.LayerOffset`.
 
-~~~admonish tip title=""
-```python
-{{#include ../../../../code/core/composition.py:compositionArcSpecialize}}
-```
+To quote from the USD glossary:
+~~~admonish quote title=""
+The specializes behavior is desirable in this context of building up many unique refinements of something whose base properties we may want to continue to update as assets travel down the pipeline, but without changing anything that makes the refinements unique.
 ~~~
+
+The specializes behavior is desirable in this context of building up many unique refinements of something whose base properties we may want to continue to update as assets travel down the pipeline, but without changing anything that makes the refinements unique.
+
+~~~admonish tip title="Pro Tip | What do we use specializes for?"
+- We use specialize arcs as a "broadcast" operator for supplying a template-like hierarchy: When we want to supply a "base" hierarchy to multiple places, we typically create a class prim, whose child prims contain the properties we want to modify. After that we create a specialize arc on all prims that should receive the hierarchy.
+- The specialize arc lookup is never [encapsulated](./fundamentals.md#compositionFundamentalsEncapsulation), the specialize arc list-editable op is. This means that any layer stack, that re-creates the prims that that the specialize targets, gets used by the specialize. This does come at a performance cost, as the composition engine needs to check all layer stacks from where the arc was authored and higher for the hierarchy that the specialize targets.
+- The specialize arc commonly gets used together with the [class prim specifier](../elements/prim.md#primSpecifier). The class prim specifier is specifically there to get ignored by default traversals and to provide template hierarchies that can then get inherited (or internally referenced/specialized) to have a "single source to multiple targets" effect.  
+- Depending on if we are working on shots or assets are common practices:
+    - **Assets**: As assets provide the data for our shot content, specializes are more typical here.
+        - When creating assets, we can author a `/__CLASS__/<assetName>` specialize. When we use the asset in shots, we can then easily add "underrides" to all assets of this type, by creating prims and properties under that specific class prim hierarchy. Since specializes have the lowest strength, any other composition arc that provides data will win in any higher layer. While this sounds great in theory, artists often want to only selectively apply an override to an asset. Therefore having the additional performance cost of this arc in assets is something might not worth doing.
+        - The other common case is to use them for materials: 
+            - We put all of our materials under a `/__CLASS__` and then specialize it to the asset materials. This way asset (material) variants can add overrides to the materials. We could also use an internal reference arc to achieve this, depending on how you structure your composition though it would defeat the purpose of even a non direction opinion style authoring. For example if we payload individual asset layers together (e.g. fx_layer.usd, model_layer.usd), then the internal reference would be encapsulated and not live anymore. Whereas a specialize would be.
+            - We specialize materials with each other. You can find the example from the USD glossary below that shows how this works. 
+    - **Shots**: In shots, specializes are more rare, as the shot layer stack is the "final" layer stack that gets rendered. Some use cases might be:
+        - Batch apply render geometry settings to (instanceable) prims. This is a great way of having a single control point to editing render settings per different areas of interest in your scene. This has the same intent as inherits, the difference is that existing overrides are kept in place, as with inherits they are not (unless they are direct opinions on sublayers).
+        - Building a template hierarchy for new content hierarchies that don't 'over' over any existing prims.
+~~~
+
+In the accompanying [Houdini file](https://github.com/LucaScheller/VFX-UsdSurvivalGuide/tree/main/files/composition) you can find the specialize example from the [USD Glossary - Specializes](https://openusd.org/release/glossary.html#usdglossary-specializes) section.
+
+
+Let's look at some more examples.
+
+~~~admonish danger title="Pro Tip | Specialize Performance Cost"
+As with inherits, an specialize "only" searches the active layer stack and layer stacks the reference/payload the active layer stack. That means if we create a specialize in a "final" stage (A stage that never gets referenced or payloaded), there is little performance cost to using specializes.
+~~~
+
+![Houdini Composition Specialize Styles](houdiniCompositionSpecializeStyles.jpg)
+
+Here is the composition result (For how to log this, see our [Inspecting composition](./pcp.md) section).
+
+![Houdini Composition Inherit - Classical Asset](houdiniCompositionSpecializeStyleClassicalAsset.svg)
+
+Let's compare it to the inherit visualization:
+
+![Houdini Composition Specialize - Classical Asset](houdiniCompositionInheritStyleClassicalAsset.svg)
+
+You might have expected it to look the exact same way, so why does it not? The answer lies in the composition calculation as described by our diagram in the [Composition Strength Ordering](#compositionStrengthOrdering) section. (At least that's how we read the graph, if this is wrong, please correct us!) Specializes are special (hehe) in that, since they are the lowest arc, they can just directly look at the layer stacks of where they should specialize from as to "following" the composition arc structure. (It still follows, but builds a list of flattened sources in full LIVRPS mode (because it always has to follow all arcs because it is the weakest arc) as to recursively following the source by looking into files in LIVRP mode (no "S") and stopping on first source hit).
+
+If we look at the right hand node output graph, this becomes more clear.
+
+![Houdini Composition Specialize - Classical Assembly](houdiniCompositionSpecializeClassicAssembly.svg)
+
+Vs inherits:
+
+![Houdini Composition Inherit - Classical Assembly](houdiniCompositionInheritClassicAssembly.svg)
+
+Let's have a look at the example from the [USD Glossary - Specializes](https://openusd.org/release/glossary.html#usdglossary-specializes) section:
+
+<video width="100%" height="100%" controls autoplay muted loop>
+  <source src="houdiniCompositionInheritVsInternalReferenceVsSpecialize.mp4" type="video/mp4" alt="Houdini Inherit vs Internal Reference vs Specialize">
+</video>
+
+This shows the individual arcs in action and also again the effect of encapsulation when using internal references.
 
 
 ## Instancing in USD <a name="compositionInstance"></a>

@@ -135,7 +135,7 @@ For `Inherits` and `Specializes` the arcs still evaluate relative to the compose
 
 For `Internal References` this does not work though. They can only see the encapsulated layer stack and not the "live" composed stage. This makes composition faster for internal references.
 
-We show some interactive examples in Houdini in our [LIVRPS](../composition/livrps.md) section, as this is hard to describe in words.
+We show some interactive examples in Houdini in our [LIVRPS](../composition/livrps.md#compositionArcReferencePayloadEncapsulation) section, as this is hard to describe in words.
 ~~~
 
 ### Layer Stack <a name="compositionFundamentalsLayerStack"></a>

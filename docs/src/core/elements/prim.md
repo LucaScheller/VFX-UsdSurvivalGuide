@@ -116,6 +116,7 @@ The `class` specifier gets used to define "template" hierarchies that can then g
 ~~~admonish important
 - By default stage traversals will skip over `class` prims.
 - Usd refers to class prims as "abstract", as they never directly contribute to the hierarchy.
+- We target these class prims via inherits/internal references and specialize [composition arcs](../composition/livrps.md)
 ~~~
 
 ~~~admonish info title=""
