@@ -1,0 +1,21 @@
+#usda 1.0
+
+def Xform "World"
+{
+    def Xform "Characters"
+    {
+        def "Rosie" (
+            references = @./Robot.usd@</Robot>
+        )
+        {
+            over "Materials"
+            {
+                over "Metal"
+                {
+                     float inputs:diffuseGain = 0.3
+                     float inputs:specularRoughness = 0.1
+                }
+            }
+        }
+    }
+}

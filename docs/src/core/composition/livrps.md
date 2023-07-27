@@ -25,7 +25,10 @@ We have a supplementary Houdini scene, that you can follow along with, available
         1. [Sharing data among variants](#compositionArcVariantSharing)
         1. [Efficiently re-writing existing data as variants](#compositionArcVariantReauthor)
     1. [References](#compositionArcReference)
+        1. [Composition encapsulation for references (and payloads)](#compositionArcReferencePayloadEncapsulation)
+        1. [Nested composition and list editable op order](#compositionArcReferenceStrongWeakerListOrder)
     1. [Payloads](#compositionArcPayload)
+        1. [Workflows for loading payloads over references in shots](#compositionArcPayloadLoadWorkflow)
     1. [Specializes](#compositionArcSpecialize)
 1. [Instancing in USD](#compositionInstance)
 
@@ -51,6 +54,7 @@ All arcs, except the `sublayer` arc, target (load) a specific prim of a layer st
 ~~~admonish important title="Important | Good-To-Knows"
 - Composition arcs target layer stacks, not individual layers. This just means that they recursively load what is in a layer.
 - When arcs target a non root prim, they do **not** receive parent data that usually "flows" down the hierarchy. This means that primvars, material bindings or transforms from ancestor prims do not get "inherited" (we don't mean the inherited arc here). They **do** see the composition result though. So for example if your file reference targets a prim inside a variant, it can't change the variant as the variant is not in the stage it was referenced into to.
+- Internal composition arcs (inherit/internal references/specialize) cannot target ancestor or child arcs. We can only target sibling prims or prims that are at/under a different "/" stage root prim.
 ~~~
 
 ## Composition Strength Ordering <a name="compositionStrengthOrdering"></a>
@@ -558,13 +562,31 @@ The reference arc is one of the most used arcs. Its main purpose is to aggregate
 - The reference arc (as the payload arc) uses the principle of encapsulation. This means once a file is referenced in, the composition arcs in the file can't be list-edited any more.
 ~~~
 
-Let's have a look at encapsulation
+#### Composition encapsulation for references (and payloads) <a name="compositionArcReferencePayloadEncapsulation"></a>
+Let's have a look at encapsulation:
 
-
-<video width="100%" height="100%" controls>
+<video width="100%" height="100%" controls autoplay muted loop>
   <source src="houdiniCompositionReferenceEncapsulate.webm" type="video/mp4" alt="Houdini Reference Encapsulation">
 </video>
 
+As you can see, once we start loading another written USD file, we can't remove any composition arcs.
+
+Let's compare this to other list-editable ops, like relationships:
+
+<video width="100%" height="100%" controls autoplay muted loop>
+  <source src="houdiniCompositionListEditableRelationship.mp4" type="video/mp4" alt="Houdini Relationship Encapsulation">
+</video>
+
+As you can see they don't have the same restrictions as composition arc list-editable ops.
+
+#### Nested composition and list editable op order <a name="compositionArcReferenceStrongWeakerListOrder"></a>
+Remember how with list editable ops we can specify if we want to pre-/append to the list op? Let's take a look how that works, when working with nested references, for example in assemblies:
+
+<video width="100%" height="100%" controls autoplay muted loop>
+  <source src="houdiniCompositionReferenceStrongWeaker.mp4" type="video/mp4" alt="Houdini Relationship Encapsulation">
+</video>
+
+As you can see, as soon as the encapsulated assembly ref is brought it, it doesn't matter if our asset scaled box ref is weaker or stronger. Why? In this case it is actually due to being the closer arc to the "box" prim. The closer (ancestor-wise) a composition arc is authored to a prim, the higher its strength will be when we have nested arcs.
 
 
 
@@ -580,6 +602,15 @@ The payload arc is also one of the most used arcs. Its main purpose is to load h
 - The payload arc (as the reference arc) uses the principle of encapsulation. This means once a file is payloaded in, the composition arcs in the file can't be list-edited any more. See the reference section above for more info. Now with payloads this isn't an issue that much, because typically we use payloads to point to a cache file that carries the raw data and not other cache files.
 - Payloads can also be time offset via an `Sdf.LayerOffset`.
 ~~~
+
+#### Workflows for loading payloads over references in shots <a name="compositionArcPayloadLoadWorkflow"></a>
+Let's take a look at how we can bring in payloads in shots:
+
+<video width="100%" height="100%" controls autoplay muted loop>
+  <source src="houdiniCompositionPayloadOverReference.mp4" type="video/mp4" alt="Houdini Payload over Reference">
+</video>
+
+As you can see, we could bring it in as a reference, when it "collides" with an existing asset reference, so that the shot data wins (the color and updated position in this case). When we unload the asset payload, you'll notice that we still have reference shot data. Remember when we talked about how composition builds a value source index (prim/property index) in our [fundamentals section](./fundamentals.md)? In theory, USD doesn't load the actual values of attributes until a render delegate queries for it. So as long as we don't access the attributes (via UI panels/code), the hierarchy is still loaded, but the heavy data is not pulled yet. Now there are still downsides: USD still has to build the hierarchy, so there is a file read (USD is smart enough to only read the hierarchy structure and not load the full data). It also depends if your hydra delegate is smart enough to filter out prims, that can't be rendered. So in summary: We don't recommend doing this, but the option is there, and it will not impact performance as much as you think in small to midsize hierarchies.
 
 
 ### Specializes <a name="compositionArcSpecialize"></a>
