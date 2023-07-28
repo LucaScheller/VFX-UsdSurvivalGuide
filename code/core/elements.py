@@ -38,8 +38,6 @@ prim_path_str = Sdf.Path("/set/bicycle").pathString # Returns the Python str "/s
 # Properties (Attribute/Relationship)
 property_path = Sdf.Path("/set/bicycle.size")
 property_with_namespace_path = Sdf.Path("/set/bicycle.tire:size")
-# Attribute targets (connections)
-attribute_rel_target_path = Sdf.Path("/set.bikes[/set/bicycles].size") # Attribute to attribute linking (E.g. serializing node graph connections to Usd)
 # Relationship targets
 prim_rel_target_path = Sdf.Path("/set.bikes[/set/bicycles]")           # Prim to prim linking (E.g. path collections)
 # Variants
@@ -737,8 +735,7 @@ layer = stage.GetSessionLayer()
 metadata = layer.customLayerData
 metadata["myCustomSessionData"] = 1
 layer.metadata = metadata
-# To get the composed value from the session and root layer:
-# This actually only returns the value of the root layer, I'm guessing this is a bug?
+# To get the value from the session/root layer depending on the edit target:
 stage.GetMetadata("customLayerData")
 #// ANCHOR_END: metadataStage
 
@@ -3361,7 +3358,7 @@ layer.endTimeCode = time_samples[-1]
 # See all open layers: 'GetLoadedLayers'
 from pxr import Sdf
 layer = Sdf.Layer.CreateAnonymous()
-## The .CreateNew command will check if the layer is saveable at the file location.
+## The .CreateNew command will check if the layer is saveable at the file location and create an empty file.
 layer_file_path = os.path.expanduser("~/Desktop/layer_identifier_example.usd")
 layer = Sdf.Layer.CreateNew(layer_file_path)
 print(layer.dirty) # Returns: False
@@ -3501,3 +3498,218 @@ IsTargetPath /set/yard/bicycle.tire:diameter[/set/yard/bicycle.tire:size]
 IsTargetPath /characters/mike.vehicle[/set/yard/bicycle]
 """
 #// ANCHOR_END: layerTraversal
+
+#// ANCHOR: stageMetadata
+from pxr import Usd, Sdf
+stage = Usd.Stage.CreateInMemory()
+bicycle_prim = stage.DefinePrim("/bicycle")
+stage.SetMetadata("customLayerData", {"myCustomStageData": 1})
+# Is the same as:
+layer = stage.GetRootLayer()
+metadata = layer.customLayerData
+metadata["myCustomRootData"] = 1
+layer.metadata = metadata
+# As with layers, we can also set the default prim
+stage.SetDefaultPrim(bicycle_prim)
+# Is the same as:
+layer.defaultPrim = "bicycle"
+#// ANCHOR_END: stageMetadata
+
+
+#// ANCHOR: stageLayerAccess
+### High Level ###
+# Has: 'HasLocalLayer'
+# Get: 'GetRootLayer', 'GetSessionLayer', 'GetLayerStack', 'GetUsedLayers', 
+from pxr import Sdf, Usd
+stage = Usd.Stage.CreateInMemory()
+root_layer = stage.GetRootLayer()
+prim = stage.DefinePrim(Sdf.Path("/pig_1"), "Xform")
+prim.GetReferences().AddReference("/opt/hfs19.5/houdini/usd/assets/pig/pig.usd", "/pig")
+# Get sublayers of current layer stack
+print(stage.GetLayerStack()) 
+# Get 
+"""Returns:
+[Sdf.Find('anon:0x7ff9f5676280:tmp-session.usda'), Sdf.Find('anon:0x7ff9f5641700:tmp.usda')]
+"""
+# Get all loaded layers
+print(stage.GetUsedLayers()) 
+"""Returns:
+[Sdf.Find('/opt/hfs19.5/houdini/usd/assets/pig/pig.usd'), Sdf.Find('/opt/hfs19.5/houdini/usd
+/assets/pig/geo.usdc'), Sdf.Find('/opt/hfs19.5/houdini/usd/assets/pig/payload.usdc'), Sdf.Fi
+nd('/opt/hfs19.5/houdini/usd/assets/pig/mtl.usdc'), Sdf.Find('anon:0x7ff9f5675880:tmp-sessio
+n.usda'), Sdf.Find('anon:0x7ff9f55e7200:tmp.usda')]
+"""
+#// ANCHOR_END: stageLayerAccess
+
+#// ANCHOR: stageLayerStackUsedLayers
+import os
+from pxr import Sdf, Usd, UsdUtils
+stage = Usd.Stage.CreateInMemory()
+root_layer = stage.GetRootLayer()
+# Create sublayers with references
+bottom_layer_file_path = os.path.expanduser("~/Desktop/layer_bottom.usda")
+bottom_layer = Sdf.Layer.CreateNew(bottom_layer_file_path)
+top_layer_file_path = os.path.expanduser("~/Desktop/layer_top.usda")
+top_layer = Sdf.Layer.CreateNew(top_layer_file_path)
+root_layer.subLayerPaths.append(top_layer_file_path)
+top_layer.subLayerPaths.append(bottom_layer_file_path)
+stage.SetEditTarget(top_layer)
+prim = stage.DefinePrim(Sdf.Path("/pig_1"), "Xform")
+prim.GetReferences().AddReference("/opt/hfs19.5/houdini/usd/assets/pig/pig.usd", "/pig")
+stage.SetEditTarget(bottom_layer)
+prim = stage.DefinePrim(Sdf.Path("/pig_1"), "Xform")
+prim.GetReferences().AddReference("/opt/hfs19.5/houdini/usd/assets/rubbertoy/rubbertoy.usd", "/rubbertoy")
+# Save
+stage.Save()
+# Layer stack
+print(stage.GetLayerStack(includeSessionLayers=False)) 
+""" Returns:
+[Sdf.Find('anon:0x7ff9f47b9600:tmp.usda'),
+Sdf.Find('/home/lucsch/Desktop/layer_top.usda'),
+Sdf.Find('/home/lucsch/Desktop/layer_bottom.usda')]
+""" 
+layers = set()
+for layer in stage.GetLayerStack(includeSessionLayers=False):
+    layers.add(layer)
+    layers.update([Sdf.Layer.FindOrOpen(i) for i in layer.GetCompositionAssetDependencies()])
+print(list(layers))
+""" Returns:
+[Sdf.Find('/opt/hfs19.5/houdini/usd/assets/rubbertoy/rubbertoy.usd'), 
+Sdf.Find('/home/lucsch/Desktop/layer_top.usda'),
+Sdf.Find('anon:0x7ff9f5677180:tmp.usda'),
+Sdf.Find('/opt/hfs19.5/houdini/usd/assets/pig/pig.usd'),
+Sdf.Find('/home/lucsch/Desktop/layer_bottom.usda')]
+"""
+#// ANCHOR_END: stageLayerStackUsedLayers
+
+#// ANCHOR: stageLayerManagement
+### High Level ###
+# Create: 'CreateNew', 'CreateInMemory', 'Open', 'IsSupportedFile', 
+# Set: 'Save', 'Export', 'Flatten', 'ExportToString', 'SaveSessionLayers',
+# Clear: 'Reload'
+import os
+from pxr import Sdf, Usd
+# The stage.CreateNew has multiple method signatures, these take:
+# - stage root layer identifier: The stage.GetRootLayer().identifier, this is where your stage get's saved to.
+# - session layer (optional): We can pass in an existing layer to use as an session layer.
+# - asset resolver context (optional): We can pass in a resolver context to aid path resolution. If not given, it will call
+#                                      ArResolver::CreateDefaultContextForAsset() on our registered resolvers.
+# - The initial payload loading mode: Either Usd.Stage.LoadAll or Usd.Stage.LoadNone
+stage_file_path = os.path.expanduser("~/Desktop/stage_identifier_example.usda")
+stage = Usd.Stage.CreateNew(stage_file_path)
+# The stage creation will create an empty USD file at the specified path.
+print(stage.GetRootLayer().identifier) # Returns: /home/lucsch/Desktop/stage_identifier_example.usd
+prim = stage.DefinePrim(Sdf.Path("/bicycle"), "Xform")
+# We can also create a stage in memory, this is the same as Sdf.Layer.CreateAnonymous() and using it as a root layer
+# stage = Usd.Stage.CreateInMemory("test")
+# Or:
+layer = Sdf.Layer.CreateAnonymous()
+stage.Open(layer.identifier)
+## Saving
+# Calling stage.Save(), calls layer.Save() on all dirty layers that contribute to the stage.
+stage.Save()
+# The same as:
+for layer in stage.GetLayerStack(includeSessionLayers=False):
+    if not layer.anonymous and layer.dirty:
+        layer.Save()
+# Calling stage.SaveSessionLayers() will also save all session layers, that are not anonymous
+## Flatten
+# We can also flatten our layers of the stage. This merges all the data, so it should be used with care,
+# as it will likely flood your RAM with large scenes. It removes all composition arcs and returns a single layer
+# with the combined result
+stage = Usd.Stage.CreateInMemory()
+root_layer = stage.GetRootLayer()
+prim = stage.DefinePrim(Sdf.Path("/bicycle"), "Xform")
+sublayer = Sdf.Layer.CreateAnonymous()
+root_layer.subLayerPaths.append(sublayer.identifier)
+stage.SetEditTarget(sublayer)
+prim = stage.DefinePrim(Sdf.Path("/car"), "Xform")
+print(root_layer.ExportToString())
+"""Returns:
+#usda 1.0
+(
+    subLayers = [
+        @anon:0x7ff9f5fed300@
+    ]
+)
+
+def Xform "bicycle"
+{
+}
+"""
+flattened_result = stage.Flatten()
+print(flattened_result.ExportToString())
+"""Returns:
+#usda 1.0
+(
+)
+
+def Xform "car"
+{
+}
+
+def Xform "bicycle"
+{
+}
+"""
+## Export:
+# The export command calls the same thing we just did
+# layer = stage.Flatten()
+# layer.Export("/myFilePath.usd")
+print(stage.ExportToString()) # Returns: The same thing as above
+## Reload:
+stage.Reload()
+# The same as:
+for layer in stage.GetUsedLayers():
+    # !IMPORTANT! This does not check if the layer is anonymous,
+    # so you will lose all your anon layer content.
+    layer.Reload()
+    # Here is a saver way:
+    if not layer.anonymous:
+        layer.Reload()
+#// ANCHOR_END: stageLayerManagement
+
+
+#// ANCHOR: stageTraversal
+### High Level ###
+# Get: 'GetPseudoRoot', 'GetObjectAtPath',
+#      'GetPrimAtPath', 'GetPropertyAtPath','GetAttributeAtPath', 'GetRelationshipAtPath',
+# Set: 'DefinePrim', 'OverridePrim', 'CreateClassPrim', 'RemovePrim'
+# Traversal: 'Traverse','TraverseAll'
+from pxr import Sdf, Usd, UsdUtils
+stage = Usd.Stage.CreateInMemory()
+# Define and change specifier
+stage.DefinePrim("/changedSpecifier/definedCube", "Cube").SetSpecifier(Sdf.SpecifierDef)
+stage.DefinePrim("/changedSpecifier/overCube", "Cube").SetSpecifier(Sdf.SpecifierOver)
+stage.DefinePrim("/changedSpecifier/classCube", "Cube").SetSpecifier(Sdf.SpecifierClass)
+# Or create with specifier
+stage.DefinePrim("/createdSpecifier/definedCube", "Cube")
+stage.OverridePrim("/createdSpecifier/overCube")
+stage.CreateClassPrim("/createdSpecifier/classCube")
+# Create attribute
+prim = stage.DefinePrim("/bicycle")
+prim.CreateAttribute("tire:size", Sdf.ValueTypeNames.Float)
+# Get the pseudo root prim at "/"
+pseudo_root_prim = stage.GetPseudoRoot()
+# Or:
+pseudo_root_prim = stage.GetPrimAtPath("/")
+# Traverse:
+for prim in stage.TraverseAll():
+    print(prim)
+""" Returns:
+Usd.Prim(</changedSpecifier>)
+Usd.Prim(</changedSpecifier/definedCube>)
+Usd.Prim(</changedSpecifier/overCube>)
+Usd.Prim(</changedSpecifier/classCube>)
+Usd.Prim(</createdSpecifier>)
+Usd.Prim(</createdSpecifier/definedCube>)
+Usd.Prim(</createdSpecifier/overCube>)
+Usd.Prim(</createdSpecifier/classCube>)
+"""
+# Get Prims/Properties
+# The GetObjectAtPath returns the entity requested by the path (prim/attribute/relationship)
+prim = stage.GetObjectAtPath(Sdf.Path("/createdSpecifier"))
+prim = stage.GetPrimAtPath(Sdf.Path("/changedSpecifier"))
+attr = stage.GetObjectAtPath(Sdf.Path("/bicycle.tire:size"))
+attr = stage.GetAttributeAtPath(Sdf.Path("/bicycle.tire:size"))
+#// ANCHOR_END: stageTraversal

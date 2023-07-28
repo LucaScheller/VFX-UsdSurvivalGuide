@@ -301,7 +301,7 @@ Layer metadata, like some other classes in the low level API, uses the lower cam
 
 ~~~admonish danger
 As we are operating on the layer (lower level API), we do not see any composed metadata and instead only the data in the layer we are looking at. The `Usd.Stage` class also offers the metadata methods, it follows a different logic though:
-It writes the metadata to the session or root layer. So you won't see any composed metadata of individual layers, only those of the session or root layer (at least according to the [docs](https://openusd.org/release/api/class_usd_stage.html#ad2d76f736733f3ad51aa1ea1df6f4d44), we couldn't get this to work.)
+It writes the metadata to the session or root layer. So you won't see any composed metadata of individual layers, only those of the session/root layer (depending on the edit target according to the [docs](https://openusd.org/release/api/class_usd_stage.html#ad2d76f736733f3ad51aa1ea1df6f4d44)
 ~~~
 
 ~~~admonish info title=""

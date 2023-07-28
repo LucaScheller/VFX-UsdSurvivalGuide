@@ -24,8 +24,7 @@ Paths can encode the following path data:
 - `Prim`: "/set/bicycle" - Separator `/`
 - `Property`:
     - `Attribute`: "/set/bicycle.size"  - Separator `.`
-        - `Connection`: "/set.size[/set/bicycles].size" - Separator `.` / Targets `[]` (Attribute to attribute target paths e.g.  when serializing node graph connections)
-    - `Relationship`: "/set.bikes"  - Separator `.` / Targets `[]`  (Prim to prim target paths e.g. collections of prim paths)
+    - `Relationship`: "/set.bikes[/path/to/target/prim]"  - Separator `.` / Targets `[]`  (Prim to prim target paths e.g. collections of prim paths)
 - `Variants` ("/set/bicycle{style=blue}wheel.size")
 
 ~~~admonish info title=""
