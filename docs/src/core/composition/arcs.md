@@ -59,6 +59,9 @@ As we can see, all arc APIs, except for sublayers, in the high level API, are th
 
 
 ### Sublayers / Local Opinions <a name="compositionArcSublayer"></a>
+~~~admonish tip title="Pro Tip | What do I use sublayer arcs for?"
+In our [Composition Strength Ordering (LIVRPS)](./arcs.md#compositionArcSublayer) section we cover in detail, with production related examples, what the sublayer arc is used for.
+~~~
 
 ~~~admonish tip title=""
 ```python
@@ -79,11 +82,19 @@ Here is the result:
 ![Alt text](houdiniCompositionSublayerPython.jpg)
 
 #### Value Clips <a name="compositionArcValueClips"></a>
+~~~admonish tip title="Pro Tip | What do I use value clips for?"
+In our [Composition Strength Ordering (LIVRPS)](./arcs.md#compositionArcValueClips) section we cover in detail, with production related examples, what value clips are used for.
+~~~
+
 We cover value clips in our [animation section](../elements/animation.md). Their opinion strength is lower than direct (sublayer) opinions, but higher than anything else.
 
 The write them via metadata entries as covered here in our [value clips](../elements/animation.md#value-clips-loading-time-samples-from-multiple-files) section.
 
 ### Inherits <a name="compositionArcInherit"></a>
+~~~admonish tip title="Pro Tip | What do I use inherit arcs for?"
+In our [Composition Strength Ordering (LIVRPS)](./arcs.md#compositionArcInherit) section we cover in detail, with production related examples, what the inherit arc is used for.
+~~~
+
 Inherits, like specializes, don't have a object representation, they directly edit the list-editable op list.
 
 ~~~admonish tip title=""
@@ -93,6 +104,10 @@ Inherits, like specializes, don't have a object representation, they directly ed
 ~~~
 
 ### Variants <a name="compositionArcVariant"></a>
+~~~admonish tip title="Pro Tip | What do I use variant arcs for?"
+In our [Composition Strength Ordering (LIVRPS)](./arcs.md#compositionArcVariant) section we cover in detail, with production related examples, what the variant arc is used for.
+~~~
+
 Variant sets (the variant set->variant name mapping) are also managed via list editable ops.
 The actual variant set data is not though. It is written "in-line" into the prim spec via the `Sdf.VariantSetSpec`/`Sdf.VariantSpec` specs, so that's why we have dedicated specs.
 
@@ -178,6 +193,9 @@ Here is how we can created nested variant sets via the high level and low level 
 
 
 ### References <a name="compositionArcReference"></a>
+~~~admonish tip title="Pro Tip | What do I use reference arcs for?"
+In our [Composition Strength Ordering (LIVRPS)](./arcs.md#compositionArcReference) section we cover in detail, with production related examples, what the reference arc is used for.
+~~~
 
 The `Sdf.Reference` class creates a read-only reference description object:
 ~~~admonish tip title=""
@@ -204,6 +222,10 @@ Here is how we add internal references (references that load data from another p
 ~~~
 
 ### Payloads <a name="compositionArcPayload"></a>
+~~~admonish tip title="Pro Tip | What do I use payload arcs for?"
+In our [Composition Strength Ordering (LIVRPS)](./arcs.md#compositionArcPayload) section we cover in detail, with production related examples, what the payload arc is used for.
+~~~
+
 The `Sdf.Payload` class creates a read-only payload description object:
 ~~~admonish tip title=""
 ```python
@@ -219,6 +241,10 @@ Here is how we add payloads. Payloads always load data from other files:
 ~~~
 
 ### Specializes <a name="compositionArcSpecialize"></a>
+~~~admonish tip title="Pro Tip | What do I use specialize arcs for?"
+In our [Composition Strength Ordering (LIVRPS)](./arcs.md#compositionArcSpecialize) section we cover in detail, with production related examples, what the specialize arc is used for.
+~~~
+
 Specializes, like inherits, don't have a object representation, they directly edit the list-editable op list.
 
 ~~~admonish tip title=""

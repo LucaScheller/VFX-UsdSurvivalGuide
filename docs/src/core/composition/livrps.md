@@ -243,6 +243,10 @@ Typically we'll be using sublayers for mainly these things:
 - In shot workflows to load different shot layers. Why don't we do this via references or payloads you might be asking yourself? As covered in our [fundamentals](./fundamentals.md#compositionFundamentalsEncapsulation) section, anything your reference or payload in will be encapsulated. In shot workflows we want to keep having access to list editable ops. For example if we have a layout and a lighting layer, the lighting layer should still be able to remove a reference, that was created in the layout layer.
 ~~~
 
+~~~admonish tip title="Pro Tip | Editing sublayer arcs via the USD API"
+If you want to create/edit sublayer arcs via code, see our [Composition Arc - Code API](./arcs.md#compositionArcSublayer) section.
+~~~
+
 Let's look at how sublayers are used in native USD:
 
 When creating a stage we have two layers by default:
@@ -272,7 +276,9 @@ We cover value clips in our [animation section](../elements/animation.md). Value
 
 Their opinion strength is lower than direct (sublayer) opinions, but higher than anything else. This of course is only relevant if we author time samples and value clips in the same layer. If we have multiple layers, then it behaves as expected, so the highest layers wins.
 
-The write them via metadata entries as covered here in our [value clips](../elements/animation.md#value-clips-loading-time-samples-from-multiple-files) section.
+~~~admonish tip title="Pro Tip | Editing value clips via the USD API"
+Value clips are written via metadata entries on prims. If you want to create/edit value clips via code, see our [value clips](../elements/animation.md#value-clips-loading-time-samples-from-multiple-files) section.
+~~~
 
 Here is a comparison between a layer with value clip metadata and time samples vs separate layers with each.
 Houdini's "Load Layer For Editing", simply does a `active_layer.TransferContent(Sdf.Layer.FindOrOpen("/Disk/Layer.usd"))`, in case you are wondering, so it fakes it as if we created the value clip metadata in the active layer.
@@ -299,6 +305,10 @@ The inherit arc is used to add overrides to existing (instanceable) prims. The t
     - **Shots**: This is where inherits shine! We usually create inherits to:
         - Batch apply render geometry settings to (instanceable) prims. This is a great way of having a single control point to editing render settings per different areas of interest in your scene.
         - Batch apply activation/visibility to instanceable prims. This way we don't increase the prototype count.
+~~~
+
+~~~admonish tip title="Pro Tip | Editing inherit arcs via the USD API"
+If you want to create/edit inherit arcs via code, see our [Composition Arc - Code API](./arcs.md#compositionArcInherit) section.
 ~~~
 
 In the accompanying [Houdini file](https://github.com/LucaScheller/VFX-UsdSurvivalGuide/tree/main/files/composition) you can find the inherit example from the [USD Glossary - Inherit](https://openusd.org/release/glossary.html#usdglossary-inherits) section.
@@ -361,6 +371,10 @@ The variant arc is used to allow users to switch through different variations of
 - We don't need to have a variant selection. If we block or unset the selection, no variant will be selected/loaded, which results in an empty hierarchy. Fallbacks for variant set selections can be configured via the USD API or a USD plugin ([API Docs](https://openusd.org/dev/api/class_usd_stage.html), search for 'Variant Management')
 - How are variants structured? Variants are written "inline", unlike the inherit/reference/payload/specialize arcs, they do not point to another hierarchy path. Instead they are more similar to child prims (specs). We usually then write other arcs, like payloads, into the variants, that do the actual heavy data loading.
 - We can also use variants as the mechanism to "variant away" arcs that have been encapsulated. More info in our [fundamentals section](./fundamentals.md#compositionFundamentalsEncapsulation).
+~~~
+
+~~~admonish tip title="Pro Tip | Editing variant arcs via the USD API"
+If you want to create/edit variant arcs via code, see our [Composition Arc - Code API](./arcs.md#compositionArcVariant) section.
 ~~~
 
 Let's talk about technical details:
@@ -579,6 +593,10 @@ The reference arc is one of the most used arcs. Its main purpose is to aggregate
 - The reference arc (as the payload arc) uses the principle of encapsulation. This means once a file is referenced in, the composition arcs in the file can't be list-edited any more.
 ~~~
 
+~~~admonish tip title="Pro Tip | Editing reference arcs via the USD API"
+If you want to create/edit reference arcs via code, see our [Composition Arc - Code API](./arcs.md#compositionArcReference) section.
+~~~
+
 #### Composition encapsulation for references (and payloads) <a name="compositionArcReferencePayloadEncapsulation"></a>
 Let's have a look at encapsulation of the list-editable ops of composition arcs:
 
@@ -631,6 +649,10 @@ The payload arc is also one of the most used arcs. Its main purpose is to load h
 - Payloads can also be time offset via an `Sdf.LayerOffset`.
 ~~~
 
+~~~admonish tip title="Pro Tip | Editing payload arcs via the USD API"
+If you want to create/edit payload arcs via code, see our [Composition Arc - Code API](./arcs.md#compositionArcPayload) section.
+~~~
+
 #### Workflows for loading payloads over references in shots <a name="compositionArcPayloadLoadWorkflow"></a>
 Let's take a look at how we can bring in payloads in shots:
 
@@ -665,6 +687,10 @@ The specializes behavior is desirable in this context of building up many unique
     - **Shots**: In shots, specializes are more rare, as the shot layer stack is the "final" layer stack that gets rendered. Some use cases might be:
         - Batch apply render geometry settings to (instanceable) prims. This is a great way of having a single control point to editing render settings per different areas of interest in your scene. This has the same intent as inherits, the difference is that existing overrides are kept in place, as with inherits they are not (unless they are direct opinions on sublayers).
         - Building a template hierarchy for new content hierarchies that don't 'over' over any existing prims.
+~~~
+
+~~~admonish tip title="Pro Tip | Editing specialize arcs via the USD API"
+If you want to create/edit specialize arcs via code, see our [Composition Arc - Code API](./arcs.md#compositionArcSpecialize) section.
 ~~~
 
 In the accompanying [Houdini file](https://github.com/LucaScheller/VFX-UsdSurvivalGuide/tree/main/files/composition) you can find the specialize example from the [USD Glossary - Specializes](https://openusd.org/release/glossary.html#usdglossary-specializes) section.

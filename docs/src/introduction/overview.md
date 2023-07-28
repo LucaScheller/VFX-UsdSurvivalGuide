@@ -12,6 +12,8 @@ This guide is currently still under construction and will be properly introduced
 
 {{#include ../contributors.md}}
 
+## License 
+This guide is licensed under the **Apache License 2.0**. For more information as to how this affects copyright and distribution see our [license](https://github.com/LucaScheller/VFX-UsdSurvivalGuide/blob/main/LICENSE) page.
 
 ## Prerequisites
 Before starting our journey, make sure you are all packed:

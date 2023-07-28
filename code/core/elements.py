@@ -636,7 +636,7 @@ from pxr import Sdf, Usd
 stage = Usd.Stage.CreateInMemory()
 prim_path = Sdf.Path("/bicycle")
 prim = stage.DefinePrim(prim_path, "Xform")
-prim.SetMetadata("assetInfo", {"version": 1})
+prim.SetMetadata("assetInfo", {"version": "1"})
 prim.SetAssetInfoByKey("identifier", Sdf.AssetPath("bicycler.usd"))
 prim.SetMetadata("customData", {"sizeUnit": "meter"})
 prim.SetCustomDataByKey("nested:shape", "round")
@@ -667,7 +667,7 @@ stage = Usd.Stage.CreateInMemory()
 prim_path = Sdf.Path("/bicycle")
 prim = stage.DefinePrim(prim_path, "Xform")
 prim.SetAssetInfoByKey("identifier", Sdf.AssetPath("bicycler.usd"))
-prim.SetAssetInfoByKey("nested", {"assetPath": Sdf.AssetPath("bicycler.usd"), "version": 1})
+prim.SetAssetInfoByKey("nested", {"assetPath": Sdf.AssetPath("bicycler.usd"), "version": "1"})
 prim.SetMetadataByDictKey("assetInfo", "nested:color", "blue")
 attr = prim.CreateAttribute("tire:size", Sdf.ValueTypeNames.Float)
 attr.SetMetadata("customData", {"sizeUnit": "meter"})
@@ -3213,3 +3213,138 @@ print(type_def.typeName) # Returns: VtArray<GfVec2f> # The same as value_type_na
 # Root/Base/Derived Types
 type_def.GetRoot(), type_def.baseTypes, type_def.derivedTypes
 #// ANCHOR_END: tfTypeRegistry
+
+#// ANCHOR: layerIdentifier
+# Add code to modify the stage.
+# Use drop down menu to select examples.
+#### Low Level ####
+# Get: 'identifier', 'resolvedPath', 'realPath', 'fileExtension' 
+# Set: 'identifier'
+## Helper functions:
+# Get: 'GetFileFormat', 'GetFileFormatArguments', 'ComputeAbsolutePath'
+# Create: 'CreateIdentifier', 'SplitIdentifier'
+### Anoymous identifiers
+# Get: 'anonymous'
+## Helper functions:
+# Get: 'IsAnonymousLayerIdentifier'
+import os
+from pxr import Sdf
+## Anonymous layers
+layer = Sdf.Layer.CreateAnonymous() 
+print(layer.identifier) # Returns: anon:0x7f8a1040ba80
+layer = Sdf.Layer.CreateAnonymous("myCustomAnonLayer")
+print(layer.identifier) # Returns: anon:0x7f8a10498500:myCustomAnonLayer
+print(layer.anonymous, layer.resolvedPath or "-", layer.realPath or "-", layer.fileExtension) # Returns: True, "-", "-", "sdf"
+print(Sdf.Layer.IsAnonymousLayerIdentifier(layer.identifier)) # Returns True
+## Standard layers
+layer.identifier = "/my/cool/file/path/example.usd"
+print(layer.anonymous, layer.resolvedPath or "-", layer.realPath or "-", layer.fileExtension)
+# Returns: False, "/my/cool/file/path/example.usd", "/my/cool/file/path/example.usd", "usd"
+# When accesing an identifier string, we should always split it for args:
+layer_uri, layer_args = layer.SplitIdentifier(layer.identifier)
+print(layer_uri, layer_args) # Returns: "/my/cool/file/path/example.usd", {}
+layer_identifier = layer.CreateIdentifier("/dir/file.usd", {"argA": "1", "argB": "test"})
+print(layer_identifier) # Returns: "/dir/file.usd:SDF_FORMAT_ARGS:argA=1&argB=test"
+layer_uri, layer_args = layer.SplitIdentifier(layer_identifier)
+print(layer_uri, layer_args) # Returns: "/dir/file.usd", {'argA': '1', 'argB': 'test'}
+# CreateNew requires the file path to be writable
+layer_file_path = os.path.expanduser("~/Desktop/layer_identifier_example.usd")
+layer = Sdf.Layer.CreateNew(layer_file_path, {"myCoolArg": "test"})
+print(layer.GetFileFormat()) # Returns: Instance of Sdf.FileFormat
+print(layer.GetFileFormatArguments()) # Returns: {'myCoolArg': 'test'}
+# Get the actuall resolved path (from our asset resolver):
+print(layer.identifier, layer.realPath, layer.fileExtension) # Returns: "~/Desktop/layer_identifier_example.usd" "~/Desktop/layer_identifier_example.usd" "usd"
+# This is the same as:
+print(layer.identifier, layer.resolvedPath.GetPathString())
+# Compute a file relative to the directory of the layer identifier
+print(layer.ComputeAbsolutePath("./some/other/file.usd")) # Returns: ~/Desktop/some/other/file.usd
+#// ANCHOR_END: layerIdentifier
+
+#// ANCHOR: layerDefaultPrim
+### Low Level ###
+# Has: 'HasDefaultPrim'
+# Get: 'defaultPrim'
+# Set: 'defaultPrim'
+# Clear: 'ClearDefaultPrim'
+from pxr import Sdf
+layer = Sdf.Layer.CreateAnonymous()
+print(layer.defaultPrim) # Returns ""
+layer.defaultPrim = "example"
+# While we can set it to "/example/path",
+# references and payloads won't use it.
+#// ANCHOR_END: layerDefaultPrim
+
+#// ANCHOR: layerMuting
+### Low Level ###
+# Get: 'IsMuted', 'GetMutedLayers'
+# Set: 'AddToMutedLayers', 'RemoveFromMutedLayers'
+from pxr import Sdf
+layer = Sdf.Layer.CreateAnonymous()
+print(Sdf.Layer.IsMuted(layer)) # Returns: False
+Sdf.Layer.AddToMutedLayers(layer.identifier)
+print(Sdf.Layer.GetMutedLayers()) # Returns: ['anon:0x7f8a1098f100']
+print(Sdf.Layer.IsMuted(layer)) # Returns: True
+Sdf.Layer.RemoveFromMutedLayers(layer.identifier)
+print(Sdf.Layer.IsMuted(layer)) # Returns: False
+#// ANCHOR_END: layerMuting
+
+
+#// ANCHOR: layerPermissions
+### Low Level ###
+# Get: 'permissionToEdit', 'SetPermissionToEdit'
+# Set: 'permissionToSave', 'SetPermissionToSave'
+import os
+from pxr import Sdf
+layer = Sdf.Layer.CreateAnonymous()
+print("Can edit layer", layer.permissionToEdit) # Returns: True
+Sdf.CreatePrimInLayer(layer, Sdf.Path("/bicycle"))
+# Edit permission
+layer.SetPermissionToEdit(False)
+try: 
+    # This will now raise an error
+    Sdf.CreatePrimInLayer(layer, Sdf.Path("/car"))
+except Exception as e:
+    print(e)
+layer.SetPermissionToEdit(True)
+# Save permission
+print("Can save layer", layer.permissionToSave) # Returns: False
+try:
+    # This fails as we can't save anoymous layers
+    layer.Save()
+except Exception as e:
+    print(e)
+# Changing this on anoymous layers doesn't work
+layer.SetPermissionToSave(True)
+print("Can save layer", layer.permissionToSave) # Returns: False
+# If we change the identifer to not be an anonymous identifer, we can save it.
+layer.identifier = os.path.expanduser("~/Desktop/layerPermission.usd")
+print("Can save layer", layer.permissionToSave) # Returns: True
+#// ANCHOR_END: layerPermissions
+
+#// ANCHOR: layerTimeSamples
+### Low Level ###
+# Get: 'QueryTimeSample', 'ListAllTimeSamples', 'ListTimeSamplesForPath', 'GetNumTimeSamplesForPath', 
+#      'GetBracketingTimeSamples', 'GetBracketingTimeSamplesForPath',
+# Set: 'SetTimeSample', 
+# Clear: 'EraseTimeSample',
+from pxr import Sdf
+layer = Sdf.Layer.CreateAnonymous()
+prim_path = Sdf.Path("/bicycle")
+prim_spec = Sdf.CreatePrimInLayer(layer, prim_path)
+attr_spec = Sdf.AttributeSpec(prim_spec, "size", Sdf.ValueTypeNames.Double)
+for frame in range(1001, 1005):
+    value = float(frame - 1001)
+    # .SetTimeSample() takes args in the .SetTimeSample(<path>, <frame>, <value>) format
+    layer.SetTimeSample(attr_spec.path, frame, value)
+print(layer.QueryTimeSample(attr_spec.path, 1005)) # Returns: 4
+print(layer.ListTimeSamplesForPath(attr_spec.path)) # Returns: [1001.0, 1002.0, 1003.0, 1004.0]
+attr_spec = Sdf.AttributeSpec(prim_spec, "width", Sdf.ValueTypeNames.Float)
+layer.SetTimeSample(attr_spec.path, 50, 150)
+print(layer.ListAllTimeSamples()) # Returns: [50.0, 1001.0, 1002.0, 1003.0, 1004.0]
+# A typicall thing we can do is set the layer time metrics:
+time_samples = layer.ListAllTimeSamples()
+layer.startTimeCode = time_samples[0]
+layer.endTimeCode = time_samples[-1]
+#// ANCHOR_END: layerTimeSamples
+
+

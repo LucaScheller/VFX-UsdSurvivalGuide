@@ -25,7 +25,7 @@ Metadata is the smallest building block in Usd. It is part of the base class fro
     1. [Special metadata fields for properties](#metadataSpecialProperty)
         1. [Support for animation (USD speak **variability**)](#metadataVariability)
         1. [Custom vs schema defined properties](#metadataCustom)
-    1. [Special metadata fields for layers and stages](#metadataMetricsLayer)
+    1. [Special metadata fields for layers and stages](#metadataLayerStage)
         1. [Reading/writing stage and layer metrics (FPS/Scene Unit Scale/Up Axis) (High/Low level API)](#metadataMetricsLayer)
         2. [Reading/writing stage and layer customData metadata (High/Low level API)](#metadataCustomDataLayer)
 

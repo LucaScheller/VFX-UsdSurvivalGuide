@@ -14,7 +14,7 @@ Usd encodes time related data in a very simple format:
     1. [Time Code](#animationTimeCode)
     2. [Layer Offset (A Non-Animateable Time Offset/Scale for Composition Arcs)](#animationLayerOffset)
     3. [Reading & Writing default values and time samples](#animationReadWrite)
-    4. [Frames Per Second](#animationMetadata)
+    4. [Time Metrics (Frames Per Second & Frame Range)](#animationMetadata)
     5. [Stitching/Combining time samples](#animationStitch)
     6. [Value Clips (Loading time samples from multiple files)](#animationValueClips)
 
@@ -198,7 +198,7 @@ You can also tell a time sample to block a value. Blocking means that the attrib
 ```
 ~~~
 
-### Frames Per Second <a name="animationMetadata"></a>
+### Time Metrics (Frames Per Second & Frame Range) <a name="animationMetadata"></a>
 With what FPS the samples are interpreted is defined by the `timeCodesPerSecond`/`framesPerSecond` metadata.
 
 The [loading order of FPS](https://openusd.org/dev/api/class_usd_stage.html#a85092d7455ae894d50224e761dc6e840) is:
@@ -224,6 +224,8 @@ If we want to load a let's say 24 FPS cache in a 25 FPS setup, we will have to a
     endTimeCode = 1010
 )
 ```
+
+The `startTimeCode` and `endTimeCode` entries give intent hints on what the (useful) frame range of the USD file is. Applications can use this to automatically set the frame range of the stage when opening a USD file or use it as the scaling pivot when calculating time offsets or creating loop-able caches via value clips.
 
 ~~~admonish info title=""
 ```python
