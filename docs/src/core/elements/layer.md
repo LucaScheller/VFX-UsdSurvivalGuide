@@ -10,8 +10,18 @@ This sub-section is still under development, it is subject to change and needs e
 1. [What should I use it for?](#usage)
 1. [Resources](#resources)
 1. [Overview](#overview)
-1. [Layers](#exampleA)
-    1. [Subexample A](#subexampleA)
+1. [Layers](#layerOverview)
+    1. [Layer Singleton](#layerSingleton)
+    1. [(Anonymous) Layer Identifiers](#layerIdentifier) 
+    1. [Layers Creation/Import/Export](#layerImportExport)
+    1. [Dependencies](#layerDependencies)
+    1. [Layer Metrics](#layerMetrics)
+    1. [Permissions](#layerPermissions)
+    1. [Muting](#layerMuting)
+    1. [Composition](#layerCompositionArcs)
+    1. [Traversal and Prim/Property Access](#layerTraversal)
+    1. [Time Samples](#layerTimeSamples)
+    1. [Metadata](#layerMetadata)
 1. [Stages](#exampleA)
     1. [Stages](#subexampleA)
 
@@ -27,7 +37,6 @@ Summarize actual production relevance.
 - [API Docs]()
 
 ## Overview <a name="overview"></a>
-
 
 ## Layers <a name="layerOverview"></a>
 ```mermaid
@@ -53,7 +62,7 @@ Layers are the data container for our prim specs and properties, they are the pa
 - USD's [crate (binary)](https://openusd.org/release/glossary.html#crate-file-format) format allows layers to be lazily read and written to. Calling `layer.Save()` multiple times, flushes the in-memory content to disk by appending it to the .usd file, which allows us to efficiently write large layer files. This format can also read in hierarchy data without loading property value data. This way we have low IO when opening files, as the property data gets lazy loaded on demand. This is similar to how we can parse image metadata without reading the image content.
 ~~~
 
-### Layer singleton <a name="layerSingleton"></a>
+### Layer Singleton <a name="layerSingleton"></a>
 Layers in USD are managed by a singleton design pattern. This means that each layer, identified by its layer identifier, can only be opened once. Each stage that makes use of a layer, uses the same layer. That means if we make an edit on a layer in one stage, all other stages will get changed notifications and update accordingly.
 
 We get all opened layers via the `Sdf.Layer.GetLoadedLayers()` method.
@@ -190,7 +199,7 @@ Anonymous layers can't be saved to disk, therefore for them `layer.permissionToS
 ```
 ~~~
 
-### Muting
+### Muting <a name="layerMuting"></a>
 Muting layers can be done globally on the layer itself or per stage via `stage.MuteLayer(layer.identifier)`/`stage.UnmuteLayer(layer.identifier)`.
 When doing it globally on the layer, it affects all stages that use the layer. This is also why the mute method is not exposed on a layer instance, instead we call it on the `Sdf.Layer` class, as we modify muting on the singleton.
 
@@ -226,7 +235,7 @@ We typically use this in asset layers to specify the root prim that is the asset
 ~~~
 
 
-### Traversal and Prim/Property Access <a name="layerPermissions"></a>
+### Traversal and Prim/Property Access <a name="layerTraversal"></a>
 
 
 In our example below, we assume that the code is run in Houdini.
@@ -249,7 +258,7 @@ See our [animation section](./animation.md) for more info about how to deal with
 
 
 
-### Metadata
+### Metadata <a name="layerMetadata"></a>
 Layers, like prims and properties, can store metadata. Apart from the above mentioned layer metrics, we can store custom metadata in the `customLayerData` key or create custom metadata root keys as discussed in our [metadata plugin](../plugins/metadata.md) section. This can be used to track important pipeline related data without storing it on a prim.
 
 ~~~admonish info title=""
