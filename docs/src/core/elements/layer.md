@@ -41,7 +41,9 @@ flowchart LR
     layer2([Layer]) --> prim2([...])
 ```
 
-~~~admonish tip title="Tip | Layers"
+Layers are the data container for our prim specs and properties, they are the part of USD that actually holds and import/exports the data.
+
+~~~admonish tip title="Layers - In-A-Nutshell"
 - Layers are managed via a singleton pattern: Each layer is only opened once in memory and is identified by the layer identifier.
 - Layers identifiers can have two different formattings:
     - Standard identifiers: `Sdf.Layer.CreateNew("/file/path/or/URI/identifier.<ext(.usd/.usdc/.usda)>")`
@@ -51,15 +53,56 @@ flowchart LR
 - USD's [crate (binary)](https://openusd.org/release/glossary.html#crate-file-format) format allows layers to be lazily read and written to. Calling `layer.Save()` multiple times, flushes the in-memory content to disk by appending it to the .usd file, which allows us to efficiently write large layer files. This format can also read in hierarchy data without loading property value data. This way we have low IO when opening files, as the property data gets lazy loaded on demand. This is similar to how we can parse image metadata without reading the image content.
 ~~~
 
-
-
-
 ### Layer singleton <a name="layerSingleton"></a>
+Layers in USD are managed by a singleton design pattern. This means that each layer, identified by its layer identifier, can only be opened once. Each stage that makes use of a layer, uses the same layer. That means if we make an edit on a layer in one stage, all other stages will get changed notifications and update accordingly.
+
+We get all opened layers via the `Sdf.Layer.GetLoadedLayers()` method.
+~~~admonish tip title=""
+```python
+for layer in Sdf.Layer.GetLoadedLayers():
+    print(layer.identifier)
+# Skip anonymous layers
+for layer in Sdf.Layer.GetLoadedLayers():
+    if layer.anonymous:
+        continue
+    print(layer.identifier)
+```
+~~~
+
+If a layer is not used anymore in a stage and goes out of scope in our code, it will be deleted. Should we still have access the to Python object, we can check if it actually points to a valid layer via the `layer.expired` property.
+
+As also mentioned in the next section, the layer identifier is made up of the URI(Unique Resource Identifier) and optional arguments.
+
+~~~admonish danger
+The layer identifier includes the optional args. This is on purpose, because different args can potentially mean a different file.
+~~~
+
+To demonstrate the singleton behavior let's try changing a layers content in Houdini and then view the layer through two different unrelated stages. (In Houdini every LOPs node is a separate stage):
+
+<video width="100%" height="100%" controls autoplay muted loop>
+  <source src="layerSingleton.mp4" type="video/mp4" alt="Houdini Layer Singleton">
+</video>
+
+The snippet from the video:
+
+~~~admonish tip title=""
+```python
+from pxr import Sdf
+flippy_layer = Sdf.Layer.FindOrOpen("/opt/hfs19.5/houdini/usd/assets/rubbertoy/geo.usdc")
+pig_layer = Sdf.Layer.FindOrOpen("/opt/hfs19.5/houdini/usd/assets/pig/geo.usdc")
+flippy_layer.TransferContent(pig_layer)
+```
+~~~
+
+"No flippyyyy, where did you go?" Luckily all of our edits were just in memory, so if we just call layer.Reload() or refresh the layer via the reference node, all is good again. 
+
+Should you ever use this in production as a way to broadcast an edit of a nested layer? We wouldn't recommend it, as it breaks the WYSIWYG paradigm. A better approach would be to rebuild the layer stack (this is what Houdini's "Edit Target Layer" node does) or we remap it via our asset resolver. In Houdini you should never use this method, as it can cause very strange stage caching issues.
 
 ### (Anonymous) Layer Identifiers <a name="layerIdentifier"></a>
 Layer identifiers come in two styles:
 - Standard identifiers: `Sdf.Layer.CreateNew("URI.<ext(.usd/.usdc/.usda)>")`
 - Anonymous identifiers: `Sdf.Find('anon:<someHash(MemoryLocation)>:<customName>'` 
+
 We can optionally add file format args: `Sdf.Layer.CreateNew("URI.<ext>:SDF_FORMAT_ARGS:<ArgNameA>=<ArgValueA>&<ArgNameB>=<ArgValueB>")` 
 
 Anonymous layers have these special features:
@@ -69,13 +112,12 @@ Anonymous layers have these special features:
 - They cannot be saved via `layer.Save()`, it will return an error
 - We can convert them to "normal" layers, by assigning a non-anonymous identifier (`layer.identifier="/file/path/myIdentifier.usd"`), this also removes the save permission lock.
 
-When using standard identifiers, we use the URI not the absolute resolved path. The URI is then resolved by our [asset resolver](../plugins/assetresolver.md).
+When using standard identifiers, we use the URI not the absolute resolved path. The URI is then resolved by our [asset resolver](../plugins/assetresolver.md). We often need to compare the URI, when doing so be sure to call `layer_uri, layer_args = layer.SplitIdentifier(layer.identifier)` to strip out the optional args or compare using the resolve URI `layer.realPath`. 
 
 ~~~admonish danger
 The layer identifier includes the optional args. This is on purpose, because different args can potentially mean a different file.
 ~~~
 
-The layer identifier can also store additional args, we should therefore always split them, when accessing the identifier via code.
 If we write our own [file format plugin](https://openusd.org/dev/api/_sdf__page__file_format_plugin.html), we can also pass in these args via attributes, but only non animated.
 
 ~~~admonish tip title=""
@@ -84,20 +126,37 @@ If we write our own [file format plugin](https://openusd.org/dev/api/_sdf__page_
 ```
 ~~~
 
-### Layers
-'Find','FindOrOpen',  'FindOrOpenRelativeToLayer', 'FindRelativeToLayer', 'New', 'OpenAsAnonymous', 'CreateNew', 
- 
-### Layer Creation and Export 
-'Import', 'ImportFromString',
-'Export', 'ExportToString', 'Save',
-'TransferContent',
-'Clear', 'Reload', 'ReloadLayers', 
-'CreateAnonymous', 
+### Layers Creation/Import/Export <a name="layerImportExport"></a>
 
-### Dependencies
-'GetCompositionAssetDependencies', 'GetExternalAssetDependencies', 'GetExternalReferences',  
-'GetLoadedLayers',  , 'UpdateCompositionAssetDependency',  'UpdateExternalReference',   'externalReferences',
-'DumpLayerInfo',  'GetAssetInfo', 'UpdateAssetInfo', 'GetAssetName',
+Here is an overview of how we can create layers:
+~~~admonish danger title="Pro Tip  | Saving and Reloading"
+- We can call layer.Save() multiple times with the USD binary format (.usd/.usdc). This will then dump the content from memory to disk in "append" mode. This avoids building up huge memory footprints when creating large layers.
+- Calling `layer.Reload()` on anonymous layers clears their content (destructively). So make sure you can really dispose of it as there is no undo method.
+- To reload all (composition) related layers, we can use `stage.Reload()`. This calls `layer.Reload()` on all used stage layers.
+- Calling `layer.Reload()` consults the result of `layer.GetExternalAssetDependencies()`. These return non USD/composition related external files, that influence the layer. This is only relevant when using non USD file formats.
+~~~
+
+~~~admonish tip title=""
+```python
+{{#include ../../../../code/core/elements.py:layerImportExport}}
+```
+~~~
+
+### Dependencies <a name="layerDependencies"></a>
+We can also query the layer dependencies of a layer. 
+
+~~~admonish tip title="Pro Tip | Inspecting dependencies"
+The most important methods are:
+- `layer.GetCompositionAssetDependencies()`: This gets layer identifiers of sublayer/reference/payload composition arcs. This is only for the active layer, it does not run recursively.
+- `layer.UpdateCompositionAssetDependency("oldIdentifier", "newIdentifier")`: The allows us to remap any sublayer/reference/payload identifier in the active layer, without having to edit the list-editable ops ourselves. Calling `layer.UpdateCompositionAssetDependency("oldIdentifier", "")` removes a layer.
+~~~
+
+In our example below, we assume that the code is run in Houdini.
+~~~admonish tip title=""
+```python
+{{#include ../../../../code/core/elements.py:layerDependencies}}
+```
+~~~
 
 ### Layer Metrics <a name="layerMetrics"></a>
 We can also set animation/time related metrics, these are stored via metadata entries on the layer itself.
@@ -168,9 +227,14 @@ We typically use this in asset layers to specify the root prim that is the asset
 
 
 ### Traversal and Prim/Property Access <a name="layerPermissions"></a>
-'empty', 'pseudoRoot', 'rootPrims', 'Traverse', 'expired'  
-'GetObjectAtPath', 'GetPrimAtPath', 'GetPropertyAtPath', 'GetAttributeAtPath', 'GetRelationshipAtPath',
-'RemoveInertSceneDescription'
+
+
+In our example below, we assume that the code is run in Houdini.
+~~~admonish tip title=""
+```python
+{{#include ../../../../code/core/elements.py:layerTraversal}}
+```
+~~~
 
 ### Time Samples <a name="layerTimeSamples"></a>
 In the high level API, reading and writing time samples is handled via the `attribute.Get()/Set()` methods. In the lower level API, we use the methods exposed on the layer.

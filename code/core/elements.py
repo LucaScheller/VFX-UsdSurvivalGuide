@@ -131,7 +131,10 @@ prim_path = path.GetPrimPath(path) # Returns: Sdf.Path('/set/bicycle')
 prim_rel_target_path = Sdf.Path("/set.bikes[/set/bicycle]")
 prim_rel_target_path.IsTargetPath() # Returns: True
 prim_rel_target_path = Sdf.Path("/set.bikes").AppendTarget("/set/bicycle")
-# We can also encode attribute connection targets (For example shader node graph connections):
+# We can also encode check if a path is a relational attribute.
+# ToDo: I've not seen this encoding being used anywhere so far.
+# "Normal" attr_spec.connectionsPathList connections as used in shaders
+# are encoded via Sdf.Path("/set.bikes[/set/bicycle.someOtherAttr]")
 attribute_rel_target_path = Sdf.Path("/set.bikes[/set/bicycles].size")
 attribute_rel_target_path.IsRelationalAttributePath()  # Returns: True
 #// ANCHOR_END: pathProperties
@@ -3240,7 +3243,7 @@ print(Sdf.Layer.IsAnonymousLayerIdentifier(layer.identifier)) # Returns True
 layer.identifier = "/my/cool/file/path/example.usd"
 print(layer.anonymous, layer.resolvedPath or "-", layer.realPath or "-", layer.fileExtension)
 # Returns: False, "/my/cool/file/path/example.usd", "/my/cool/file/path/example.usd", "usd"
-# When accesing an identifier string, we should always split it for args:
+# When accesing an identifier string, we should always split it for args to get the URI
 layer_uri, layer_args = layer.SplitIdentifier(layer.identifier)
 print(layer_uri, layer_args) # Returns: "/my/cool/file/path/example.usd", {}
 layer_identifier = layer.CreateIdentifier("/dir/file.usd", {"argA": "1", "argB": "test"})
@@ -3348,3 +3351,153 @@ layer.endTimeCode = time_samples[-1]
 #// ANCHOR_END: layerTimeSamples
 
 
+
+#// ANCHOR: layerImportExport
+### Low Level ###
+# Create: 'New', 'CreateNew', 'CreateAnonymous', 
+# Get: 'Find','FindOrOpen', 'OpenAsAnonymous',  'FindOrOpenRelativeToLayer', 'FindRelativeToLayer',
+# Set: 'Save', 'TransferContent', 'Import', 'ImportFromString', 'Export', 'ExportToString'
+# Clear: 'Clear', 'Reload', 'ReloadLayers'
+# See all open layers: 'GetLoadedLayers'
+from pxr import Sdf
+layer = Sdf.Layer.CreateAnonymous()
+## The .CreateNew command will check if the layer is saveable at the file location.
+layer_file_path = os.path.expanduser("~/Desktop/layer_identifier_example.usd")
+layer = Sdf.Layer.CreateNew(layer_file_path)
+print(layer.dirty) # Returns: False
+## Our layers are marked as "dirty" (edited) as soon as we make an edit.
+prin_spec = Sdf.CreatePrimInLayer(layer, Sdf.Path("/pig"))
+print(layer.dirty) # Returns: True
+layer.Save()
+# Only edited (dirty) layers are saved, when layer.Save() is called
+# Only edited (dirty) layers are reloaded, when layer.Reload(force=False) is called.
+# Our layer.Save() and layer.Reload() methods also take an optional "force" arg.
+# This forces the layer to be saved. We can also call layer.Save() multiple times,
+# with the USD binary format (.usd/.usdc). This will then dump the content from memory
+# to disk in "append" mode. This avoids building up huge memory footprints when
+# creating large layers.
+## We can also transfer layer contents:
+other_layer = Sdf.Layer.CreateAnonymous()
+layer.TransferContent(other_layer)
+# Or we import the content from another layer
+layer.Import(layer_file_path)
+# This is the same as:
+layer.TransferContent(layer.FindOrOpen((layer_file_path)))
+# We can also import/export to USD ascii representations,
+# this is quite usefull for debugging and inspecting the active layer.
+# layer.ImportFromString(other_layer.ExportAsString())
+layer = Sdf.Layer.CreateAnonymous()
+prin_spec = Sdf.CreatePrimInLayer(layer, Sdf.Path("/pig"))
+print(layer.ExportToString())
+# Returns:
+"""
+#sdf 1.4.32
+over "pig"
+{
+}
+"""
+# We can also remove all prims that don't have properties/metadata
+# layer.RemoveInertSceneDescription()
+#// ANCHOR_END: layerImportExport
+
+
+#// ANCHOR: layerDependencies
+### Low Level ###
+# Get: 'GetCompositionAssetDependencies', 'GetAssetInfo', 'GetAssetName', 'GetExternalAssetDependencies',
+# Set: 'UpdateCompositionAssetDependency', 'UpdateExternalReference', 'UpdateAssetInfo'
+import os
+from pxr import Sdf
+HFS_env = os.environ["HFS"]
+layer = Sdf.Layer.FindOrOpen(os.path.join(HFS_env, "houdini","usd","assets","pig","payload.usdc"))
+# Get all sublayer, reference and payload files (These are the only arcs that can load files)
+print(layer.GetCompositionAssetDependencies()) # Returns: ['./geo.usdc', './mtl.usdc']
+# print(layer.GetExternalReferences(), layer.externalReferences) # The same thing, deprecated method.
+# Get external dependencies for non USD file formats. We don't use this with USD files.
+print(layer.GetExternalAssetDependencies()) # Returns: [] 
+# Get layer asset info. Our asset resolver has to custom implement this.
+# A common use case might be to return database related side car data.
+print(layer.GetAssetName()) # Returns: None
+print(layer.GetAssetInfo()) # Returns: None
+layer.UpdateAssetInfo() # Re-resolve/refresh the asset info. This just force requeries our asset resolver query.
+# The perhaps most powerful method for dependencies is:
+layer.UpdateCompositionAssetDependency("oldIdentifier", "newIdentifier")
+# This allows us to repath any composition arc (sublayer/reference/payload) to a new file in the active layer.
+# Calling layer.UpdateCompositionAssetDependency("oldIdentifier", ""), will remove the identifier from the
+# list-editable composition arc ops.
+#// ANCHOR_END: layerDependencies
+
+
+#// ANCHOR: layerTraversal
+### Low Level ###
+# Properties: 'pseudoRoot', 'rootPrims', 'empty'
+# Get: 'GetObjectAtPath', 'GetPrimAtPath', 'GetPropertyAtPath', 'GetAttributeAtPath', 'GetRelationshipAtPath',
+# Traversal: 'Traverse',
+from pxr import Sdf
+layer = Sdf.Layer.CreateAnonymous()
+# Check if a layer actually has any content:
+print(layer.empty) # Returns: True
+print(layer.pseudoRoot) # The same as layer.GetPrimAtPath("/")
+# Define prims
+bicycle_prim_spec = Sdf.CreatePrimInLayer(layer, Sdf.Path("/set/yard/bicycle"))
+person_prim_spec = Sdf.CreatePrimInLayer(layer, Sdf.Path("/characters/mike"))
+print(layer.rootPrims) # Returns: {'set': Sdf.Find('anon:0x7ff9f8ad7980', '/set'),
+                       #           'characters': Sdf.Find('anon:0x7ff9f8ad7980', '/characters')}
+# The GetObjectAtPath method gives us prim/attribute/relationship specs, based on what is at the path
+attr_spec = Sdf.AttributeSpec(bicycle_prim_spec, "tire:size", Sdf.ValueTypeNames.Float)
+attr_spec.default = 10
+rel_sec = Sdf.RelationshipSpec(person_prim_spec, "vehicle")
+rel_sec.targetPathList.Append(Sdf.Path(bicycle_prim_spec.path))
+print(type(layer.GetObjectAtPath(attr_spec.path))) # Returns: <class 'pxr.Sdf.AttributeSpec'>
+print(type(layer.GetObjectAtPath(rel_sec.path))) # Returns: <class 'pxr.Sdf.RelationshipSpec'>
+# Traversals work differently compared to stages.
+def traversal_kernel(path):
+    print(path)
+layer.Traverse(layer.pseudoRoot.path, traversal_kernel)
+print("---")
+# Returns:
+"""
+/set/yard/bicycle.tire:size
+/set/yard/bicycle
+/set/yard
+/set
+/characters/mike.vehicle[/set/yard/bicycle]
+/characters/mike.vehicle
+/characters/mike
+/characters
+/
+"""
+# As we can see, it traverses all path related fields, even relationships, as these map Sdf.Paths.
+# The Sdf.Path object is used as a "filter", rather than the Usd.Prim object.
+def traversal_kernel(path):
+    if path.IsPrimPath():
+        print(path) 
+layer.Traverse(layer.pseudoRoot.path, traversal_kernel)
+print("---")
+""" Returns:
+/set/yard/bicycle
+/set/yard
+/set
+/characters/mike
+/characters
+"""
+def traversal_kernel(path):
+    if path.IsPrimPropertyPath():
+        print(path) 
+layer.Traverse(layer.pseudoRoot.path, traversal_kernel)
+print("---")
+""" Returns:
+/set/yard/bicycle.tire:size
+/characters/mike.vehicle
+"""
+tire_size_attr_spec = attr_spec
+tire_diameter_attr_spec = Sdf.AttributeSpec(bicycle_prim_spec, "tire:diameter", Sdf.ValueTypeNames.Float)
+tire_diameter_attr_spec.connectionPathList.explicitItems = [tire_size_attr_spec.path]
+def traversal_kernel(path):
+    if path.IsTargetPath():
+        print(">> IsTargetPath", path) 
+layer.Traverse(layer.pseudoRoot.path, traversal_kernel)
+""" Returns:
+IsTargetPath /set/yard/bicycle.tire:diameter[/set/yard/bicycle.tire:size]
+IsTargetPath /characters/mike.vehicle[/set/yard/bicycle]
+"""
+#// ANCHOR_END: layerTraversal
