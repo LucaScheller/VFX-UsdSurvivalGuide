@@ -3716,6 +3716,7 @@ attr = stage.GetAttributeAtPath(Sdf.Path("/bicycle.tire:size"))
 
 
 #// ANCHOR: loadingMechanismsLayerMuting
+### High Level ###
 from pxr import Sdf, Usd
 stage = Usd.Stage.CreateInMemory()
 layer_A = Sdf.Layer.CreateAnonymous("Layer_A")
@@ -3727,10 +3728,417 @@ stage.GetRootLayer().subLayerPaths.append(layer_C.identifier)
 # Mute layer
 stage.MuteLayer(layer_A.identifier)
 # Unmute layer
-stage.UnmuteLayer(layer.identifier)
+stage.UnmuteLayer(layer_A.identifier)
 # Or both MuteAndUnmuteLayers([<layers to mute>], [<layers to unmute>])
-stage.MuteAndUnmuteLayers([layerA.identifier, layerB.identifier], [layer_C.identifier])
+stage.MuteAndUnmuteLayers([layer_A.identifier, layer_B.identifier], [layer_C.identifier])
 # Check what layers are muted
-stage.GetMutedLayers() # Returns: [layerA.identifier, layerB.identifier]
-stage.IsLayerMuted(layer_C.identifier) # Returns: False
+print(stage.GetMutedLayers()) # Returns: [layerA.identifier, layerB.identifier]
+print(stage.IsLayerMuted(layer_C.identifier)) # Returns: False
 #// ANCHOR_END: loadingMechanismsLayerMuting
+
+#// ANCHOR: loadingMechanismsLayerPrimPopulationMask
+## Stage
+# Create: 'OpenMasked',
+# Get: 'GetPopulationMask',
+# Set: 'SetPopulationMask', 'ExpandPopulationMask'
+## Population Mask
+# Usd.StagePopulationMask()
+# Has: 'IsEmpty',  'Includes', 'IncludesSubtree'
+# Get: 'GetIncludedChildNames', 'GetIntersection', 'GetPaths', 'GetUnion'
+# Set:  'Add', 'Intersection',  'Union'
+# Constants: 'All'
+from pxr import Sdf, Usd
+stage = Usd.Stage.CreateInMemory()
+# Create hierarchy
+prim_paths = [
+    "/set/yard/biycle",
+    "/set/yard/shed/shovel",
+    "/set/yard/shed/flower_pot",
+    "/set/yard/shed/lawnmower",
+    "/set/yard/shed/soil",
+    "/set/yard/shed/wood",
+    "/set/garage/car",
+    "/set/garage/tractor",
+    "/set/garage/helicopter",
+    "/set/garage/boat",
+    "/set/garage/key_box",
+    "/set/garage/key_box/red",
+    "/set/garage/key_box/blue",
+    "/set/garage/key_box/green",
+    "/set/people/mike",
+    "/set/people/charolotte"
+]
+for prim_path in prim_paths:
+    prim = stage.DefinePrim(prim_path, "Cube")
+    
+population_mask = Usd.StagePopulationMask()
+print(population_mask.GetPaths())
+print(population_mask.All()) # Same as: Usd.StagePopulationMask([Sdf.Path("/")])
+# Or stage.GetPopulationMask()
+population_mask.Add(Sdf.Path("/set/yard/shed/lawnmower"))
+population_mask.Add(Sdf.Path("/set/garage/key_box"))
+stage.SetPopulationMask(population_mask)
+print("<< hierarchy >>")
+for prim in stage.Traverse():
+    print(prim.GetPath())
+"""Returns:
+/set
+/set/yard
+/set/yard/shed
+/set/yard/shed/lawnmower
+/set/garage
+/set/garage/key_box
+/set/garage/key_box/red
+/set/garage/key_box/blue
+/set/garage/key_box/green
+"""
+# Intersections tests
+print(population_mask.Includes("/set/yard/shed")) # Returns: True
+print(population_mask.IncludesSubtree("/set/yard/shed")) # Returns: False (As not all child prims are included)
+print(population_mask.IncludesSubtree("/set/garage/key_box")) # Returns: True (As all child prims are included)
+#// ANCHOR_END: loadingMechanismsLayerPrimPopulationMask
+
+
+#// ANCHOR: loadingMechanismsLayerPayloadLoading
+## Stage
+# Has: 'FindLoadable', 
+# Get: 'GetLoadRules', 'GetLoadSet'
+# Set: 'Load', 'Unload', 'LoadAndUnload', 'LoadAll', 'LoadNone', 'SetLoadRules'
+# Constants: 'InitialLoadSet.LoadAll', 'InitialLoadSet.LoadNone' 
+## Stage Load Rules
+# Has: 'IsLoaded', 'IsLoadedWithAllDescendants', 'IsLoadedWithNoDescendants'
+# Get: 'GetRules', 'GetEffectiveRuleForPath',
+# Set: 'LoadWithDescendants', 'LoadWithoutDescendants'
+#      'LoadAll',  'LoadNone', 'Unload', 'LoadAndUnload', 'AddRule',  'SetRules'
+# Clear: 'Minimize'
+# Constants: StageLoadRules.AllRule, StageLoadRules.OnlyRule, StageLoadRules.NoneRule
+from pxr import Sdf, Usd
+# Spawn example data, this would be a file on disk
+layer = Sdf.Layer.CreateAnonymous()
+prim_path = Sdf.Path("/bicycle")
+prim_spec = Sdf.CreatePrimInLayer(layer, prim_path)
+prim_spec.specifier = Sdf.SpecifierDef
+prim_spec.typeName = "Cube"
+attr_spec = Sdf.AttributeSpec(prim_spec, "size", Sdf.ValueTypeNames.Double)
+for frame in range(1001, 1010):
+    value = float(frame - 1001)
+    layer.SetTimeSample(attr_spec.path, frame, value)
+# Payload data
+stage = Usd.Stage.CreateInMemory()
+ref = Sdf.Payload(layer.identifier, "/bicycle")
+prim_path = Sdf.Path("/set/yard/bicycle")
+prim = stage.DefinePrim(prim_path)
+ref_api = prim.GetPayloads()
+ref_api.AddPayload(ref)
+# Check for what can be payloaded
+print(stage.FindLoadable()) # Returns: [Sdf.Path('/set/yard/bicycle')]
+# Check what prim paths are payloaded
+print(stage.GetLoadSet()) # Returns: [Sdf.Path('/set/yard/bicycle')]
+# Unload payload
+stage.Unload(prim_path)
+print(stage.GetLoadSet()) # Returns: []
+# Please consult the official docs for how the rule system works.
+# Basically we can flag primpaths to recursively load their nested child payloads or to only load the top most payload.
+#// ANCHOR_END: loadingMechanismsLayerPayloadLoading
+
+
+#// ANCHOR: traverseDataStage
+from pxr import Sdf, Usd
+stage = Usd.Stage.CreateInMemory()
+# Create hierarchy
+prim_paths = [
+    "/set/yard/biycle",
+    "/set/yard/shed/shovel",
+    "/set/yard/shed/flower_pot",
+    "/set/yard/shed/lawnmower",
+    "/set/yard/shed/soil",
+    "/set/yard/shed/wood",
+    "/set/garage/car",
+    "/set/garage/tractor",
+    "/set/garage/helicopter",
+    "/set/garage/boat",
+    "/set/garage/key_box",
+    "/set/garage/key_box/red",
+    "/set/garage/key_box/blue",
+    "/set/garage/key_box/green",
+    "/set/people/mike",
+    "/set/people/charolotte"
+]
+for prim_path in prim_paths:
+    prim = stage.DefinePrim(prim_path, "Cube")
+
+root_prim = stage.GetPseudoRoot()
+# Standard Traversal
+# We have to cast it as an iterator to gain access to the .PruneChildren()/.IsPostVisit method.
+iterator = iter(Usd.PrimRange(root_prim))
+for prim in iterator:
+    if prim.GetPath() == Sdf.Path("/set/garage/key_box"):
+        # Skip traversing key_box hierarchy
+        iterator.PruneChildren()
+    print(prim.GetPath().pathString)
+"""Returns:
+/
+/set
+/set/yard
+/set/yard/biycle
+/set/yard/shed
+/set/yard/shed/shovel
+/set/yard/shed/flower_pot
+/set/yard/shed/lawnmower
+/set/yard/shed/soil
+/set/yard/shed/wood
+/set/garage
+/set/garage/car
+/set/garage/tractor
+/set/garage/helicopter
+/set/garage/boat
+/set/garage/key_box
+/set/people
+/set/people/mike
+/set/people/charolotte
+"""
+# PreAndPostVisitTraversal
+iterator = iter(Usd.PrimRange.PreAndPostVisit(root_prim))
+for prim in iterator:
+    print("Is Post Visit: {:<2} | Path: {}".format(iterator.IsPostVisit(), prim.GetPath().pathString))
+"""Returns:
+Is Post Visit: 0  | Path: /
+Is Post Visit: 0  | Path: /set
+Is Post Visit: 0  | Path: /set/yard
+Is Post Visit: 0  | Path: /set/yard/biycle
+Is Post Visit: 1  | Path: /set/yard/biycle
+Is Post Visit: 0  | Path: /set/yard/shed
+Is Post Visit: 0  | Path: /set/yard/shed/shovel
+Is Post Visit: 1  | Path: /set/yard/shed/shovel
+Is Post Visit: 0  | Path: /set/yard/shed/flower_pot
+Is Post Visit: 1  | Path: /set/yard/shed/flower_pot
+Is Post Visit: 0  | Path: /set/yard/shed/lawnmower
+Is Post Visit: 1  | Path: /set/yard/shed/lawnmower
+Is Post Visit: 0  | Path: /set/yard/shed/soil
+Is Post Visit: 1  | Path: /set/yard/shed/soil
+Is Post Visit: 0  | Path: /set/yard/shed/wood
+Is Post Visit: 1  | Path: /set/yard/shed/wood
+Is Post Visit: 1  | Path: /set/yard/shed
+Is Post Visit: 1  | Path: /set/yard
+Is Post Visit: 0  | Path: /set/garage
+Is Post Visit: 0  | Path: /set/garage/car
+Is Post Visit: 1  | Path: /set/garage/car
+Is Post Visit: 0  | Path: /set/garage/tractor
+Is Post Visit: 1  | Path: /set/garage/tractor
+Is Post Visit: 0  | Path: /set/garage/helicopter
+Is Post Visit: 1  | Path: /set/garage/helicopter
+Is Post Visit: 0  | Path: /set/garage/boat
+Is Post Visit: 1  | Path: /set/garage/boat
+Is Post Visit: 0  | Path: /set/garage/key_box
+Is Post Visit: 0  | Path: /set/garage/key_box/red
+Is Post Visit: 1  | Path: /set/garage/key_box/red
+Is Post Visit: 0  | Path: /set/garage/key_box/blue
+Is Post Visit: 1  | Path: /set/garage/key_box/blue
+Is Post Visit: 0  | Path: /set/garage/key_box/green
+Is Post Visit: 1  | Path: /set/garage/key_box/green
+Is Post Visit: 1  | Path: /set/garage/key_box
+Is Post Visit: 1  | Path: /set/garage
+Is Post Visit: 0  | Path: /set/people
+Is Post Visit: 0  | Path: /set/people/mike
+Is Post Visit: 1  | Path: /set/people/mike
+Is Post Visit: 0  | Path: /set/people/charolotte
+Is Post Visit: 1  | Path: /set/people/charolotte
+Is Post Visit: 1  | Path: /set/people
+Is Post Visit: 1  | Path: /set
+Is Post Visit: 1  | Path: /
+"""
+#// ANCHOR_END: traverseDataStage
+
+
+#// ANCHOR: traverseSampleData
+import random
+from pxr import Sdf, Usd, UsdGeom,UsdShade, Tf
+stage = Usd.Stage.CreateInMemory()
+layer = stage.GetEditTarget().GetLayer()
+
+leaf_prim_types = ("Cube", "Cylinder", "Sphere", "Mesh", "Points", "RectLight", "Camera")
+leaf_prim_types_count = len(leaf_prim_types)
+
+def create_hierarchy(layer, root_prim_path, max_levels):
+    def generate_hierarchy(layer, root_prim_path, leaf_prim_counter, max_levels):
+        levels = random.randint(1, max_levels)
+        for level in range(levels):
+            level_depth = root_prim_path.pathElementCount + 1
+            prim_path = root_prim_path.AppendChild(f"level_{level_depth}_child_{level}")
+            prim_spec = Sdf.CreatePrimInLayer(layer, prim_path)
+            prim_spec.specifier = Sdf.SpecifierDef
+            # Type
+            prim_spec.typeName = "Xform"
+            # Kind
+            prim_spec.SetInfo("kind", "group")
+            # Seed parent prim specs
+            hiearchy_seed_state = random.getstate()
+            # Active
+            random.seed(level_depth)
+            if random.random() < 0.1:
+                prim_spec.SetInfo("active", False)
+            random.setstate(hiearchy_seed_state)
+            if levels == 1:
+                # Parent prim
+                # Kind
+                prim_spec.nameParent.SetInfo("kind", "component")
+                # Purpose
+                purpose_attr_spec = Sdf.AttributeSpec(prim_spec.nameParent, "purpose", Sdf.ValueTypeNames.Token)
+                if random.random() < .9:
+                    purpose_attr_spec.default = UsdGeom.Tokens.render
+                else:
+                    purpose_attr_spec.default = UsdGeom.Tokens.proxy
+                # Seed leaf prim specs
+                leaf_prim_counter[0] += 1
+                hiearchy_seed_state = random.getstate()
+                random.seed(leaf_prim_counter[0])
+                # Custom Leaf Prim attribute
+                prim_spec.typeName = leaf_prim_types[random.randint(0, leaf_prim_types_count -1)]
+                prim_spec.assetInfo["is_leaf"] = True
+                prim_spec.ClearInfo("kind")
+                is_leaf_attr_spec = Sdf.AttributeSpec(prim_spec, "is_leaf", Sdf.ValueTypeNames.Bool)
+                is_leaf_attr_spec.default = True
+                # Active
+                if random.random() < 0.1:
+                    prim_spec.SetInfo("active", False)
+                # Visibility
+                visibility_attr_spec = Sdf.AttributeSpec(prim_spec, "visibility", Sdf.ValueTypeNames.Token)
+                if random.random() < .5:
+                    visibility_attr_spec.default = UsdGeom.Tokens.inherited
+                else:
+                    visibility_attr_spec.default = UsdGeom.Tokens.invisible
+                    
+                random.setstate(hiearchy_seed_state)
+            else:
+                generate_hierarchy(layer, prim_path, leaf_prim_counter, max_levels -1)
+    random.seed(0)
+    leaf_prim_counter = [0] # Make sure this is a pointer
+    generate_hierarchy(layer, root_prim_path, leaf_prim_counter, max_levels)
+                
+with Sdf.ChangeBlock():
+    prim_path = Sdf.Path("/profiling_grp")
+    prim_spec = Sdf.CreatePrimInLayer(layer, prim_path)
+    prim_spec.specifier = Sdf.SpecifierDef
+    prim_spec.typeName = "Xform"
+    prim_spec.SetInfo("kind", "group")
+    create_hierarchy(layer, prim_path, 9)
+#// ANCHOR_END: traverseSampleData
+
+#// ANCHOR: traverseSampleDataProfiling
+# We assume we are running on the stage from the previous example.
+root_prim = stage.GetPrimAtPath("/profiling_grp")
+leaf_prim_types = ("Cube", "Cylinder", "Sphere", "Mesh", "Points", "RectLight", "Camera")
+
+def profile(func, label, root_prim):
+    # The changeblock doesn't do much here as we are only querying data, but
+    # let's keep it in there anyway.
+    with Sdf.ChangeBlock():
+        runs = 3
+        sw = Tf.Stopwatch()
+        time_delta = 0.0
+        for run in range(runs):
+            sw.Reset()
+            sw.Start()
+            matched_prims = []
+            for prim in iter(Usd.PrimRange(root_prim)):
+                if func(prim):
+                    matched_prims.append(prim)
+            sw.Stop()
+            time_delta += sw.seconds
+        print("{:.5f} Seconds | {} | Match {}".format(time_delta / runs, label, len(matched_prims)))
+
+print("----")
+
+def profile_boundable(prim):
+    return prim.IsA(UsdGeom.Boundable)
+
+profile(profile_boundable, "IsA(Boundable)", root_prim)
+    
+def profile_GetTypeName(prim):
+    return prim.GetTypeName() in leaf_prim_types
+
+profile(profile_GetTypeName, "GetTypeName", root_prim)
+
+def profile_kind(prim):
+    model_api = Usd.ModelAPI(prim)
+    return model_api.GetKind() != Kind.Tokens.group
+    
+profile(profile_kind, "Kind", root_prim)
+ 
+def profile_assetInfo_is_leaf(prim):
+    asset_info = prim.GetAssetInfo()
+    return asset_info.get("is_leaf", False)
+
+profile(profile_assetInfo_is_leaf, "IsLeaf AssetInfo ", root_prim)
+
+def profile_attribute_has_is_leaf(prim):
+    if prim.HasAttribute("is_leaf"):
+        return True
+    return False
+
+profile(profile_attribute_has_is_leaf, "IsLeaf Attribute Has", root_prim)
+
+def profile_attribute_is_leaf(prim):
+    is_leaf_attr = prim.GetAttribute("is_leaf")
+    if is_leaf_attr:
+        if is_leaf_attr.Get():
+            return True
+    return False
+
+profile(profile_attribute_is_leaf, "IsLeaf Attribute ", root_prim)
+
+def profile_attribute_extra_validation_is_leaf(prim):
+    if prim.HasAttribute("is_leaf"):
+        is_leaf_attr = prim.GetAttribute("is_leaf")
+        if is_leaf_attr.Get():
+            return True
+    return False
+
+profile(profile_attribute_extra_validation_is_leaf, "IsLeaf Attribute (Validation)", root_prim)
+#// ANCHOR_END: traverseSampleDataProfiling
+
+#// ANCHOR: traverseDataStageTemplate
+# Standard
+start_prim = stage.GetPrimAtPath() # Or stage.GetPseudoRoot(), this is the same as stage.Traverse()
+iterator = iter(Usd.PrimRange(start_prim))
+for prim in iterator:
+    if prim.IsA(UsdGeom.Imageable): # Some condition as listed above or custom property/metadata checks
+        # Don't traverse into the child prims
+        iterator.PruneChildren()
+# Pre and post visit:
+start_prim = stage.GetPrimAtPath() # Or stage.GetPseudoRoot(), this is the same as stage.Traverse()
+iterator = iter(Usd.PrimRange.PreAndPostVisit(start_prim))
+for prim in iterator:
+    if not iterator.IsPostVisit():
+        if prim.IsA(UsdGeom.Imageable): # Some condition as listed above or custom property/metadata checks
+            # Don't traverse into the child prims
+            iterator.PruneChildren()
+# Custom Predicate
+predicate = Usd.PrimIsActive & Usd.PrimIsLoaded # All prims, even class and over prims.
+start_prim = stage.GetPrimAtPath() # Or stage.GetPseudoRoot(), this is the same as stage.Traverse()
+iterator = iter(Usd.PrimRange.PrimRange(start_prim, predicate=predicate))
+for prim in iterator:
+    if not iterator.IsPostVisit():
+        if prim.IsA(UsdGeom.Imageable): # Some condition as listed above or custom property/metadata checks
+            # Don't traverse into the child prims
+            iterator.PruneChildren()
+#// ANCHOR_END: traverseDataStageTemplate
+
+
+#// ANCHOR: traverseDataLayerTemplate
+prim_paths = []
+variant_prim_paths = []
+property_paths = [] # The Sdf.Path class doesn't distinguish between attributes and relationships
+property_relationship_target_paths = []
+def traversal_kernel(path):
+    print(path)
+    if path.IsPrimPath():
+        prim_paths.append(path)
+    elif path.IsPrimVariantSelectionPath():
+        variant_prim_paths.append(path)
+    elif path.IsPropertyPath():
+        property_paths.append(path)
+    elif path.IsTargetPath():
+        property_relationship_target_paths.append(path)
+layer.Traverse(layer.pseudoRoot.path, traversal_kernel)
+#// ANCHOR_END: traverseDataLayerTemplate

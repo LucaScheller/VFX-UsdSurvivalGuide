@@ -757,6 +757,35 @@ cube_prim_spec.typeName = "Cube"
 bicycle_prim_spec.specializesList.appendedItems = [cube_prim_path]
 #// ANCHOR_END: compositionArcSpecialize
 
+
+#// ANCHOR: compositionInstanceable
+# Check if the active prim is marked as instanceable:
+# The prim.IsInstance() checks if it is actually instanced, this
+# just checks if the 'instanceable' metadata is set.
+prim.IsInstanceable()
+# Check if the active prim is an instanced prim:
+prim.IsInstance()
+# Check if we are inside an instanceable prim:
+prim.IsInstanceProxy()
+# Check if the active prim is a prototype root prim with the following format /__Prototype_<idx>
+prim.IsPrototype()
+# For these type of prototype root prims, we can get the instances via:
+prim.GetInstances()
+# From each instance we can get back to the prototype via
+prim.GetPrototype()
+# Check if we are in the /__Prototype_<idx> prim:
+prim.IsInPrototype()
+
+# When we are within an instance, we can get the prototype via:
+if prim.IsInstanceProxy():
+    for ancestor_prim_path in prim.GetAncestorsRange():
+        ancestor_prim = stage.GetPrimAtPath(ancestor_prim_path)
+        if ancestor_prim.IsInstance():
+            prototype = ancestor_prim.GetPrototype()
+            print(list(prototype.GetInstances()))
+            break
+#// ANCHOR_END: compositionInstanceable
+
 #// ANCHOR: listEditableOpsLowLevelAPI
 from pxr import Sdf
 path_list_op = Sdf.PathListOp()

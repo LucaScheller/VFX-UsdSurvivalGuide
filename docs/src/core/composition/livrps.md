@@ -763,3 +763,10 @@ print("Prototype Count", len(stage.GetPrototypes()))
 In Houdini we can show the implicit prototypes by enabling the "Show Implicit Prototype Primitives" option in the sunglasses menu in our scene graph tree panel.
 
 ![Houdini Instanceable](houdiniCompositionInstanceable.jpg)
+
+Here is how we can check if a prim is inside an instance or inside a prototype:
+~~~admonish tip title=""
+```python
+{{#include ../../../../code/core/composition.py:compositionInstanceable}}
+```
+~~~

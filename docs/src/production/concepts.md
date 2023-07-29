@@ -1,5 +1,9 @@
 # Advanced Concepts
 
+
+## Moving/Renaming/Removing prim specs with Sdf.BatchNamespaceEdit()
+
+
 ## Sdf.CopySpec
 
 ## Delaying change notifications with the Sdf.ChangeBlock

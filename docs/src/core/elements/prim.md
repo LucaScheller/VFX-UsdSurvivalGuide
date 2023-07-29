@@ -64,6 +64,7 @@ The job of specifiers is mainly to define if a prim should be visible to hierarc
 ~~~
 
 Here is an example USD ascii file with all three specifiers.
+~~~admonish info title=""
 ```json
 def Cube "definedCube" ()
 {
@@ -80,6 +81,7 @@ class Cube "classCube" ()
     double size = 2
 }
 ```
+~~~
 
 This is how it affects traversal:
 ~~~admonish info title=""

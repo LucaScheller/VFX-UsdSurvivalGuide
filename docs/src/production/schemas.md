@@ -14,6 +14,7 @@ Here is a list of the most used production schemas with a short explanation of w
                 - [UsdVol.OpenVDBAsset](https://openusd.org/dev/api/class_usd_vol_open_v_d_b_asset.html): VDB Volumes
             - [UsdGeom.Xformable](https://openusd.org/dev/api/class_usd_geom_xformable.html): Transforms
             - [UsdGeom.ModelAPI](https://openusd.org/dev/api/class_usd_geom_model_a_p_i.html): Draw Mode, ExtentHint
+            - [UsdGeom.Camera](https://openusd.org/dev/api/class_usd_geom_camera.html)
 - API:
     - [Usd.ModeAPI](https://openusd.org/dev/api/class_usd_model_a_p_i.html): Asset info, Kind 
     - [Usd.ClipsAPI](https://openusd.org/dev/api/class_usd_clips_a_p_i.html): Value Clips (Metadata for per frame caches)
@@ -24,3 +25,6 @@ Here is a list of the most used production schemas with a short explanation of w
     - [UsdSkel.BindingAPI](https://openusd.org/dev/api/class_usd_skel_binding_a_p_i.html): Skeleton bindings
     - [UsdShade.ConnectableAPI](https://openusd.org/dev/api/class_usd_shade_connectable_a_p_i.html): Shader connections
     - [UsdShade.CoordSysAPI](https://openusd.org/dev/api/class_usd_shade_coord_sys_a_p_i.html): Coordinate spaces for shaders
+- Graphics Foundations (Gf):
+    - [Gf.Camera](https://openusd.org/dev/api/class_gf_camera.html)
+    - [Gf.Frustum](https://openusd.org/dev/api/class_gf_frustum.html)
