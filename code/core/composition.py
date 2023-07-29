@@ -1,3 +1,106 @@
+#// ANCHOR: compositionEditTarget
+from pxr import Sdf, Usd
+## Standard way of using edit targets
+stage = Usd.Stage.CreateInMemory()
+root_layer = stage.GetRootLayer()
+a_layer = Sdf.Layer.CreateAnonymous("LayerA")
+b_layer = Sdf.Layer.CreateAnonymous("LayerB")
+root_layer.subLayerPaths.append(a_layer.identifier)
+root_layer.subLayerPaths.append(b_layer.identifier)
+# Direct edits to different layers
+stage.SetEditTarget(Usd.EditTarget(a_layer))
+bicycle_prim = stage.DefinePrim(Sdf.Path("/bicycle"), "Xform")
+stage.SetEditTarget(Usd.EditTarget(b_layer))
+car_prim = stage.DefinePrim(Sdf.Path("/car"), "Xform")
+print(b_layer.ExportToString())
+"""Returns:
+#sdf 1.4.32
+def Xform "car"
+{
+}
+"""
+## Reference/Payload Edit Targets
+asset_stage = Usd.Stage.CreateInMemory()
+cube_prim = asset_stage.DefinePrim(Sdf.Path("/root/RENDER/cube"), "Xform")
+asset_layer = asset_stage.GetRootLayer()
+shot_stage = Usd.Stage.CreateInMemory()
+car_prim = shot_stage.DefinePrim(Sdf.Path("/set/garage/car"), "Xform")
+car_prim.GetReferences().AddReference(asset_layer.identifier, Sdf.Path("/root"), Sdf.LayerOffset(10))
+# We can't construct edit targets to layers that are not sublayers in the active layer stack.
+# Is this a bug? According to the docs https://openusd.org/dev/api/class_usd_edit_target.html it should work.
+# shot_stage.SetEditTarget(Usd.EditTarget(asset_layer))
+## Variant Edit Targets
+from pxr import Sdf, Usd
+stage = Usd.Stage.CreateInMemory()
+bicycle_prim_path = Sdf.Path("/bicycle")
+bicycle_prim = stage.DefinePrim(bicycle_prim_path, "Xform")
+variant_sets_api = bicycle_prim.GetVariantSets()
+variant_set_api = variant_sets_api.AddVariantSet("color", position=Usd.ListPositionBackOfPrependList)
+variant_set_api.AddVariant("colorA")
+variant_set_api.SetVariantSelection("colorA")
+with variant_set_api.GetVariantEditContext():
+    # Anything we write in this edit target context, goes into the variant.
+    cube_prim_path = bicycle_prim_path.AppendChild("cube")
+    cube_prim = stage.DefinePrim(cube_prim_path, "Cube")
+print(stage.GetEditTarget().GetLayer().ExportToString())
+"""Returns:
+#usda 1.0
+
+def Xform "bicycle" (
+    variants = {
+        string color = "colorA"
+    }
+    prepend variantSets = "color"
+)
+{
+    variantSet "color" = {
+        "colorA" {
+            def Cube "cube"
+            {
+            }
+
+        }
+    }
+}
+"""
+#// ANCHOR_END: compositionEditTarget
+
+
+#// ANCHOR: compositionEditTargetContext
+from pxr import Sdf, Usd
+stage = Usd.Stage.CreateInMemory()
+root_layer = stage.GetRootLayer()
+a_layer = Sdf.Layer.CreateAnonymous("LayerA")
+b_layer = Sdf.Layer.CreateAnonymous("LayerB")
+root_layer.subLayerPaths.append(a_layer.identifier)
+root_layer.subLayerPaths.append(b_layer.identifier)
+# Set edit target to a_layer
+stage.SetEditTarget(a_layer)
+bicycle_prim_path = Sdf.Path("/bicycle")
+bicycle_prim = stage.DefinePrim(bicycle_prim_path, "Xform")
+edit_target = Usd.EditTarget(b_layer)
+with Usd.EditContext(stage, edit_target):
+    print("Edit Target Layer:", stage.GetEditTarget().GetLayer()) # Edit Target Layer: Sdf.Find('anon:0x7ff9f4391580:LayerB')
+    car_prim_path = Sdf.Path("/car")
+    car_prim = stage.DefinePrim(car_prim_path, "Xform")
+print("Edit Target Layer:", stage.GetEditTarget().GetLayer()) # Edit Target Layer: Sdf.Find('anon:0x7ff9f4391580:LayerA')
+# Verify result
+print(a_layer.ExportToString())
+"""Returns:
+#sdf 1.4.32
+def Xform "bicycle"
+{
+}
+"""
+print(b_layer.ExportToString())
+"""Returns:
+#sdf 1.4.32
+def Xform "car"
+{
+}
+"""
+#// ANCHOR_END: compositionEditTargetContext
+
 #// ANCHOR: compositionListEditableOpsBasics
 from pxr import Sdf
 # Sdf.ReferenceListOp, Sdf.PayloadListOp, Sdf.PathListOp,
@@ -914,3 +1017,5 @@ for arc in query.GetCompositionArcs():
 Pcp.ArcTypePayload | Introducing Prim Path /pig | Introducing Layer Sdf.Find('/opt/hfs19.5/houdini/usd/assets/pig/pig.usd') | Is ancestral False | In Root Layer Stack False
 """
 #// ANCHOR_END: pcpPrimCompositionQuery
+
+

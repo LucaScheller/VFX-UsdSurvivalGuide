@@ -13,7 +13,7 @@ Usd encodes time related data in a very simple format:
 4. [Overview](#overview)
     1. [Time Code](#animationTimeCode)
     2. [Layer Offset (A Non-Animateable Time Offset/Scale for Composition Arcs)](#animationLayerOffset)
-    3. [Reading & Writing default values and time samples](#animationReadWrite)
+    3. [Reading & Writing default values, time samples and value blocks](#animationReadWrite)
     4. [Time Metrics (Frames Per Second & Frame Range)](#animationMetadata)
     5. [Stitching/Combining time samples](#animationStitch)
     6. [Value Clips (Loading time samples from multiple files)](#animationValueClips)
@@ -146,7 +146,7 @@ Instead you have to create new ones and re-write the arc/assign the new layer of
 
 If you are interested on how to author composition in the low level API, checkout our [composition](../composition/overview.md) section.
 
-### Reading & Writing default values and time samples <a name="animationReadWrite"></a>
+### Reading & Writing default values, time samples and value blocks <a name="animationReadWrite"></a>
 
 #### Writing data
 

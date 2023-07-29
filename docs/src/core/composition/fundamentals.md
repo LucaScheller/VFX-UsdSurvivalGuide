@@ -17,6 +17,7 @@ If you detect an error or have useful production examples, please [submit a tick
     1. [List-Editable Operations](#compositionFundamentalsListEditableOps)
     1. [Encapsulation](#compositionFundamentalsEncapsulation)
     1. [Layer Stack](#compositionFundamentalsLayerStack)
+    1. [Edit Target](#compositionFundamentalsEditTarget)
 
 ## TL;DR - Composition Fundamentals In-A-Nutshell <a name="summary"></a>
 - Composition editing works in the active [layer stack](#compositionFundamentalsLayerStack) via [list editable ops](#compositionFundamentalsListEditableOps). 
@@ -56,11 +57,12 @@ Composition is "easy" to explain in theory, but hard to master in production. It
 We recommend really playing through as much scenarios as possible before you start using USD in production. Houdini is one of the best tools on the market that let's you easily concept and play around with composition. Therefore we will use it in our examples below.
 
 ## Composition Editing Fundamentals - What do we need to know before we start? <a name="compositionFundamentals"></a>
-Now before we talk about individual `composition arcs`, let's first focus on three different principles composition runs on.
-These three principles build on each other, so make sure you work through them in order they are listed below.
-- [List-Editable Operations](#list-editable-operations-ops)
-- [Encapsulation](#encapsulation)
-- [Layer Stack](#layer-stack)
+Now before we talk about individual `composition arcs`, let's first focus on these different base principles composition runs on.
+These principles build on each other, so make sure you work through them in order they are listed below.
+- [List-Editable Operations](#compositionFundamentalsListEditableOps)
+- [Encapsulation](#compositionFundamentalsEncapsulation)
+- [Layer Stack](#compositionFundamentalsLayerStack)
+- [Edit Target](#compositionFundamentalsEditTarget)
 
 ### List-Editable Operations (Ops) <a name="compositionFundamentalsListEditableOps"></a>
 USD has the concept of list editable operations. Instead of having a "flat" array (`[Sdf.Path("/cube"), Sdf.Path("/sphere")]`) that stores what files/hierarchy paths we want to point to, we have wrapper array class that stores multiple sub-arrays. When flattening the list op, USD removes duplicates, so that the end result is like an ordered Python `set()`.
@@ -159,3 +161,42 @@ This means to keep our pipeline flexible, we usually have "only" three kind of l
 - **Shot Layer Stack**: The shot layer stack is the one that sublayers in all of your different shot layers that come from different departments. That's right, since we sublayer everything, we still have access to list editable ops on everything that is loaded in via composition arcs that are generated in individual shot layers. This keeps the shot pipeline flexible, as we don't run into the encapsulation problem.
 - **Set/Environment/Assembly Layer Stack** (Optional): We can also reference in multiple assets to an assembly type of asset, that then gets referenced into our shots. This is where you might run into encapsulation problems. For example, if we want to remove a reference from the set from our shot stage, we can't as it is baked into the composition structure. The usual way around it is to: 1. Write the assembly with variants, so we can variant away unwanted assets. 2. Deactivate the asset reference 3. Write the asset reference with variants and then switch to a variant that is empty.
 
+
+### Edit Target <a name="compositionFundamentalsEditTarget"></a>
+To sum up edit targets in once sentence:
+
+~~~admonish tip title="Pro Tip | Edit Targets"
+A edit target defines, what layer all calls in the high level API should write to.
+~~~
+
+Let's take a look what that means:
+
+An edit target's job is to map from one namespace to another, we mainly use them for writing to layers in the active layer stack (though we could target any layer) and to write variants, as these are written "inline" and therefore need an extra name space injection. 
+
+Setting the edit target is done on the stage, as this is our "controller" of layers in the high level API: 
+
+~~~admonish tip title=""
+```python
+stage.SetEditTarget(layer)
+# We can also explicitly create the edit target:
+# Or
+stage.SetEditTarget(Usd.EditTarget(layer))
+# Or
+stage.SetEditTarget(stage.GetEditTargetForLocalLayer(layer))
+# These all have the same effect.
+```
+~~~
+
+~~~admonish tip title=""
+```python
+{{#include ../../../../code/core/composition.py:compositionEditTarget}}
+```
+~~~
+
+For convenience, USD also offers a context manager for variants, so that we don't have to revert to the previous edit target once we are done:
+
+~~~admonish tip title=""
+```python
+{{#include ../../../../code/core/composition.py:compositionEditTargetContext}}
+```
+~~~

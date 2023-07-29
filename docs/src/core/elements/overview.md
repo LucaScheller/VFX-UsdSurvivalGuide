@@ -11,7 +11,7 @@ Our approach is incrementally going from the smallest building blocks to the lar
 - [Schemas ('Classes' in OOP terminology)](./schemas.md)
 - [Metadata](./metadata.md)
 - [Layers & Stages (Containers of actual data)](./layer.md)
-- [Loading Data (Purpose/Visibility/Activation/Population)](./loading_mechanisms.md)
+- [Traversing/Loading Data (Purpose/Visibility/Activation/Population)](./loading_mechanisms.md)
 - [Animation/Time Varying Data](./animation.md)
 - [Materials](./materials.md)
 - [Transforms](./transform.md)

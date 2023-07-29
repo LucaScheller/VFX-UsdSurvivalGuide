@@ -3713,3 +3713,24 @@ prim = stage.GetPrimAtPath(Sdf.Path("/changedSpecifier"))
 attr = stage.GetObjectAtPath(Sdf.Path("/bicycle.tire:size"))
 attr = stage.GetAttributeAtPath(Sdf.Path("/bicycle.tire:size"))
 #// ANCHOR_END: stageTraversal
+
+
+#// ANCHOR: loadingMechanismsLayerMuting
+from pxr import Sdf, Usd
+stage = Usd.Stage.CreateInMemory()
+layer_A = Sdf.Layer.CreateAnonymous("Layer_A")
+layer_B = Sdf.Layer.CreateAnonymous("Layer_B")
+layer_C = Sdf.Layer.CreateAnonymous("Layer_C")
+stage.GetRootLayer().subLayerPaths.append(layer_A.identifier)
+stage.GetRootLayer().subLayerPaths.append(layer_B.identifier)
+stage.GetRootLayer().subLayerPaths.append(layer_C.identifier)
+# Mute layer
+stage.MuteLayer(layer_A.identifier)
+# Unmute layer
+stage.UnmuteLayer(layer.identifier)
+# Or both MuteAndUnmuteLayers([<layers to mute>], [<layers to unmute>])
+stage.MuteAndUnmuteLayers([layerA.identifier, layerB.identifier], [layer_C.identifier])
+# Check what layers are muted
+stage.GetMutedLayers() # Returns: [layerA.identifier, layerB.identifier]
+stage.IsLayerMuted(layer_C.identifier) # Returns: False
+#// ANCHOR_END: loadingMechanismsLayerMuting

@@ -48,14 +48,14 @@ This is in very simplified terms how the Usd API works in terms of data storage.
     2. [Properties](./property.md)
 
 ## TL;DR - Data Containers (Prims/Properties/Attributes/Relationships) In-A-Nutshell <a name="summary"></a>
-- In order to store data at our `Sdf.Path`s, we need data containers. Usd therefore has the concept of `Usd.Prim`s, which can hold `Usd.Property`ies
+- In order to store data at our `Sdf.Path`s, we need data containers. Usd therefore has the concept of `Usd.Prim`s/`Sdf.PrimSpec`s, which can hold `Usd.Property`ies/`Sdf.PropertySpec`s
 - To distinguish between data and data relations, `Usd.Property`ies are separated in:
-    - `Usd.Attribute`s: These store data of different types (float/ints/arrays/etc.)
+    - `Usd.Attribute`s/`Sdf.AttributeSpec`s: These store data of different types (float/ints/arrays/etc.)
         - `UsdGeom.Primvar`s: These are the same as attributes with extra features:
             - They are created the same way as attributes, except they use the `primvars.<myAttributeName>` namespace.
             - They get inherited down the hierarchy if they are of constant interpolation (They don't vary per point/vertex/prim).
             - They are exported to Hydra (Usd's render scene description abstraction API), so you can use them for materials/render settings/etc.
-    - `Usd.Relationship`s: These store mapping from prim to prim(s) or attribute to attribute.
+    - `Usd.Relationship`s/`Sdf.RelationshipSpec`s: These store mapping from prim to prim(s) or attribute to attribute.
 
 ## What should I use it for? <a name="usage"></a>
 ~~~admonish tip

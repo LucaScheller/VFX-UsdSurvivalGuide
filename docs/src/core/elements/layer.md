@@ -1,10 +1,6 @@
 # Layers & Stages
 Layers and stages are the main entry point to accessing our data stored in USD.
 
-~~~admonish question title="Still under construction!"
-This sub-section is still under development, it is subject to change and needs extra validation.
-~~~
-
 # Table of contents
 1. [Layers & Stages In-A-Nutshell](#summary)
 1. [What should I use it for?](#usage)
@@ -35,20 +31,34 @@ This sub-section is still under development, it is subject to change and needs e
     1. [Stage Layer Management (Creation/Save/Export)](#stageLayerManagement)
     1. [Traversal and Prim/Property Access](#stageTraversal)
 
-## TL;DR - <Topic> In-A-Nutshell <a name="summary"></a>
-- Main points to know
+## TL;DR - Layers & Stages In-A-Nutshell <a name="summary"></a>
+**Layers**
+- Layers are managed via a singleton pattern: Each layer is only opened once in memory and is identified by the layer identifier. When stages load a layer, they point to the same data in memory.
+- Layers identifiers can have two different formats:
+    - Standard identifiers: `Sdf.Layer.CreateNew("/file/path/or/URI/identifier.<ext(.usd/.usdc/.usda)>")`, these layers are backed by a file on disk
+    - Anonymous identifiers: `Sdf.Find('anon:<someHash(MemoryLocation)>:<customName>'`, these are in-memory only layers
+
+**Shots**
+- A stage is a view of a set of composed layers. You can think of it as the viewer in a view--model design. Each layer that the stage opens is a data source to the data model. When "asking" the stage for data, we ask the view for the combined (composed) data, which then queries into the layers based on the value source found by our composition rules.
+- When creating a stage we have two layers by default:
+    - **Session Layer**: This is a temp layer than doesn't get applied on disk save. Here we usually put things like viewport overrides.
+    - **Root Layer**: This is the base layer all edits target by default. We can add sublayers based on what we need to it. When calling `stage.Save()`, all sublayers that are dirty and not anonymous, will be saved. 
 
 ## What should I use it for? <a name="usage"></a>
 ~~~admonish tip
-Summarize actual production relevance.
+Stages and layers are what make USD work, it is our entry point to accessing our hierarchies.
 ~~~
 
 ## Resources <a name="resources"></a>
-- [API Docs]()
+- [Sdf.Layer](https://openusd.org/dev/api/class_sdf_layer.html)
+- [Usd.Stage](https://openusd.org/release/api/class_usd_stage.html)
+- [Usd.EditTarget](https://openusd.org/release/api/class_usd_edit_target.html)
 
 ## Overview <a name="overview"></a>
+This section will focus on what the `Sdf.Layer` and `Usd.Stage` classes have to offer. For an explanation of how layers work together, please see our [compsition section](../composition/overview.md).
+
 ~~~admonish tip title="Pro Tip | Advanced Concepts and Utility Functions for Layers/Stages"
-There are also utility methods available, that are not in the `Sdf.Layer`/`Ùsd.Stage` namespace.
+There are also utility methods available, that are not in the `Sdf.Layer`/`Usd.Stage` namespace.
 We cover these in our [advanced concepts in production](../../production/concepts.md) section.
 ~~~
 
@@ -68,7 +78,7 @@ Layers are the data container for our prim specs and properties, they are the pa
 
 ~~~admonish tip title="Layers - In-A-Nutshell"
 - Layers are managed via a singleton pattern: Each layer is only opened once in memory and is identified by the layer identifier.
-- Layers identifiers can have two different formattings:
+- Layers identifiers can have two different formats:
     - Standard identifiers: `Sdf.Layer.CreateNew("/file/path/or/URI/identifier.<ext(.usd/.usdc/.usda)>")`
     - Anonymous identifiers: `Sdf.Find('anon:<someHash(MemoryLocation)>:<customName>'` 
 - Layers store our prim and property specs, they are the data container for all USD data that gets persistently written to file. When we want to edit layers directly, we have to use the low-level API, the high level API edits the stage, which in return forwards the edits to the layer that is set by the active edit target.
@@ -244,7 +254,6 @@ We typically use this in asset layers to specify the root prim that is the asset
 ```
 ~~~
 
-
 ### Traversal and Prim/Property Access <a name="layerTraversal"></a>
 Traversing and accessing prims/properties works a tad different:
 - The `layer.Get<SpecType>AtPath` methods return `Sdf.Spec` objects (`Sdf.PrimSpec`, `Sdf.AttributeSpec`, `Sdf.RelationshipSpec`) and not USD high level objects.
@@ -291,7 +300,7 @@ See our [Metadata](./metadata.md#metadataLayerStage) section for detailed exampl
 
 
 ## Stages
-Stages offers views on a set of composed layers. We cover [composition](../composition/overview.md) in its on section, as it is a complicated topic. 
+Stages offer a view on a set of composed layers. We cover [composition](../composition/overview.md) in its on section, as it is a complicated topic. 
 
 ```mermaid
 flowchart LR
@@ -310,6 +319,11 @@ flowchart LR
 Unlike layers, stages are not managed via a singleton. There is the [Usd.StageCache](https://openusd.org/dev/api/class_usd_stage_cache.html) class though, that would provide a similar mechanism. We usually don't use this though, as our DCCs manage the lifetime cycle of our stages.
 
 If a stage goes out of scope in our code, it will be deleted. Should we still have access the to Python object, we can check if it actually points to a valid layer via the `stage.expired` property.
+
+When creating a stage we have two layers by default:
+- **Session Layer**: This is a temp layer than doesn't get applied on disk save. Here we usually put things like viewport overrides.
+- **Root Layer**: This is the base layer all edits target by default. We can add sublayers based on what we need to it. When calling `stage.Save()`, all sublayers that are dirty and not anonymous, will be saved. 
+
 
 ### Configuration <a name="stageConfiguration"></a>
 Let's first look at some configuration related options we can set on the stage.
@@ -399,8 +413,6 @@ stage.SetEditTarget(stage.GetEditTargetForLocalLayer(layer))
 ~~~
 
 In Houdini we don't have to manage this, it is always the highest layer in the active layer stack. Houdini gives it to us via `hou.node.activeLayer()` or `node.editableLayer`in python LOP nodes.
-
-An edit target's job is to map from one namespace to another, we mainly use them for writing to layers in the active layer stack (though we could target any layer) and to write variants, as these are written "inline" and therefore need an extra name space injection. 
 
 More info about edit targets in our [composition fundamentals](../composition/fundamentals.md) section.
 
