@@ -7,6 +7,8 @@ Let's see how we can make it complicated 🤪. We'll take a look at these two ca
 
 You can find all the .hip files of our shown examples in our [USD Survival Guide - GitHub Repo](https://github.com/LucaScheller/VFX-UsdSurvivalGuide/tree/main/files/dcc/houdini).
 
+For all options for SOP to LOP importing, check out the official [Houdini docs](https://www.sidefx.com/docs/houdini/solaris/sop_import.html).
+
 ## Houdini Native Import
 When importing points, all you need to set is a path attribute on your points (rather than on prims as with polygon meshes), because we don't have any prims on sop level. (Thanks captain obvious).
 
@@ -28,6 +30,8 @@ Why should we do it ourselves, you might ask? Because there are instances, where
 Now you might be thinking, is Python performant enough to actually manipulate geometry?
 
 In the context of points (also point instancers), we answer is yes. As we do not have to do geometry operations, manipulating points is "just" editing arrays. This can be done very efficiently via numpy, if we use it for final tweaking. So don't expect to have the power of vex, the below is a "cheap" solution to adding render time overrides, when you don't have the resources to write your own compiled language (looking at your [DNEG (OpenVDB AX)](https://www.openvdb.org/documentation/doxygen/openvdbax.html)).
+
+In the near future, this can probably also be done by Houdini's render procedurals (it actually already can be). The method we show here, is DCC independent though, so it does have its benefits, because you don't need a Houdini (engine) license. 
 
 To showcase how we manipulate arrays at render time, we've built a "Python Wrangle" .hda. Here is the basic .hda structure:
 
