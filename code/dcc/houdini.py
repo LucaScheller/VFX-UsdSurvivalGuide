@@ -119,3 +119,43 @@ if mode == "average" and data:
         visibility_attr.Block()
         visibility_attr.Set(UsdGeom.Tokens.inherited if any(visibility_data["visibility"]) else UsdGeom.Tokens.invisible)
 #// ANCHOR_END: houdiniFrustumCulling
+
+#// ANCHOR: houdiniPointsNativeStream
+import numpy as np
+from pxr import UsdGeom
+sop_node = node.parm("spare_input0").evalAsNode()
+sop_geo = sop_node.geometry()
+
+frame = hou.frame()
+
+prim = stage.DefinePrim("/points", "Points")
+attribute_mapping = {
+    "P": "points",
+    "id": "ids",
+    "pscale": "widths",
+    "Cd": "primvars:displayColor",
+}
+# Import attributes
+for sop_attr in sop_geo.pointAttribs():
+    attr_name = attribute_mapping.get(sop_attr.name())
+    if not attr_name:
+        continue
+    attr = prim.GetAttribute(attr_name)
+    if not attr:
+        continue
+    attr_type_name = attr.GetTypeName()
+    attr_type = attr_type_name.type
+    attr_class = attr_type.pythonClass
+    # The pointFloatAttribValuesAsString always gives us a float array
+    value = np.frombuffer(sop_geo.pointFloatAttribValuesAsString(sop_attr.name()), dtype=np.float32)
+    # This casts it back to its correct type
+    attr.Set(attr_class.FromNumpy(value), frame)
+    # Enforce "vertex" (Houdini speak "Point") interpolation
+    attr.SetMetadata("interpolation", "vertex")
+# Re-Compute extent hints
+boundable_api = UsdGeom.Boundable(prim)
+extent_attr = boundable_api.GetExtentAttr()
+extent_value = UsdGeom.Boundable.ComputeExtentFromPlugins(boundable_api, frame)
+if extent_value:
+    extent_attr.Set(extent_value, frame)
+#// ANCHOR_END: houdiniPointsNativeStream
