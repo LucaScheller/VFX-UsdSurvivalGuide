@@ -26,5 +26,5 @@ Here is a list of the most used production schemas with a short explanation of w
     - [UsdShade.ConnectableAPI](https://openusd.org/dev/api/class_usd_shade_connectable_a_p_i.html): Shader connections
     - [UsdShade.CoordSysAPI](https://openusd.org/dev/api/class_usd_shade_coord_sys_a_p_i.html): Coordinate spaces for shaders
 - Graphics Foundations (Gf):
-    - [Gf.Camera](https://openusd.org/dev/api/class_gf_camera.html)
-    - [Gf.Frustum](https://openusd.org/dev/api/class_gf_frustum.html)
+    - [Gf.Camera](https://openusd.org/dev/api/class_gf_camera.html): Camera
+    - [Gf.Frustum](https://openusd.org/dev/api/class_gf_frustum.html): Frustum

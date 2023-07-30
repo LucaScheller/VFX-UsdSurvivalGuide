@@ -83,7 +83,7 @@ Is this something you need to be doing? No, Houdini's LOPs import as well as the
   <source src="./media/pointInstancerPerformance.mp4" type="video/mp4" alt="Houdini Prototype Re-Order">
 </video>
 
-As you can see we are at a factor 20 (1 second : 50 milliseconds). Wow! Now what we don't show is, that we actually have to conform the point instances attributes to what the PointInstancer prim schema expects. So the ratio we just mentioned is the best case scenario, but it can be a bit slower, when we have to map for example `N`/`up` to `orientations`. This is also only this performant because we are importing a single PointInstancer prim, which means we don't have to segment any of the protoIndices.
+As you can see we are at a factor 20 (1 seconds : 50 milliseconds). Wow! Now what we don't show is, that we actually have to conform the point instances attributes to what the PointInstancer prim schema expects. So the ratio we just mentioned is the best case scenario, but it can be a bit slower, when we have to map for example `N`/`up` to `orientations`. This is also only this performant because we are importing a single PointInstancer prim, which means we don't have to segment any of the protoIndices.
 
 We also loose the benefit of being able to work with our packed prims in SOP level, for example for collision detection etc.
 
