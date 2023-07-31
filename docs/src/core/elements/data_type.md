@@ -32,7 +32,7 @@ from pxr import Vt
 import numpy as np
 from array import array
 # Python Arrays
-vt_array = Vt.Vec3hArray.FromBuffer(array("f", [1,2,3])) # Returns: Vt.Vec3hArray(1, (Gf.Vec3h(1.0, 2.0, 3.0),))
+vt_array = Vt.Vec3hArray.FromBuffer(array("f", [1,2,3,4,5,6])) # Returns: Vt.Vec3hArray(2, (Gf.Vec3h(1.0, 2.0, 3.0),Gf.Vec3h(4.0, 5.0, 6.0),))
 # From Numpy Arrays 
 Vt.Vec3hArray.FromNumpy(np.ones((10, 3)))
 Vt.Vec3hArray.FromBuffer(np.ones((10, 3)))
