@@ -39,7 +39,7 @@ Anything that is path related in your hierarchy, use Sdf.Path objects. It will m
 ~~~
 
 ## Resources <a name="resources"></a>
-- [API Docs](https://openusd.org/release/api/class_sdf_path.html#sec_SdfPath_Overview)
+- [Sdf.Path](https://openusd.org/release/api/class_sdf_path.html#sec_SdfPath_Overview)
 
 ## Overview <a name="overview"></a>
 Each element in the path between the "/" symbol is a [prim](https://openusd.org/release/glossary.html#usdglossary-prim) similar to how on disk file paths mark a folder or a file.

@@ -26,7 +26,7 @@ The solution is to set the scale of the packed piece to 0. For hero simulations,
 You can find all the .hip files of our shown examples in our [USD Survival Guide - GitHub Repo](https://github.com/LucaScheller/VFX-UsdSurvivalGuide/tree/main/files/dcc/houdini).
 
 
-## Houdini native import via KineFX/Crowd Agents
+## Houdini Native Import via KineFX/Crowd Agents
 Let's first take a look at what Houdini supports out of the box:
 - We can import KineFX characters and crowd agents as skeletons. This does have the overhead of creating KineFX characters/crowd agents in a way that they map to our target output hierarchy we want in LOPs. It is also harder to setup with a lot of different skeletons (Or we couldn't figure, input is always welcome).
 - The "RBD Destruction" LOP node has a reference implementation of how to import packed prims as skeletons animations. It relies on Python for the heavy data lifting and doesn't scale well, we'll take a look at a high performance solution in the next section below, that uses Houdini's native import for the data loading and Python to map everything to its correct place.

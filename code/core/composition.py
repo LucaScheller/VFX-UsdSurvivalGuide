@@ -450,29 +450,26 @@ source_stage = source_node.stage()
 source_layer = source_node.activeLayer()
 
 with Sdf.ChangeBlock():
+    edit = Sdf.BatchNamespaceEdit()
+
     iterator = iter(Usd.PrimRange(source_stage.GetPseudoRoot()))
     for prim in iterator:
         if "GEO" not in prim.GetChildrenNames():
             continue
         iterator.PruneChildren()
         prim_path = prim.GetPath()
-        prim_spec = Sdf.CreatePrimInLayer(layer, prim_path)
-        prim_spec.specifier = Sdf.SpecifierDef
-        prim_spec.typeName = "Xform"
-        parent_prim_spec = prim_spec.nameParent
-        while parent_prim_spec:
-            parent_prim_spec.specifier = Sdf.SpecifierDef
-            parent_prim_spec.typeName = "Xform"
-            parent_prim_spec = parent_prim_spec.nameParent
-                    
+        prim_spec = layer.GetPrimAtPath(prim_path)
         # Copy content into variant
         variant_set_spec = Sdf.VariantSetSpec(prim_spec, "model")
         variant_spec = Sdf.VariantSpec(variant_set_spec, "myCoolVariant")
         variant_prim_path = prim_path.AppendVariantSelection("model", "myCoolVariant")
-        Sdf.CopySpec(source_layer, prim_path, layer, variant_prim_path)
+        edit.Add(prim_path.AppendChild("GEO"), variant_prim_path.AppendChild("GEO"))
         # Variant selection
         prim_spec.SetInfo("variantSetNames", Sdf.StringListOp.Create(prependedItems=["model"]))
         prim_spec.variantSelections["model"] = "myCoolVariant"
+        
+    if not layer.Apply(edit):
+        raise Exception("Failed to apply layer edit!")
 #// ANCHOR_END: compositionArcVariantMoveHoudini
 
 

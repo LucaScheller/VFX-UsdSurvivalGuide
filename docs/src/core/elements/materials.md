@@ -1,5 +1,5 @@
 # Materials
-Materials in USD are exposed via the [USDShade](https://openusd.org/dev/api/usd_shade_page_front.html) module.
+Materials in USD are exposed via the [UsdShade](https://openusd.org/dev/api/usd_shade_page_front.html) module.
 
 Shader networks are encoded via the [UsdShade.ConnectableAPI](https://openusd.org/dev/api/class_usd_shade_connectable_a_p_i.html). So we have full access to the node graph as it is fully represented as USD prims. This allows for flexible editing, as it is as simple as editing attributes and connections on your individual material node prims.
 

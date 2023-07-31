@@ -565,7 +565,10 @@ Here is how it can be setup in Houdini:
 Via the low level API we can also copy or move content on a layer into a variant. This is super powerful to easily create variants from caches.
 
 Here is how it can be setup in Houdini:
-![Houdini Composition Variant Reauthor](houdiniCompositionVariantCopyMove.gif)
+
+<video width="100%" height="100%" controls autoplay muted loop>
+  <source src="./houdiniCompositionVariantCopyMove.mp4" type="video/mp4" alt="Houdini Composition Variant Copy/Move">
+</video>
 
 Here is the code for moving variants:
 ~~~admonish tip title=""
@@ -770,3 +773,10 @@ Here is how we can check if a prim is inside an instance or inside a prototype:
 {{#include ../../../../code/core/composition.py:compositionInstanceable}}
 ```
 ~~~
+
+Here is an example of how we can't edit the content within an instanceable prim. Instead we have to create a hierarchy (in this case a `/__CLASS__` hierarchy) where we inherit from. As you can see the prototype count changes depending on if we apply the inherit to only a single reference or all. (Houdini shows the `/__class__` prim in the righ click menu, this is because the Houdini test assets where setup with an inherit by default that always runs on all assets. Since we only want to selectively broadcast our edit, we have to create a different class hierarchy.)
+
+<video width="100%" height="100%" controls autoplay muted loop>
+  <source src="./houdiniCompositionInstanceableInherit.mp4" type="video/mp4" alt="Houdini Composition Variant Copy/Move">
+</video>
+

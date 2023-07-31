@@ -1,37 +1,34 @@
 
 Tree view  ==============
    inclusive    exclusive        
-    0.455 ms     0.295 ms       1 samples    Main Thread
-    0.003 ms     0.003 ms       2 samples    | pxrInternal_v0_22__pxrReserved__::Sdf_FileFormatRegistry::FindByExtension
-    0.003 ms     0.001 ms       2 samples    | pxrInternal_v0_22__pxrReserved__::SdfLayer::_InitializeFromIdentifier
+    0.519 ms     0.246 ms       1 samples    Main Thread
+    0.005 ms     0.005 ms       2 samples    | pxrInternal_v0_22__pxrReserved__::Sdf_FileFormatRegistry::FindByExtension
+    0.004 ms     0.002 ms       2 samples    | pxrInternal_v0_22__pxrReserved__::SdfLayer::_InitializeFromIdentifier
     0.002 ms     0.002 ms       2 samples    |   pxrInternal_v0_22__pxrReserved__::Sdf_LayerRegistry::InsertOrUpdate
-    0.009 ms     0.000 ms       1 samples    | pxrInternal_v0_22__pxrReserved__::PcpLayerStack
-    0.009 ms     0.008 ms       1 samples    |   pxrInternal_v0_22__pxrReserved__::PcpLayerStack::_Compute
+    0.014 ms     0.000 ms       1 samples    | pxrInternal_v0_22__pxrReserved__::PcpLayerStack
+    0.013 ms     0.013 ms       1 samples    |   pxrInternal_v0_22__pxrReserved__::PcpLayerStack::_Compute
     0.001 ms     0.001 ms       2 samples    |   | pxrInternal_v0_22__pxrReserved__::PcpMapFunction::Create
-    0.020 ms     0.019 ms       1 samples    | pxrInternal_v0_22__pxrReserved__::PcpComputePrimIndex
-    0.000 ms     0.000 ms       1 samples    |   pxrInternal_v0_22__pxrReserved__::Pcp_PrimIndexIsInstanceable
-    0.001 ms     0.000 ms       1 samples    |   pxrInternal_v0_22__pxrReserved__::PcpPrimIndex_Graph::Finalize
-    0.000 ms     0.000 ms       1 samples    |   | pxrInternal_v0_22__pxrReserved__::PcpPrimIndex_Graph::_ComputeStrengthOrderIndexMapping
+    0.012 ms     0.010 ms       2 samples    | pxrInternal_v0_22__pxrReserved__::PcpComputePrimIndex
+    0.000 ms     0.000 ms       2 samples    |   pxrInternal_v0_22__pxrReserved__::Pcp_PrimIndexIsInstanceable
+    0.001 ms     0.000 ms       2 samples    |   pxrInternal_v0_22__pxrReserved__::PcpPrimIndex_Graph::Finalize
+    0.001 ms     0.001 ms       1 samples    |   | pxrInternal_v0_22__pxrReserved__::PcpPrimIndex_Graph::_ComputeStrengthOrderIndexMapping
     0.000 ms     0.000 ms       1 samples    |   | pxrInternal_v0_22__pxrReserved__::PcpPrimIndex_Graph::_ComputeEraseCulledNodeIndexMapping
-    0.002 ms     0.002 ms       2 samples    | pxrInternal_v0_22__pxrReserved__::PcpPrimIndex::ComputePrimChildNames
-    0.001 ms     0.001 ms       2 samples    | pxrInternal_v0_22__pxrReserved__::Usd_InstanceCache::ProcessChanges
-    0.018 ms     0.014 ms       2 samples    | pxrInternal_v0_22__pxrReserved__::UsdStage::_ComposeSubtreesInParallel
+    0.000 ms     0.000 ms       1 samples    |   pxrInternal_v0_22__pxrReserved__::PcpPrimIndex_Graph::New
+    0.003 ms     0.003 ms       3 samples    | pxrInternal_v0_22__pxrReserved__::PcpPrimIndex::ComputePrimChildNames
+    0.002 ms     0.002 ms       2 samples    | pxrInternal_v0_22__pxrReserved__::Usd_InstanceCache::ProcessChanges
+    0.104 ms     0.102 ms       2 samples    | pxrInternal_v0_22__pxrReserved__::UsdStage::_ComposeSubtreesInParallel
     0.001 ms     0.001 ms       1 samples    |   pxrInternal_v0_22__pxrReserved__::UsdStage::_GetMetadata
-    0.000 ms     0.000 ms       2 samples    |   pxrInternal_v0_22__pxrReserved__::PcpPrimIndex::ComputePrimChildNames
-    0.001 ms     0.001 ms       1 samples    |   pxrInternal_v0_22__pxrReserved__::_GetPrimSpecifierImpl
-    0.002 ms     0.002 ms       1 samples    |   pxrInternal_v0_22__pxrReserved__::Usd_ClipCache::PopulateClipsForPrim
-    0.010 ms     0.010 ms       1 samples    | pxrInternal_v0_22__pxrReserved__::SdfPath
+    0.000 ms     0.000 ms       1 samples    |   pxrInternal_v0_22__pxrReserved__::PcpPrimIndex::ComputePrimChildNames
+    0.012 ms     0.012 ms       1 samples    | pxrInternal_v0_22__pxrReserved__::SdfPath
     0.000 ms     0.000 ms       1 samples    | pxrInternal_v0_22__pxrReserved__::PcpCache::FindSiteDependencies
-    0.004 ms     0.004 ms       1 samples    | pxrInternal_v0_22__pxrReserved__::PcpChanges::DidChange
+    0.007 ms     0.006 ms       1 samples    | pxrInternal_v0_22__pxrReserved__::PcpChanges::DidChange
     0.001 ms     0.001 ms       1 samples    |   pxrInternal_v0_22__pxrReserved__::PcpCache::FindSiteDependencies
-    0.000 ms     0.000 ms       1 samples    | pxrInternal_v0_22__pxrReserved__::PcpCache::Apply
-    0.000 ms     0.000 ms       1 samples    | pxrInternal_v0_22__pxrReserved__::UsdStage::_DestroyPrimsInParallel
-    0.089 ms     0.011 ms       1 samples    | Python func: foo
-    0.078 ms     0.078 ms       1 samples    |   InnerScope
-    0.093 ms     0.010 ms       1 samples    Thread 139652285585088
-    0.081 ms     0.080 ms       1 samples    | pxrInternal_v0_22__pxrReserved__::PcpComputePrimIndex
-    0.001 ms     0.001 ms       1 samples    |   pxrInternal_v0_22__pxrReserved__::PcpPrimIndex_Graph::New
-    0.000 ms     0.000 ms       1 samples    |   pxrInternal_v0_22__pxrReserved__::Pcp_PrimIndexIsInstanceable
-    0.000 ms     0.000 ms       1 samples    |   pxrInternal_v0_22__pxrReserved__::PcpPrimIndex_Graph::Finalize
-    0.001 ms     0.001 ms       1 samples    | pxrInternal_v0_22__pxrReserved__::PcpPrimIndex::ComputePrimChildNames
+    0.002 ms     0.002 ms       1 samples    | pxrInternal_v0_22__pxrReserved__::PcpCache::Apply
+    0.001 ms     0.001 ms       1 samples    | pxrInternal_v0_22__pxrReserved__::UsdStage::_DestroyPrimsInParallel
+    0.107 ms     0.019 ms       1 samples    | Python func: foo
+    0.088 ms     0.088 ms       1 samples    |   InnerScope
+    0.079 ms     0.068 ms       1 samples    Thread 140229356811968
+    0.001 ms     0.001 ms       1 samples    | pxrInternal_v0_22__pxrReserved__::_GetPrimSpecifierImpl
+    0.008 ms     0.008 ms       1 samples    | pxrInternal_v0_22__pxrReserved__::Usd_ClipCache::PopulateClipsForPrim
+    0.002 ms     0.002 ms       1 samples    | pxrInternal_v0_22__pxrReserved__::PcpPrimIndex::ComputePrimChildNames
 

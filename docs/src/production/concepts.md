@@ -1,12 +1,43 @@
 # Advanced Concepts
 
+# Table of contents
+1. [Special Utility Operations in the Sdf Module]()
+    1. [Moving/Renaming/Removing prim specs with Sdf.BatchNamespaceEdit()](#sdfBatchNamespaceEdit)
+    1. [Copying data in the low level API iwth Sdf.CopySpec](#sdfCopySpec)
+    1. [Delaying change notifications with the Sdf.ChangeBlock](#sdfChangeBlock)
+    
+## Edit Targets
+~~~admonish tip title="Pro Tip | Edit Targets"
+A edit target defines, what layer all calls in the high level API should write to.
+~~~
 
-## Moving/Renaming/Removing prim specs with Sdf.BatchNamespaceEdit()
+An edit target's job is to map from one namespace to another, we mainly use them for writing to layers in the active layer stack (though we could target any layer) and to write variants, as these are written "inline" and therefore need an extra name space injection. 
 
+We cover edit targets in detail in our [composition fundamentals](../core/composition/fundamentals.md#compositionFundamentalsEditTarget) section.
 
-## Sdf.CopySpec
+## Remapping assets path in current layer stack
 
-## Delaying change notifications with the Sdf.ChangeBlock
+## Relationships
+
+### Special Relationships
+    - xform space rel
+    - proxy prim rel
+    - material binding rel
+    - skeleton anim rel
+
+### Relationship Forwarding (Binding post)
+~~~admonish question title="Still under construction!"
+This sub-section is still under development, it is subject to change and needs extra validation.
+~~~
+
+## Collections
+Invert collection
+
+### Moving/Renaming/Removing prim specs with Sdf.BatchNamespaceEdit()
+
+### Sdf.CopySpec
+
+### Delaying change notifications with the Sdf.ChangeBlock <a name="sdfChangeBlock"></a>
 Whenever we edit something in our layers, change notifications get sent to all consumers (stages/hydra delegates) that use the layer. This causes them to recompute and trigger updates.
 
 When performing a large edit, for example creating large hierarchies, we can batch the edit, so that the change notification gets the combined result.
@@ -63,21 +94,10 @@ listener.Revoke()
 
 
 
-## Relationships
-- xform space rel
-- proxy prim rel
-- material binding rel
-- skeleton anim rel
 
-### Edit Targets
 
-### Collections
-- Invert collection
-- 
 
-### Relationship Forwarding (Binding post)
-~~~admonish question title="Still under construction!"
-This sub-section is still under development, it is subject to change and needs extra validation.
-~~~
 
-## Remapping assets path in current layer stack
+
+
+

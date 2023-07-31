@@ -21,8 +21,8 @@ pxr.Vt.Vec3dArray([(1,2,3)])
 ```
 Instead of searching for the corresponding `Gf` or `Vt` array class, we can get it from the type name and instantiate it:
 ```python
-vec3h_array = Sdf.ValueTypeNames.Point3hArray.type.pythonClass((0,1,2))
-# Or: Usd.Attribute.GetTypeName().type.pythonClass((0,1,2)) / Sdf.AttributeSpec.typeName.type.pythonClass((0,1,2))
+vec3h_array = Sdf.ValueTypeNames.Point3hArray.type.pythonClass([(0,1,2)])
+# Or: Usd.Attribute.GetTypeName().type.pythonClass([(0,1,2)]) / Sdf.AttributeSpec.typeName.type.pythonClass([(0,1,2)])
 print(type(vec3h_array)) # Returns: <class 'pxr.Vt.Vec3hArray'>
 ```
 As `Vt.Array` support the buffer protocol, we can map the arrays to numpy without data duplication and perform high performance 

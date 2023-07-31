@@ -6,7 +6,11 @@
 Via the low level API we can also copy or move content on a layer into a variant. This is super powerful to easily create variants from caches.
 
 Here is how it can be setup in Houdini:
-![Houdini Composition Variant Reauthor](../../../core/composition/houdiniCompositionVariantCopyMove.gif)
+
+<video width="100%" height="100%" controls autoplay muted loop>
+  <source src="../../../core/composition/houdiniCompositionVariantCopyMove.mp4" type="video/mp4" alt="Houdini Composition Variant Copy/Move">
+</video>
+
 
 Here is the code for moving variants:
 ~~~admonish tip title=""

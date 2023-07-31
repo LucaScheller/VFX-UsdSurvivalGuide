@@ -4099,14 +4099,14 @@ profile(profile_attribute_extra_validation_is_leaf, "IsLeaf Attribute (Validatio
 
 #// ANCHOR: traverseDataStageTemplate
 # Standard
-start_prim = stage.GetPrimAtPath() # Or stage.GetPseudoRoot(), this is the same as stage.Traverse()
+start_prim = stage.GetPrimAtPath("/") # Or stage.GetPseudoRoot(), this is the same as stage.Traverse()
 iterator = iter(Usd.PrimRange(start_prim))
 for prim in iterator:
     if prim.IsA(UsdGeom.Imageable): # Some condition as listed above or custom property/metadata checks
         # Don't traverse into the child prims
         iterator.PruneChildren()
 # Pre and post visit:
-start_prim = stage.GetPrimAtPath() # Or stage.GetPseudoRoot(), this is the same as stage.Traverse()
+start_prim = stage.GetPrimAtPath("/") # Or stage.GetPseudoRoot(), this is the same as stage.Traverse()
 iterator = iter(Usd.PrimRange.PreAndPostVisit(start_prim))
 for prim in iterator:
     if not iterator.IsPostVisit():
@@ -4115,7 +4115,7 @@ for prim in iterator:
             iterator.PruneChildren()
 # Custom Predicate
 predicate = Usd.PrimIsActive & Usd.PrimIsLoaded # All prims, even class and over prims.
-start_prim = stage.GetPrimAtPath() # Or stage.GetPseudoRoot(), this is the same as stage.Traverse()
+start_prim = stage.GetPrimAtPath("/") # Or stage.GetPseudoRoot(), this is the same as stage.Traverse()
 iterator = iter(Usd.PrimRange.PrimRange(start_prim, predicate=predicate))
 for prim in iterator:
     if not iterator.IsPostVisit():

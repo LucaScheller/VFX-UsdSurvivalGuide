@@ -1,3 +1,24 @@
+#// ANCHOR: houdiniTimeDependency
+def GetValueMightBeTimeVarying(attribute, checkVariability=False):
+    """Check if an attribute has time samples.
+    Args:
+        attribute (Usd.Attribute): The attribute to check.
+        checkVariability (bool): Preflight check if the time variability metadata is uniform,
+                                 if yes return False and don't check the value
+    Returns:
+        bool: The state if the attribute has time samples
+    """
+    if checkVariability and attribute.GetVariability() == pxr.Sdf.VariabilityUniform:
+        return False
+    # Get the layer stack without value clips
+    property_stack = attribute.GetPropertyStack(pxr.Usd.TimeCode.Default())
+    if property_stack[0].layer.anonymous:
+        # It is fast to lookup data that is in memory
+        return attribute.GetNumTimeSamples() > 0
+    # Otherwise fallback to the default behaviour as this inspects only max two timeSamples
+    return attribute.ValueMightBeTimeVarying()
+#// ANCHOR_END: houdiniTimeDependency
+
 #// ANCHOR: houdiniFrustumCulling
 import numpy as np
 from pxr import Gf, Sdf, Usd, UsdGeom
