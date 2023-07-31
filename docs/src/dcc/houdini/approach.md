@@ -2,7 +2,7 @@
 - Handling Paths
 - Asset Resolver
 - time freeze --> How to hack the dependency frame eval Subframe caching in hudini
-
+- Expose properties to houdini
 - [Solaris Performance](https://www.sidefx.com/docs/houdini/solaris/performance.html)
 - Artist vs Pipeline:
            * How to balance artist expectations vs technical overhead:

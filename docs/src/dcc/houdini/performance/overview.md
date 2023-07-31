@@ -1,14 +1,49 @@
 # Performance Optimizations
 
 # Table of contents
-1. [LOP Hdas - In-A-Nutshell](#summary)
-1. [What should I use it for?](#usage)
-1. [Resources](#resources)
 1. [Selection Rules](#houLopSelectionRule)
 1. [How to get your scene to load and open fast](#loadingMechanisms)
 1. [Write full time sample ranges (with subsamples)](#timeSample) 
 1. [Layer Content Size](#layerContentSize)
 1. [Layer Count](#layerCount)
+
+## Selection Rules <a name="houLopSelectionRule"></a>
+Houdini's [LOPs Selection Rule/Prim Pattern Matching](https://www.sidefx.com/docs/houdini/solaris/pattern.html) syntax is a artist friendly wrapper around stage traversals.
+
+Pretty much any artist selectable prim pattern parm is/should be run through the selection rules. Now we won't cover how they work here, because Houdini's documentation is really detailed on this topic.
+
+Instead we'll compare it to our own [traversal section](../../../core/elements/loading_mechanisms.md#traverseData).
+~~~admonish tip title=""
+```python
+import hou
+rule = hou.LopSelectionRule()
+# Set traversal demand, this is similar to USD's traversal predicate
+# https://openusd.org/dev/api/prim_flags_8h.html#Usd_PrimFlags
+hou.lopTraversalDemands.Active
+hou.lopTraversalDemands.AllowInstanceProxies
+hou.lopTraversalDemands.Default
+hou.lopTraversalDemands.Defined
+hou.lopTraversalDemands.Loaded
+hou.lopTraversalDemands.NoDemands
+hou.lopTraversalDemands.NonAbstract
+rule.setTraversalDemands(hou.lopTraversalDemands.Default)
+# Set rule pattern
+rule.setPathPattern("%type:Boundable")
+# Evaluate rule
+prim_paths = rule.expandedPaths(lopnode=None, stage=stage)
+for prim_path in prim_paths:
+    print(prim_path) # Returns: Sdf.Path
+```
+~~~
+
+As you can see we have a similar syntax, the predicate is "replaced" by hou.lopTraversalDemands.
+
+Now the same rules apply for fast traversals:
+- Fast traversals mean not going into the hierarchies we are not interested in. The equivalent to `iterator.PruneChildren` is the `~` tilde symbol (e.g. `%type:Xform ~ %kind:component`)
+- We should aim to pre-filter by type `%type:<ConcreteTypedSchemaName>` and kind `%kind:component`, before querying other data as this is fast
+- Attributes lookups (via vex in the expression) are heavy to compute
+
+## How to get your scene to load and open fast <a name="loadingMechanisms"></a>
 
 ## Write full time sample ranges (with subsamples) <a name="timeSample"></a>
 In Houdini we always want to avoid time dependencies where possible, because that way the network doesn't have to recook the tree per frame.

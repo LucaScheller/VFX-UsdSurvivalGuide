@@ -65,6 +65,8 @@ Here is how we get a correct value:
 The logic is relatively simple: When looking at in-memory layers, use the usual command of `GetNumTimeSamples` as in-memory layers are instant when querying data.
 When looking at on disk files, use the `ValueMightBeTimeVarying`, as it is the fastest solution.
 
+You can find the shown file here: [UsdSurvivalGuide - GitHub](https://github.com/LucaScheller/VFX-UsdSurvivalGuide/tree/main/files/dcc/houdini/timeSamples)
+
 ![Houdini Attribute Value Might Be Time Varying](houdiniAttributeValueMightBeTimeVarying.jpg)
 
 

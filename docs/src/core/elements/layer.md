@@ -187,6 +187,11 @@ In our example below, we assume that the code is run in Houdini.
 ```
 ~~~
 
+Now there are also utility functions available in the `UsdUtils` module ([USD Docs](https://openusd.org/dev/api/flatten_layer_stack_8h.html)):
+- **UsdUtils.ExtractExternalReferences**: This is similar to `layer.GetCompositionAssetDependencies()`, except that it returns three lists: `[<sublayers>], [<references>], [<payloads>]`. It also consults the assetInfo metadata, so result might be more "inclusive" than `layer.GetCompositionAssetDependencies()`.
+- **UsdUtils.ComputeAllDependencies**: This recursively calls `layer.GetCompositionAssetDependencies()` and gives us the aggregated result.
+- **UsdUtils.ModifyAssetPaths**: This is similar to Houdini's output processors. We provide a function that gets the input path and returns a (modified) output path.
+
 ### Layer Metrics <a name="layerMetrics"></a>
 We can also set animation/time related metrics, these are stored via metadata entries on the layer itself.
 ~~~admonish info title=""
