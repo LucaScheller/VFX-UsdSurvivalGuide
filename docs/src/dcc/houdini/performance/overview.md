@@ -4,10 +4,38 @@
 1. [LOP Hdas - In-A-Nutshell](#summary)
 1. [What should I use it for?](#usage)
 1. [Resources](#resources)
-1. [Selection Rules]
-1. [Write full time sample ranges](#) 
+1. [Selection Rules](#houLopSelectionRule)
+1. [How to get your scene to load and open fast](#loadingMechanisms)
+1. [Write full time sample ranges (with subsamples)](#timeSample) 
 1. [Layer Content Size](#layerContentSize)
 1. [Layer Count](#layerCount)
+
+## Write full time sample ranges (with subsamples) <a name="timeSample"></a>
+In Houdini we always want to avoid time dependencies where possible, because that way the network doesn't have to recook the tree per frame.
+
+We cover this in more detail for HDAs in our [HDA section](../hda/hda.md) as it is very important when building tools, but here is the short version.
+
+We have two ways of caching the animation, so that the node itself loses its time dependency.
+
+Starting with H19.5 most LOP nodes can whole frame range cache their edits. This does mean that a node can cook longer for very long frame ranges, but overall your network will not have a time dependency, which means when writing your node network to disk (for example for rendering), we only have to write a single frame and still have all the animation data. How cool is that! 
+
+<video width="100%" height="100%" controls autoplay muted loop>
+  <source src="../hda/hdaTimeDependencyPerNode.mp4" type="video/mp4" alt="Houdini Time Sample Per Node">
+</video>
+
+If a node doesn't have that option, we can almost always isolate that part of the network and pre cache it, that way we have the same effect but for a group of nodes.
+
+The common workflow is to link the shutter samples count to your camera/scene xform sample count and cache out the frames you need.
+
+<video width="100%" height="100%" controls autoplay muted loop>
+  <source src="./timeSample.mp4" type="video/mp4" alt="Houdini Time Sample Subframes">
+</video>
+
+We recommend driving the parms through global variables or functions, that you can attach to any node via the node [onLoaded](https://www.sidefx.com/docs/houdini/hom/locations.html#scene_events) scripts.
+
+This is also how you can write out SOP geometry with deform/xform subsamples, simply put the cache node after a "SOP Import" and set the mode to "Sample Current Frame".
+We usually do this in combination with enabling "Flush Data After Each Frame" on the USD render rop plus adding "$F4" to your file path.
+This way we stay memory efficient and dump the layer from memory to disk every frame. After that we stitch it via [value clips](../../../core/elements/animation.md#animationValueClips) or the "UsdStitch" commandline tool/rop node. 
 
 
 ## Layer Content Size <a name="layerContentSize"></a>
@@ -34,10 +62,12 @@ with Sdf.ChangeBlock():
     for idx in range(prim_count):
         prim_path = Sdf.Path(f"/root_grp/prim_{idx}")
         prim_spec = Sdf.CreatePrimInLayer(layer, prim_path)
-        prim_spec.typeName = "Xform"
+        prim_spec.typeName = "Cube"
         prim_spec.specifier = Sdf.SpecifierDef
         attr_spec = Sdf.AttributeSpec(prim_spec, "debug", Sdf.ValueTypeNames.Float)
         attr_spec.default = float(idx)
+        if idx != 0:
+            prim_spec.SetInfo(prim_spec.ActiveKey, False)
 ```
 ~~~
 
@@ -57,7 +87,9 @@ What does this mean for our .hda setups? The answer is simple: As there is no do
 
 Here is a comparison video:
 
-![Layer Content Size](layerContentSize.gif)
+<video width="100%" height="100%" controls autoplay muted loop>
+  <source src="./layerContentSize.mp4" type="video/mp4" alt="Layer Size">
+</video>
 
 ## Layer Count <a name="layerCount"></a>
 Now as mentioned in the [layer content size](#layerContentSize) section, there is no down side to having thousands of layers. Houdini will merge these to a single (or multiple, depending on how you configured your save paths) layers on USD rop render. Since this is done on write, the described active layer stashing mechanism doesn't kick in and therefore it stays fast.
@@ -69,3 +101,10 @@ So as a rule of thumb: Encapsulate heavy layer edits with newly started layers, 
 ~~~
 
 In LOPs we also often work with the principle of having a "main" node stream (the stream, where your shot layers are loaded from). A good workflow would be to always put anything you merge into the main node stream into a new layer, as often these "side" streams create heavy data.
+
+~~~admonish danger title="Important | LOP 'For Each Loops'"
+LOPs "for each loops" work a bit different: Each iteration of the loop is either merged with the active layer or kept as a separate layer, depending on the set merge style.
+When we want to spawn a large hierarchy, we recommend doing it via Python, as it is a lot faster. We mainly use the "for each loop" nodes for stuff we can't do in Python code. For example for each looping a sop import.
+
+![Houdini For Each Loop Merge Style](houdiniForEachMergeStyle.jpg)
+~~~

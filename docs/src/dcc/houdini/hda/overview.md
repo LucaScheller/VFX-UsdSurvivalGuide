@@ -4,28 +4,12 @@ As with any other network in Houdini, we can also create HDAs in LOPs.
 This page will focus on the most important performance related aspects of LOP HDAs, we will be referencing some of the points mentioned in the [performance optimizations](./performance/overview.md) section with a more practical view.
 
 # Table of contents
-1. [LOP HDAs In-A-Nutshell](#summary)
-1. [What should I use it for?](#usage)
-1. [Resources](#resources)
 1. [Overview](#overview)
 1. [HDA Template Setup](#hdaTemplate)
     1. [Order of operations](#hdaOrderOfOperations)
     1. [Dealing with time dependencies](#hdaTimeDependencies)
     1. [Layer Size/Count](#hdaLayerSizeCount)
 1. [Composition](#hdaComposition)
-    1. [Reference/Payload](#hdaCompositionReferencePayload)
-    1. [Variants](#hdaCompositionVariant)
-
-## TL;DR - <Topic> In-A-Nutshell <a name="summary"></a>
-- Main points to know
-
-## What should I use it for? <a name="usage"></a>
-~~~admonish tip
-Summarize actual production relevance.
-~~~
-
-## Resources <a name="resources"></a>
-- [API Docs]()
 
 ## Overview <a name="overview"></a>
 When building LOP HDAs with USD, the big question is:
@@ -64,7 +48,19 @@ Let's take a look at how we can typically structure HDAs:
   <source src="./hdaTemplateStructure.mp4" type="video/mp4" alt="Houdini Hda Template Structure">
 </video>
 
-The structure we recommend is:
+For parms we can make use of Houdini's internal loputils under the following path:
+~~~admonish tip title=""
+$HFS/houdini/python3.9libs/loputils.py
+~~~
+It is not an official API module, so use it with care, it may be subject to change.
+
+You can simply import via `import loputils`. It is a good point of reference for UI related functions, for example action buttons on parms use it at lot.
+
+Here you can find the [loputils.py - Sphinx Docs](https://ikrima.github.io/houdini_additional_python_docs/loputils.html) online.
+
+It gives us common lop related helpers, like selectors etc.
+
+For the structure we recommend:
 1. Create a new layer
 2. Perform your edits (best-case only a single Python node) or merge in content from other inputs.
 3. Create a new layer
@@ -82,11 +78,10 @@ Let's look at a wrong example and how to fix it:
   <source src="./hdaOrderOfOperationSlow.mp4" type="video/mp4" alt="Houdini Order of Operations slow">
 </video>
 
-
 Here is a more optimized result:
 
 <video width="100%" height="100%" controls autoplay muted loop>
-  <source src="./hdaOrderOfOperation.mp4" type="video/mp4" alt="Houdini Order of Operations fast">
+  <source src="./hdaOrderOfOperationOptimized.mp4" type="video/mp4" alt="Houdini Order of Operations fast">
 </video>
 
 The name of the game is isolating your time dependencies. Now the above is often different how a production setup might look, but the important part is that we try to isolate each individual component that can stand by itself to a separate node stream before combining it into the scene via a merge node.
@@ -103,10 +98,11 @@ Don't cross the streams!*
 *(unless you use a layer break).
 ~~~
 
+The solution is simple, add a layer break (and make sure that your have the "Strip Layers Above Layer Breaks" toggle turned on). We have these "diamond" shaped networks quite a lot, so make sure you always layer break them correctly. For artists it can be convenient to build a HDA that does this for them.
+
 <video width="100%" height="100%" controls autoplay muted loop>
   <source src="./hdaOrderOfOperationsLayerBreak.mp4" type="video/mp4" alt="Houdini Merge Order">
 </video>
-
 
 ~~~admonish danger title="Important | Merging a layer stack with itself"
 USD is also very "forgiving", if we create content in a layer, that is already there from another layer (or layer stack via a reference or payload). The result is the same (due to composition), but the layer stack is "doubled". This is particularly risky and can lead to strange crashes, e.g. when we start to duplicate references on the same prim.
@@ -131,10 +127,6 @@ For LOPs this is different: The merge order is the sublayer order and therefore 
 <video width="100%" height="100%" controls autoplay muted loop>
   <source src="./hdaOrderOfOperationsMergeOrder.mp4" type="video/mp4" alt="Houdini Merge Order">
 </video>
-
-
-
-
 
 ### Dealing with time dependencies <a name="hdaTimeDependencies"></a>
 As with SOPs, we should also follow the design principle of keeping everything non-time dependent where possible.
@@ -165,6 +157,8 @@ If a node doesn't have that option, we can almost always isolate that part of th
 If we want to preview xform/deformation motionblur that is not based on the `velocities`/`accelerations` attribute, then we have to pre-cache the time samples in interactive sessions. This is as simple as adding a LOPs cache node as shown above.
 ~~~
 
+Also check out our [Tips & Tricks section](../faq/overview.md#timeSampleValueMightBeTimeVarying) to see how we can query if an attribute is time sampled or only has a default value. This is a bit different in Houdini than bare-bone USD, because we often only have a single time sample for in session generated data.
+
 ### Layer Size/Count <a name="hdaLayerSizeCount"></a>
 As mentioned in the [overview](#overview), layer content size can become an issue.
 
@@ -172,9 +166,14 @@ We therefore recommend starting of with a new layer and ending with a new layer.
 
 For a full explanation see our [performance section](../performance/overview.md).
 
-~~~admonish danger title="Important | LOP 'For Each Loops'"
-LOPs "for each loops" work a bit different: Each iteration of the loop is either merged with the active layer or kept as a separate layer, depending on the set merge style.
-When we want to spawn a large hierarchy, we recommend doing it via Python, as it is a lot faster. We mainly use the "for each loop" nodes for stuff we can't do in Python code. For example for each looping a sop import.
+## Composition <a name="hdaComposition"></a>
+We strongly recommend reading up on our [composition section](../../../core/composition/overview.md) before getting started in LOPs.
 
-![Houdini For Each Loop Merge Style](houdiniForEachMergeStyle.jpg)
-~~~
+When setting up composition arcs in Houdini, we can either do it via nodes or code. We recommend first doing everything via nodes and then refactoring it to be code based, as it is faster. Our custom HDAs are usually the ones that bring in data, as this is the core task of every pipeline.
+
+In our [Tips & Tricks section](../faq/overview.md), we have provided these common examples:
+- [Extracting payloads and references from an existing layer stack with anonymous layers](../faq/overview.md#compositionReferencePayloadLayerStack)
+- [Efficiently re-writing existing hierarchies as variants](../faq/overview.md#compositionArcVariantReauthor)
+- [Adding overrides via inherits](../faq/overview.md#compositionArcInherit)
+
+These provide entry points of how you can post-process data do you needs, after you have SOP imported it.

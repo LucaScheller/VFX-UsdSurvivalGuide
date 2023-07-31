@@ -59,7 +59,7 @@
 - [Software Integrations](./dcc/overview.md)
     - [Houdini](./dcc/houdini/overview.md)
         - [General Approach](./dcc/houdini/approach.md)
-        - [Creating efficient LOPs HDAs](./dcc/houdini/hda/hda.md)
+        - [Creating efficient LOPs HDAs](./dcc/houdini/hda/overview.md)
         - [Geometry IO / FX](./dcc/houdini/fx/overview.md)
             - [Particles](./dcc/houdini/fx/particles.md)
             - [Deforming Meshes](./dcc/houdini/fx/deformingMeshes.md)
