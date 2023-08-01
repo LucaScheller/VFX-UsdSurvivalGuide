@@ -1141,14 +1141,14 @@ sw.Start()
 sw.Stop()
 sw.Start()
 sw.Stop()
-print(sw.GetMilliseconds(), sw.sampleCount)
+print(sw.milliseconds, sw.sampleCount)
 sw.Reset()
 # Add sampleCount + accumulated time from other stop watch
 other_sw = Tf.StopWatch()
 other_sw.Start()
 other_sw.Stop()
 sw.AddFrom(other_sw) 
-print(sw.GetMilliseconds(), sw.sampleCount)
+print(sw.milliseconds, sw.sampleCount)
 #// ANCHOR_END: profilingStopWatch
 
 #// ANCHOR: pluginsRegistry

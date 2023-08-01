@@ -1,3 +1,34 @@
+#// ANCHOR: stageQueryAttribute
+from pxr import Sdf, Usd
+stage = Usd.Stage.CreateInMemory()
+prim = stage.DefinePrim(Sdf.Path("/cube"), "Cube")
+
+size_attr = prim.GetAttribute("size")
+for frame in range(10000):
+    size_attr.Set(frame, frame)
+
+attr_query = Usd.AttributeQuery(prim, "size")
+print(attr_query.Get(1001)) # Returns 2.0
+
+from pxr import Tf
+# Attribute
+sw = Tf.Stopwatch()
+sw.Start()
+for frame in range(10000):
+    size_attr.Get(frame)
+sw.Stop()
+print(sw.milliseconds) # Returns: 14
+sw.Reset()
+# Attribute Query
+sw = Tf.Stopwatch()
+sw.Start()
+for frame in range(10000):
+    attr_query.Get(frame)
+sw.Stop()
+print(sw.milliseconds) # Returns: 7
+sw.Reset()
+#// ANCHOR_END: stageQueryAttribute
+
 #// ANCHOR: stageQueryInheritedPrimvars
 from pxr import Sdf, Usd, UsdGeom
 stage = Usd.Stage.CreateInMemory()

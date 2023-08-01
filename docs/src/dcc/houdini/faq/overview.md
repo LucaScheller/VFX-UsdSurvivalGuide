@@ -17,13 +17,23 @@ Now we've kind of covered these topics in our [A practical guide to composition]
 We strongly recommend reading these pages before this one, as they cover the concepts in a broader perspective. 
 
 ### Extracting payloads and references from an existing layer stack with anonymous layers <a name="compositionReferencePayloadLayerStack"></a>
-The important thing to remember is, that in a pipeline, geometry that has been generated in-memory in session, has to be brought in the same was as when loaded via an on disk cache.
+When building our composition in USD, we always have to make sure that layers that were generated in-memory are loaded via the same arc as layers loaded from disk.
+If we don't do this, our composition would be unreliable in live preview vs cache preview mode.
 
-With USD this means, that for live caches, you will payload/reference an anonymous layer.
+Composition arcs always reference a specific prim in a layer, therefore we usually attach our caches to some sort of predefined root prim (per asset).
+This means that if we import SOP geometry, with multiple of these root hierarchies, we should also create multiple references/payloads so that each root prim can be unloaded/loaded via the payload mechanism.
+
+Instead of having a single SOP import or multiple SOP imports that are flattened to a single layer, we can put a SOP import within a for loop. Each loop iteration will then carry only the data of the current loop index (in our example box/sphere/tube) its own layer, because we filter the sop level by loop iteration.
+
+The very cool thing then is that in a Python node, we can then find the layers from the layer stack of the for loop and individually payload them in. 
+
+Again you can also do this with a single layer, this is just to demonstrate that we can pull individual layers from another node.
 
 <video width="100%" height="100%" controls autoplay muted loop>
-  <source src="./hdaOrderOfOperationsLayerBreak.mp4" type="video/mp4" alt="Houdini Merge Order">
+  <source src="./houdiniCompositionReferencePayloadForLoop.mp4" type="video/mp4" alt="Houdini Reference/Payload For Loop">
 </video>
+
+You can find this example in the composition.hipnc file in our [USD Survival Guide - GitHub Repo](https://github.com/LucaScheller/VFX-UsdSurvivalGuide/tree/main/files/dcc/houdini).
 
 ## Efficiently re-writing existing hierarchies as variants <a name="compositionArcVariantReauthor"></a>
 Via the low level API we can also copy or move content on a layer into a variant. This is super powerful to easily create variants from caches.
@@ -47,6 +57,21 @@ And for copying:
 {{#include ../../../../../code/core/composition.py:compositionArcVariantCopyHoudini}}
 ```
 ~~~
+
+## Adding overrides via inherits <a name="compositionArcInherit"></a>
+We can add inherits as explained in detail in our [composition - LIVRPS](../../../core/composition/livrps.md#inherits) section.
+
+We typically drive the prim selection through a user defined [prim pattern/lop selection rule](../performance/overview.md#houLopSelectionRule). In the example below, for simplicity, we instead iterate over all instances of the prototype of the first pig prim.
+
+~~~admonish tip title=""
+```python
+{{#include ../../../../../code/dcc/houdini.py:houdiniCompositionInheritInstanceable}}
+```
+~~~
+
+<video width="100%" height="100%" controls autoplay muted loop>
+  <source src="./houdiniCompositionInheritInstanceable.mp4" type="video/mp4" alt="Houdini Composition Inherit">
+</video>
 
 ## How do I check if an attribute has time samples (if there is only a single time sample)? <a name="timeSampleValueMightBeTimeVarying"></a>
 We often need to check if an attribute has animation or not. Since time samples can come through many files when using value clips, USD ships with the `Usd.Attribute.ValueMightBeTimeVarying()` method. This checks for any time samples and exists as soon as it has found some as to opening every file like `Usd.Attribute.GetTimeSamples` does.

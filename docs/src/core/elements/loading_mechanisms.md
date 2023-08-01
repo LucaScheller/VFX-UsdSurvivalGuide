@@ -198,7 +198,7 @@ Traversing stages works via the `Usd.PrimRange` class. The `stage.Traverse`/`sta
 
 We have two traversal modes:
 - Default: Iterate over child prims
-- PreAndPostVisit: Iterate over the hierarchy and visit each prim twice, once when first encountering it, and then again when "exiting" the child hierarchy. See our [primvars query](../../production/caches/primvar.md) section for a hands-on example why this can be useful.
+- PreAndPostVisit: Iterate over the hierarchy and visit each prim twice, once when first encountering it, and then again when "exiting" the child hierarchy. See our [primvars query](../../production/caches/attribute.md#primvars) section for a hands-on example why this can be useful.
 
 We also have a thing called "predicate"([Predicate Overview](https://openusd.org/dev/api/prim_flags_8h.html#Usd_PrimFlags)), which just defines what core metadata to consult for pre-filtering the result:
 - Usd.PrimIsActive: Usd.Prim.IsActive() - If the "active" metadata is True

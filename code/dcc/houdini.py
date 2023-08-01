@@ -1,3 +1,26 @@
+#// ANCHOR: houdiniCompositionInheritInstanceable
+from pxr import Gf, Sdf, Usd
+node = hou.pwd()
+stage = node.editableStage()
+pig_a_prim = stage.GetPrimAtPath(Sdf.Path("/pig_A"))
+# Inspect prototype and collect what to override
+prototype = pig_a_prim.GetPrototype()
+# Create overrides
+class_prim = stage.CreateClassPrim(Sdf.Path("/__CLASS__/pig"))
+edit_prim = stage.DefinePrim(class_prim.GetPath().AppendPath("geo/shape"))
+xform = Gf.Matrix4d()
+xform.SetTranslate([0, 2, 0])
+edit_prim.CreateAttribute("xformOpOrder", Sdf.ValueTypeNames.TokenArray).Set(["xformOp:transform:transform"])
+edit_prim.CreateAttribute("xformOp:transform:transform", Sdf.ValueTypeNames.Matrix4d).Set(xform)
+# Add inherits
+instance_prims = prototype.GetInstances()
+for instance_prim in instance_prims:
+    inherits_api = instance_prim.GetInherits()
+    # if instance_prim.GetName() == "pig_B":
+    #     continue
+    inherits_api.AddInherit(class_prim.GetPath(), position=Usd.ListPositionFrontOfAppendList)    
+#// ANCHOR_END: houdiniCompositionInheritInstanceable
+
 #// ANCHOR: houdiniTimeDependency
 def GetValueMightBeTimeVarying(attribute, checkVariability=False):
     """Check if an attribute has time samples.
