@@ -20,21 +20,38 @@ Currently this is limited to LOPs basics and SOP geometry importing/exporting, w
     1. [Importing from LOPs to SOPs](#IOLopsToSops)
     1. [Exporting from SOPs to LOPs](#IOSopsToLops)
     1. [Stage/Layer Metrics](#IOLayerMetrics)
-1. [Composition]
+1. [Composition](#composition)
     1. [Asset Resolver](#compositionAssetResolver)
     1. [Creating Composition Arcs](#compositionAssetResolver)
 
-## TL;DR - <Topic> In-A-Nutshell <a name="summary"></a>
-- Main points to know
+## TL;DR - Approach In-A-Nutshell <a name="summary"></a>
+When working in Houdini, the basics our pipeline has to handle is USD import/export as well as setting up the correct composition.
+
+As covered in our composition section, composition arcs are centered around loading a specific prim (and its children) in the hierarchy. We usually design our path structure around "root" prims. That way we can load/unload a specific hierarchy selection effectively. With value clips (USD speak for per frame/chunk file loading) we also need to target a specific root prim, so that we can keep the hierarchy reference/payloadable and instanceable.
+
+To make it convenient for our artists to use USD, we should therefore make handling paths and composition as easy as possible. Our job is to abstract away composition, so that we use its benefits as best as possible without inconveniencing our artists.
+
+~~~admonish tip title="Houdini | SOPs to LOPs Path | Evaluation Order"
+As for paths, Houdini's SOPs to LOPs mechanism in a nutshell is:
+1. Check what "path" attribute names to consult
+1. Check (in order) if the attribute exists and has a non-empty value
+1. If the value is relative (starts with "./some/Path", "some/Path", "somePath", so no `/`), prefix the path with the setting defined in "Import Path Prefix" (unless it is a point instance prototype/volume grid path, see exceptions below).
+1. If no value is found, use a fallback value with the `<typeName>_<idx>` syntax.
+
+There are two special path attributes, that cause a different behavior for the relative path anchoring.
+- **usdvolumesavepath**: This defines the path of your "Volume" prim. 
+- **usdinstancerpath**: This defines the path of your "PointInstancer" prim (when exporting packed prims as point instancers).
+~~~
 
 ## What should I use it for? <a name="usage"></a>
 ~~~admonish tip
-Summarize actual production relevance.
+We'll be using LOPs to create awesome VFX via USD!
 ~~~
 
 ## Resources <a name="resources"></a>
 - [Importing SOP geometry into USD](https://www.sidefx.com/docs/houdini/solaris/sop_import.html)
 - [Solaris Performance](https://www.sidefx.com/docs/houdini/solaris/performance.html)
+- [Houdini Configure Layer](https://www.sidefx.com/docs/houdini/nodes/lop/configurelayer.html)
 
 ## Overview <a name="overview"></a>
 <video width="100%" height="100%" controls autoplay muted loop>
@@ -173,3 +190,33 @@ This ensures that the resulting cache is valid enough to work downstream in our 
 ~~~
 
 ### Stage/Layer Metrics <a name="IOLayerMetrics"></a>
+As mentioned in our [stage/layer](../../core/elements/layer.md#layerMetrics) and [animation](../../core/elements/animation.md#animationMetadata) sections, we can/should setup layer related metrics.
+
+They work the same way in Houdini, the only difference is we have to use Houdini's [Configure Layer](https://www.sidefx.com/docs/houdini/nodes/lop/configurelayer.html) node to set them, if we want to set them on the root layer/stage (due to how Houdini manages stages).
+
+![Houdini Stage/Layer metrics](houdiniLayerMetrics.jpg)
+
+## Composition <a name="composition"></a>
+
+### Asset Resolver <a name="compositionAssetResolver"></a>
+In Houdini our asset resolver is loaded as usual via the plugin system. If we don't provide a context, the default context of the resolver is used.
+
+We can pass in our [asset resolver context](../../core/plugins/assetresolver.md#assetResolverContext) in two ways:
+- Via the the configure stage node. When set via the stage node, the left most node stream with a context "wins", when we start merging node trees.
+- Globally via the scene graph tree panel settings.
+
+| Node Tree                                               | Global Context                                               |
+|---------------------------------------------------------|--------------------------------------------------------------|
+| ![LOPs SOP Import](houdiniAssetResolverContextNode.jpg) | ![SOPs Usd Configure](houdiniAssetResolverContextGlobal.jpg) |
+
+For more info about resolvers, check out our [asset resolver](../../core/plugins/assetresolver.md) section.
+We provide reference resolver implementations that are ready to be used in production.
+
+### Creating Composition Arcs <a name="compositionAssetResolver"></a>
+Creating composition arcs in LOPs can be done via Houdini's sublayer, variant and reference (for inherit/payload/specializes) nodes.
+
+We recommend using these for prototyping composition. Once we've figured out where we want to go, we should re-write it in Python, as it is easier and a lot faster when working on large hierarchies.
+
+This guide comes with an extensive [composition fundamentals](../../core/composition/overview.md)/[composition in production](../../production/composition.md) section with a lot of code samples. 
+
+We also cover advanced composition arc creation, specifically for Houdini, in our [Tips & Tricks](../houdini/faq/overview.md#compositionOverview) section.
