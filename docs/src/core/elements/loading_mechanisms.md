@@ -86,6 +86,7 @@ Houdini exposes all three in two different ways:
   <source src="houdiniSceneGraphTreePanel.mp4" type="video/mp4" alt="Houdini Scene Graph Tree Panel">
 </video>
 
+More Houdini specific information can be found in our [Houdini - Performance Optimizations](../../dcc/houdini/performance/overview.md#loadingMechanisms) section.
 
 ### Layer Muting <a name="loadingMechanismsLayerMuting"></a>
 We can "mute" (disable) layers either globally or per stage.

@@ -35,7 +35,6 @@ For animation and value clips stitching:
 For collection authoring/compression:
 - We cover these in detail in our [collection section](../core/elements/collection.md#collectionQuery).
 
-
 ## Utility functions in the Sdf module <a name="sdf"></a>
 
 ### Moving/Renaming/Removing prim specs with Sdf.BatchNamespaceEdit() <a name="sdfBatchNamespaceEdit"></a>

@@ -3,6 +3,8 @@ As with any other network in Houdini, we can also create HDAs in LOPs.
 
 This page will focus on the most important performance related aspects of LOP HDAs, we will be referencing some of the points mentioned in the [performance optimizations](./performance/overview.md) section with a more practical view.
 
+You can find all the .hip files of our shown examples in our [USD Survival Guide - GitHub Repo](https://github.com/LucaScheller/VFX-UsdSurvivalGuide/tree/main/files/dcc/houdini).
+
 # Table of contents
 1. [Overview](#overview)
 1. [HDA Template Setup](#hdaTemplate)

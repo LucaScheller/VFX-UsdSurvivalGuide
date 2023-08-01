@@ -1,8 +1,9 @@
 # Performance Optimizations
+You can find all the .hip files of our shown examples in our [USD Survival Guide - GitHub Repo](https://github.com/LucaScheller/VFX-UsdSurvivalGuide/tree/main/files/dcc/houdini).
 
 # Table of contents
 1. [Selection Rules](#houLopSelectionRule)
-1. [How to get your scene to load and open fast](#loadingMechanisms)
+1. [How to get your stage to load and open fast](#loadingMechanisms)
 1. [Write full time sample ranges (with subsamples)](#timeSample) 
 1. [Layer Content Size](#layerContentSize)
 1. [Layer Count](#layerCount)
@@ -43,7 +44,45 @@ Now the same rules apply for fast traversals:
 - We should aim to pre-filter by type `%type:<ConcreteTypedSchemaName>` and kind `%kind:component`, before querying other data as this is fast
 - Attributes lookups (via vex in the expression) are heavy to compute
 
-## How to get your scene to load and open fast <a name="loadingMechanisms"></a>
+## How to get your stage to load and open fast <a name="loadingMechanisms"></a>
+As discussed in our [Loading/Traversing section](../../../core/elements/loading_mechanisms.md), we can limit how stages are opened via our three loading mechanisms (ordered from lowest to highest granularity):
+- **Layer Muting**: This controls what layers are allowed to contribute to the composition result.
+- **Prim Population Mask**: This controls what prim paths to consider for loading at all.
+- **Payload Loading**: This controls what prim paths, that have payloads, to load.
+
+Before we proceed, it is important to note, that USD is highly performant in loading hierarchies. When USD loads .usd/.usdc binary crate files, it sparsely loads the content: It can read in the hierarchy without loading in the attributes. This allows it to, instead of loading terabytes of data, to only read the important bits in the file and lazy load on demand the heavy data when requested by API queries or a hydra delegate.
+
+What does this mean for Houdini? It can often be enough to pause the scene viewer when opening the file. It can be done via this snippet:
+~~~admonish tip title=""
+```python
+for pane in hou.ui.paneTabs():
+    if pane.type == hou.paneTabType.SceneViewer:
+        pane.setSceneGraphStageLocked(False)
+```
+~~~
+
+Houdini exposes these three loading mechanisms in two different ways:
+- **Configue Stage** LOP node: This is the same as setting it per code via the stage.
+- **Scene Graph Tree** panel: In Houdini, that stage that gets rendered, is actually not the stage of your node (at least what we gather from reverse engineering). Instead it is a duplicate, that has overrides in the session layer and loading mechanisms listed above.
+
+~~~admonish danger title="Scene Graph Tree vs Configure Stage"
+Everything you set in your scene graph tree panel is a viewport **only** override to your stage. This can be very confusing when first starting out in Houdini.
+If we want to apply it to the actual stage, we have to use the configure stage node. This will then also affect our scene graph tree panel.
+
+Why does Houdini do this? As mentioned hierarchy loading is fast, streaming the data to Hydra is not. This way we can still see the full hierarchy, but separately limit what the viewer sees, which is actually a pretty cool mechanism.
+~~~
+
+Let's have a look at the differences, as you can see anything we do with the configure stage node actually affects our hierarchy, whereas scene graph tree panel edits are only for the viewport:
+
+<video width="100%" height="100%" controls autoplay muted loop>
+  <source src="./loadingMechanisms.mp4" type="video/mp4" alt="Scene Graph Tree vs Configure Stage">
+</video>
+
+Another great tip is to disable tieing the scene graph panel to the active selected node:
+
+![Scene Graph Tree Panel Node Displayed](houdiniSceneGraphTreePanelActiveNode.jpg)
+
+Instead it is then tied to you active display flag, which makes things a lot faster when clicking through your network.
 
 ## Write full time sample ranges (with subsamples) <a name="timeSample"></a>
 In Houdini we always want to avoid time dependencies where possible, because that way the network doesn't have to recook the tree per frame.
