@@ -7,6 +7,7 @@ You can find all the .hip files of our shown examples in our [USD Survival Guide
 1. [Write full time sample ranges (with subsamples)](#timeSample) 
 1. [Layer Content Size](#layerContentSize)
 1. [Layer Count](#layerCount)
+1. [AOV Count](#renderAOVCount)
 
 ## Selection Rules <a name="houLopSelectionRule"></a>
 Houdini's [LOPs Selection Rule/Prim Pattern Matching](https://www.sidefx.com/docs/houdini/solaris/pattern.html) syntax is a artist friendly wrapper around stage traversals.
@@ -182,3 +183,50 @@ When we want to spawn a large hierarchy, we recommend doing it via Python, as it
 
 ![Houdini For Each Loop Merge Style](houdiniForEachMergeStyle.jpg)
 ~~~
+
+## AOV Count <a name="renderAOVCount"></a>
+Now this tip is kind of obvious, but we'd though we'd mention it anyway:
+
+When rendering interactively in the viewport, deactivating render var prims that are connected to the render outputs you are rendering, can speed up interactivity. Why? We are rendering to fewer image buffers, so less memory consumption and less work for the renderer to output your rays to pixels.
+
+Our AOVs are connected via the `orderedVars` relationship to the render product. That means we can just overwrite it to only contain render vars we need during interactive sessions. For farm submissions we can then just switch back to all.
+
+The same goes for the `products` relationship on your render settings prim. Here you can also just connect the products you need.
+
+~~~admonish tip title=""
+```python
+def Scope "Render"
+{
+    def Scope "Products"
+    {
+        def RenderProduct "beauty" (
+        )
+        {
+            rel orderedVars = [
+                </Render/Products/Vars/Beauty>,
+                </Render/Products/Vars/CombinedDiffuse>,
+                </Render/Products/Vars/DirectDiffuse>,
+                </Render/Products/Vars/IndirectDiffuse>,
+            ]
+            token productType = "raster"
+        }
+    }
+
+    def RenderSettings "rendersettings" (
+        prepend apiSchemas = ["KarmaRendererSettingsAPI"]
+    )
+    {
+        rel camera = </cameras/render_cam>
+        rel products = </Render/Products/beauty>
+        int2 resolution = (1280, 720)
+    }
+}
+```
+~~~
+
+In Houdini this is as simple as editing the relationship and putting the edit behind a switch node with a context option switch. On our render USD rop we can then set the context option to 1 and there you go, it is now always on for the USD rop write.
+
+<video width="100%" height="100%" controls autoplay muted loop>
+  <source src="./houdiniRenderAOVCount.mp4" type="video/mp4" alt="Houdini Render AOV Count">
+</video>
+

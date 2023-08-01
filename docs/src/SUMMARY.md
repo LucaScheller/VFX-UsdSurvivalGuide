@@ -49,7 +49,7 @@
     - [Stage API Query Caches](./production/caches/overview.md)
         - [Xforms](./production/caches/xform.md)
         - [BoundingBox](./production/caches/boundingbox.md)
-        - [Attribute/(Inherited) Primvars](./production/caches/attribute.md)
+        - [Attribute/(Inherited) ePrimvars](./production/caches/attribute.md)
         - [Material Binding](./production/caches/materialbinding.md)
         - [Collection Membership](./production/caches/collection.md)
         - [Composition](./production/caches/composition.md)

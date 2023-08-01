@@ -75,11 +75,8 @@ merge it via `UsdUtils.StitchLayers(<StrongLayer>, <WeakerLayer>)`. This is ofte
 a custom merge logic, as we get the "high layer wins" logic for free and this is what we are used to when working with USD.
 
 ~~~admonish question title="Still under construction!"
-This sub-section is still under development, it is subject to change and needs extra validation.
-
 We'll add some examples for custom filtering at a later time.
 ~~~
-
 
 ~~~admonish tip title="Sdf.CopySpec | Copying prim/property specs | Click to expand!" collapsible=true
 ```python
