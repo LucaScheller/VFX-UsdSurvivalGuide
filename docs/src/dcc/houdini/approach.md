@@ -1,6 +1,6 @@
 # General Approach
 ~~~admonish question title="Still under construction!"
-We'll likely expand our Houdini section in the future with topics such as:
+We'll expand our Houdini section in the future with topics such as:
 - lighting
 - rendering (render products/render vars (USD speak for AOVs)/render procedurals)
 - asset/shot templates
@@ -33,7 +33,7 @@ Summarize actual production relevance.
 ~~~
 
 ## Resources <a name="resources"></a>
-- [API Docs]()
+- [Importing SOP geometry into USD](https://www.sidefx.com/docs/houdini/solaris/sop_import.html)
 - [Solaris Performance](https://www.sidefx.com/docs/houdini/solaris/performance.html)
 
 ## Overview <a name="overview"></a>
@@ -54,15 +54,15 @@ You favorite node will be the Python LOP node, as we have exposure to the full U
 Ready!?! Let's goooooooo!
 
 ## Path Structure <a name="path"></a>
-As covered in our [composition section](../../core/composition/overview.md), composition arcs are centered around loading a specific prim (and its children) in the hierarchy. We usually group our path structure around an "root" prim. That way we can load/unload a specific hierarchy selection effectively. With value clips (USD speak for per frame/chunk file loading) we also need to target a specific root prim, so that we can keep the hierarchy reference/payloadable and instanceable.
+As covered in our [composition section](../../core/composition/overview.md), composition arcs are centered around loading a specific prim (and its children) in the hierarchy. We usually design our path structure around "root" prims. That way we can load/unload a specific hierarchy selection effectively. With value clips (USD speak for per frame/chunk file loading) we also need to target a specific root prim, so that we can keep the hierarchy reference/payloadable and instanceable.
 
 As pipeline developers, we therefore should make it as convenient as possible for artists to not have to worry about these "root" prims.
 
 We have two options:
-- We give artists the option to not be specific about these "root" prims. Everything that doesn't have one in its name, will then be grouped under a generic "/root" prim (or whatever we define as a "Import Path Prefix" on our import configure nodes). 
+- We give artists the option to not be specific about these "root" prims. Everything that doesn't have one in its name, will then be grouped under a generic "/root" prim (or whatever we define as a "Import Path Prefix" on our import configure nodes). This makes it hard for pipeline to re-target it into a specific (shot) hierarchy. It kind of breaks the USD principle of layering data together.
 - We enforce to always have these root prims in our path. This looses the flexibility a bit, but makes our node network easier to read as we always deal with absolute(s, like the Sith) prim paths.
 
-When working in SOPs, we don't have sidecar metadata per path segment (prim) as in LOPs, therefore we need to define a naming convention upfront, where we can detect just based on the path, if a root is defined or not. There is currently now industry standard (yet), but it might be coming sooner than we might think! Say goodbye to vendor specific asset structures, say hello to globally usable assets.
+When working in SOPs, we don't have sidecar metadata per path segment (prim) as in LOPs, therefore we need to define a naming convention upfront, where we can detect just based on the path, if a root is defined or not. There is currently no industry standard (yet), but it might be coming sooner than we might think! Say goodbye to vendor specific asset structures, say hello to globally usable assets.
 
 As also mentioned in our composition section, this means that only prims under the root prims can have data (as the structure above is not payloaded/referenced). Everything we do in SOPs, affects only the leaf prims in world space. So we are all good on that side.
 
@@ -96,7 +96,7 @@ For example:
     1. Packed: "./level_1"
         1. Mesh: "myCoolMesh"
 
-The resulting path will be "/level_0/level_1/myCoolMesh". Be careful, using "../../../myPath" works too, strongly **not** recommended as it breaks out of the path (like a cd ../../path/to/other/folder)!
+The resulting path will be "/level_0/level_1/myCoolMesh". Be careful, using "../../../myPath" works too, strongly **not** recommended as it breaks out of the path (like a `cd ../../path/to/other/folder``)!
 
 ~~~admonish danger title="Important | Paths and Packed Prims"
 When working with paths in SOPs and packed prims, we have to set the path before we pack the geometry. We can't adjust it afterwards, without unpacking the geometry. If we define absolute paths within packed geometry, they will not be relative to the parent packed level. This can cause unwanted behaviours (as your hierarchy "breaks" out of its packed level). We therefore recommend not having absolute paths inside packed prims.
@@ -119,18 +119,57 @@ Here's a video showing all variations, you can find the file, as mentioned above
 </video>
 
 ### Importing from LOPs to SOPs <a name="IOLopsToSops"></a>
+Importing from LOPs is done via two nodes:
+- **LOP Import**: This imports packed USD prims.
+- **USD Unpack**: This unpacks the packed USD prims to polygons.
+
+<video width="100%" height="100%" controls autoplay muted loop>
+  <source src="./houdiniSOPsLOPImportTraversal.mp4" type="video/mp4" alt="Houdini LOP Import Traversal">
+</video>
+
+~~~admonish danger title="Selecting Parent & Child Prims"
+If we select a parent and child prim at the same time, we will end up with duplicated geometry on import (and the import will take twice as long).
+
+By default the "USD Unpack" node traverses to "GPrims" (Geometry Prims), so it only imports anything that is a geo prim. That means on LOP import, we don't have to select our leaf mesh prims ourselves, when we want the whole model.
+~~~
+
+As loading data takes time, we recommend being as picky as possible of what you want to import. We should not import our whole stage as a "USD Packed Prim" and then traverse/break it down, instead we should pick upfront what to load. This avoids accidentally creating doubled imports and keeps things fast.
+
+~~~admonish tip title="Pro Tip | Import Xforms"
+Our packed USD prims, carry the same transform information as standard packed geo. We can use this to parent something in SOPs by extracting the packed intrinsic transform to the usual point xform attributes.
+~~~
+
+If we want to import data from a LOPs PointInstancer prim, we can LOP import the packed PointInstancer prim and then unpack it polygons. This will give us a packed USD prim per PoinstInstancer prin (confusing right?). Be careful with displaying this in the viewport, we recommend extracting the xforms and then adding a add node that only keeps the points for better performance.
+
+~~~admonish danger title="USD Packed Prims"
+Displaying a lot of packed prims in SOPS can lead to Houdini being unstable. We're guessing because it has to draw via Hydra and HoudiniGL and because USD packed prims draw a stage partially, which is a weird intermediate filter level.
+
+We recommend unpacking to polygons as "fast" as possible and/or pre-filtering the LOP import as best as possible.
+~~~
+
+<video width="100%" height="100%" controls autoplay muted loop>
+  <source src="./houdiniSOPsLOPImportPointInstancer.mp4" type="video/mp4" alt="Houdini LOP Import PointInstancer">
+</video>
 
 ### Exporting from SOPs to LOPs <a name="IOSopsToLops"></a>
+Export to LOPs is as simple as creating a SOP Import node and picking the SOP level geo.
+
+As described above, we can drive the SOP import settings via the "USD Configure" SOPs level node or the "SOP Import" LOPs node.
+
+We go into detail on how to handle the different (FX) geometry types in our [Geometry IO/FX section](../houdini/fx/overview.md).
+
+We recommend building workflows for each geo type (points/deformed meshes/transforms/copy-to-points/RBD/crowds) as this makes it easy to pre-flight check as we know exactly what to export and we can optimize (the heck) out of it.
+
 ~~~admonish tip title="Pro Tip | Working Against Stages"
 When working LOPs, we like to use the terminology: "We are working against a stage."
 
 What do we mean with that? When importing from or editing our stage, we are always making the edits relative to our current stage.
 When importing to SOPs, we can go out of sync, if our SOP network intermediate-caches geometry. For example if it writes SOP imported geometry to a .bgeo.sc cache and the hierarchy changes in LOPs, you SOPs network will not get the correct hierarchy until it is re-cached.
 
-This can start being an issue, when you want to "over" the data from SOPs onto an existing hierarchy. Therefore we should always try to write our caches "against a stage". Instead of just caching our USD to disk and then composition arcing it into our "main" node stream.
+This can start being an issue, when you want to "over" the data from SOPs onto an existing hierarchy. Therefore we should always try to write our caches "against a stage". Instead of just caching our USD to disk and then composition arc-ing it into our "main" node stream.
 
 This means that we can validate our hierarchy and read stage metrics like shutter sample count or local space transforms on USD export.
-This ensures that the resulting cache is valid enough to work downstream in our pipeline. 
+This ensures that the resulting cache is valid enough to work downstream in our pipeline.  Houdini's "SOP Import" node is also constructed to work against the input connected stage and does alot of this for you (e.g. material binding/local space correction ("Adjust Transforms for Input Hierarchy")).
 ~~~
 
 ### Stage/Layer Metrics <a name="IOLayerMetrics"></a>

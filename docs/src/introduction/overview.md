@@ -3,11 +3,11 @@
 # Usd Survival Guide
 [![Deploy Documentation to GitHub Pages](https://github.com/LucaScheller/VFX-UsdAssetResolver/actions/workflows/mdbook.yml/badge.svg)](https://github.com/LucaScheller/VFX-UsdSurvivalGuide/actions/workflows/mdbook.yml)
 
-This repository aims to be a practical onboarding guide to [Usd](https://openusd.org/release/index.html) for software developers and pipeline TDs.
+This repository aims to be a practical onboarding guide to [USD](https://openusd.org/release/index.html) for software developers and pipeline TDs.
 For more information what makes this guide unique, see the [motivation](../introduction/motivation.md) section.
 
-```admonish warning
-This guide is currently still under construction and will be properly introduced at [Siggraph 2023 - Houdini Hive](https://www.sidefx.com/houdini-hive/siggraph-2023/) on Wednesday, 9. of August 2023 at 11:00 AM PST.
+```admonish success title="Siggraph Presentation"
+This guide will be officially introduced at [Siggraph 2023 - Houdini Hive](https://www.sidefx.com/houdini-hive/siggraph-2023/) on Wednesday, 9. of August 2023 at 11:00 AM PST.
 ```
 
 {{#include ../contributors.md}}
