@@ -281,8 +281,7 @@ def pointinstancer_prototypes_reorder(layers):
         return
     # Combine prototype mapping data
     for k, v in instancer_prototype_mapping.items():
-        instancer_prototype_mapping[k] = list(v)
-        instancer_prototype_mapping[k].sort()
+        instancer_prototype_mapping[k] = sorted(v)
     # Apply combined targets
     for layer in layers:
         for instancer_prim_path, prototypes_prim_path_strs in instancer_prototype_mapping.items():

@@ -459,7 +459,7 @@ with Sdf.ChangeBlock():
         iterator.PruneChildren()
         prim_path = prim.GetPath()
         prim_spec = layer.GetPrimAtPath(prim_path)
-        # Copy content into variant
+        # Move content into variant
         variant_set_spec = Sdf.VariantSetSpec(prim_spec, "model")
         variant_spec = Sdf.VariantSpec(variant_set_spec, "myCoolVariant")
         variant_prim_path = prim_path.AppendVariantSelection("model", "myCoolVariant")

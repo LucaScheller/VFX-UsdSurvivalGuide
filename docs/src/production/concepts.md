@@ -4,8 +4,8 @@
 1. [Edit Targets](#editTargets)
 1. [Utility functions in the Usd.Utils module](#usdUtils)
 1. [Utility functions in the Sdf module](#sdf)
-    1. [Moving/Renaming/Removing prim specs with Sdf.BatchNamespaceEdit()](#sdfBatchNamespaceEdit)
-    1. [Copying data in the low level API with Sdf.CopySpec](#sdfCopySpec)
+    1. [Moving/Renaming/Removing prim/property/variant specs with Sdf.BatchNamespaceEdit()](#sdfBatchNamespaceEdit)
+    1. [Copying data with Sdf.CopySpec](#sdfCopySpec)
     1. [Delaying change notifications with the Sdf.ChangeBlock](#sdfChangeBlock)
 1. [Relationships](#relationship)
     1. [Special Relationships](#relationshipSpecial)
@@ -37,9 +37,66 @@ For collection authoring/compression:
 
 ## Utility functions in the Sdf module <a name="sdf"></a>
 
-### Moving/Renaming/Removing prim specs with Sdf.BatchNamespaceEdit() <a name="sdfBatchNamespaceEdit"></a>
+### Moving/Renaming/Removing prim/property/variant specs with Sdf.BatchNamespaceEdit() <a name="sdfBatchNamespaceEdit"></a>
+We've actually used this quite a bit in the guide so far, so in this section we'll summarize its most important uses again:
 
-### Sdf.CopySpec <a name="sdfCopySpec"></a>
+#### Using Sdf.BatchNamespaceEdit() moving/renaming/removing prim/property (specs)
+We main usage is to move/rename/delete prims. We can only run the name space edit on a layer, it does not work with stages.
+Thats means if we have nested composition, we can't rename prims any more. In production this means we'll only be using this
+with the "active" layer, that we are currently creating/editing. All the edits added are run in the order they are added,
+we have to be careful what order we add removes/renames if they interfere with each other.
+
+~~~admonish tip title="Sdf.BatchNamespaceEdit | Moving/renaming/removing prim/property specs | Click to expand!" collapsible=true
+```python
+{{#include ../../../code/production/production.py:productionConceptsSdfBatchNamespaceMoveRenameDelete}}
+```
+~~~
+
+#### Using Sdf.BatchNamespaceEdit() for variant creation
+We can create variant via the namespace edit, because variants are in-line USD namespaced paths.
+
+~~~admonish tip title="Sdf.BatchNamespaceEdit | Moving prim specs into variants | Click to expand!" collapsible=true
+```python
+{{#include ../../../code/production/production.py:productionConceptsSdfBatchNamespaceEditVariant}}
+```
+~~~
+
+We also cover variants in detail in respect to Houdini in our [Houdini - Tips & Tricks](../dcc/houdini/faq/overview.md) section.
+
+### Copying data with Sdf.CopySpec <a name="sdfCopySpec"></a>
+We use the `Sdf.CopySpec` method to copy/duplicate content from layer to layer (or within the same layer).
+
+#### Copying specs (prim and properties) from layer to layer with Sdf.CopySpec()
+The `Sdf.CopySpec` can copy anything that is representable via the `Sdf.Path`. This means we can copy prim/property/variant specs.
+When copying, the default is to completely replace the target spec. 
+
+We can filter this by passing in filter functions. Another option is to copy the content to a new anonymous layer and then
+merge it via `UsdUtils.StitchLayers(<StrongLayer>, <WeakerLayer>)`. This is often more "user friendly" than implementing
+a custom merge logic, as we get the "high layer wins" logic for free and this is what we are used to when working with USD.
+
+~~~admonish question title="Still under construction!"
+This sub-section is still under development, it is subject to change and needs extra validation.
+
+We'll add some examples for custom filtering at a later time.
+~~~
+
+
+~~~admonish tip title="Sdf.CopySpec | Copying prim/property specs | Click to expand!" collapsible=true
+```python
+{{#include ../../../code/production/production.py:productionConceptsSdfCopySpecStandard}}
+```
+~~~
+
+#### Using Sdf.CopySpec() for variant creation
+We can also use `Sdf.CopySpec` for copying content into a variant.
+
+~~~admonish tip title="Sdf.CopySpec | Copying prim specs into variants | Click to expand!" collapsible=true
+```python
+{{#include ../../../code/production/production.py:productionConceptsSdfCopySpecVariant}}
+```
+~~~
+
+We also cover variants in detail in respect to Houdini in our [Houdini - Tips & Tricks](../dcc/houdini/faq/overview.md) section.
 
 ### Delaying change notifications with the Sdf.ChangeBlock <a name="sdfChangeBlock"></a>
 Whenever we edit something in our layers, change notifications get sent to all consumers (stages/hydra delegates) that use the layer. This causes them to recompute and trigger updates.
@@ -61,51 +118,9 @@ For more info see the [Sdf.ChangeBlock](https://openusd.org/dev/api/class_sdf_ch
 
 ~~~admonish tip title=""
 ```python
-from pxr import Sdf, Tf, Usd
-def callback(notice, sender):
-    print("Changed Paths", notice.GetResyncedPaths())
-stage = Usd.Stage.CreateInMemory()
-# Add
-listener = Tf.Notice.Register(Usd.Notice.ObjectsChanged, callback, stage)
-# Edit
-layer = stage.GetEditTarget().GetLayer()
-for idx in range(5):
-    Sdf.CreatePrimInLayer(layer, Sdf.Path(f"/test_{idx}"))
-# Remove
-listener.Revoke()
-# Returns:
-"""
-Changed Paths [Sdf.Path('/test_0')]
-Changed Paths [Sdf.Path('/test_1')]
-Changed Paths [Sdf.Path('/test_2')]
-Changed Paths [Sdf.Path('/test_3')]
-Changed Paths [Sdf.Path('/test_4')]
-"""
-stage = Usd.Stage.CreateInMemory()
-# Add
-listener = Tf.Notice.Register(Usd.Notice.ObjectsChanged, callback, stage)
-with Sdf.ChangeBlock():
-    # Edit
-    layer = stage.GetEditTarget().GetLayer()
-    for idx in range(5):
-        Sdf.CreatePrimInLayer(layer, Sdf.Path(f"/test_{idx}"))
-# Remove
-listener.Revoke()
-# Returns:
-# Changed Paths [Sdf.Path('/test_0'), Sdf.Path('/test_1'), Sdf.Path('/test_2'), Sdf.Path('/test_3'), Sdf.Path('/test_4')]
+{{#include ../../../code/production/production.py:productionConceptsSdfChangeBlock}}
 ```
 ~~~
-
-
-
-
-
-
-
-
-
-
-
 
 ## Relationships <a name="relationship"></a>
 

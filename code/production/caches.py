@@ -84,3 +84,37 @@ for prim in iterator:
 0x7fea12bfe980 0x7fea12bfe980 /set/yard/tractor ['/set.primvars:size'] 5
 """
 #// ANCHOR_END: stageQueryInheritedPrimvars
+
+#// ANCHOR: stageQueryMaterialBinding
+from pxr import Sdf, Usd, UsdGeom, UsdShade
+stage = Usd.Stage.CreateInMemory()
+# Leaf prims
+cube_prim = stage.DefinePrim(Sdf.Path("/root/RENDER/pointy/cube"), "Cube")
+sphere_prim = stage.DefinePrim(Sdf.Path("/root/RENDER/round_grp/sphere"), "Sphere")
+cylinder_prim = stage.DefinePrim(Sdf.Path("/root/RENDER/round_grp/cylinder"), "Cylinder")
+round_grp_prim = sphere_prim.GetParent()
+material_prim = stage.DefinePrim(Sdf.Path("/root/MATERIALS/example_material"), "Material")
+# Parent prims
+for prim in stage.Traverse():
+    if prim.GetName() not in ("cube", "sphere", "cylinder", "example_material"):
+        prim.SetTypeName("Xform")
+
+# Bind materials via direct binding
+material = UsdShade.Material(material_prim)
+# Bind parent group
+mat_bind_api = UsdShade.MaterialBindingAPI.Apply(round_grp_prim)
+mat_bind_api.Bind(material)
+# Bind leaf prim
+mat_bind_api = UsdShade.MaterialBindingAPI.Apply(cube_prim)
+mat_bind_api.Bind(material)
+
+# Query material bindings
+materials, relationships = UsdShade.MaterialBindingAPI.ComputeBoundMaterials([cube_prim, sphere_prim, cylinder_prim])
+for material, relationship in zip(materials, relationships):
+    print(material.GetPath(), relationship.GetPath())
+"""Returns
+/root/MATERIALS/example_material /root/RENDER/pointy/cube.material:binding
+/root/MATERIALS/example_material /root/RENDER/round_grp.material:binding
+/root/MATERIALS/example_material /root/RENDER/round_grp.material:binding
+"""
+#// ANCHOR_END: stageQueryMaterialBinding

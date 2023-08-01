@@ -2889,7 +2889,7 @@ render_prim.GetParent().SetTypeName("Xform")
 material_prim.GetParent().SetTypeName("Xform")
 # Bind materials via direct binding
 material = UsdShade.Material(material_prim)
-mat_bind_api = UsdShade.MaterialBindingAPI(render_prim)
+mat_bind_api = UsdShade.MaterialBindingAPI.Apply(render_prim)
 # Unbind all
 mat_bind_api.UnbindAllBindings()
 # Bind via collection
