@@ -185,6 +185,7 @@ Like visibility, the draw mode is inherited downwards to its child prims. We can
 
 ~~~admonish danger title="Important | Draw Mode Requires Kind"
 In order for the draw mode to work, the prim and all its ancestors, must have a [kind](../plugins/kind.md) defined. Therefore it is "limited" to (asset-)root prims and its ancestors.
+See the [official docs](https://openusd.org/dev/api/class_usd_geom_model_a_p_i.html) for more info.
 ~~~
 
 Here is how we can set it via Python, it is part of the `UsdGeomModelAPI`:
@@ -195,7 +196,9 @@ Here is how we can set it via Python, it is part of the `UsdGeomModelAPI`:
 ```
 ~~~
 
-See the [official docs](https://openusd.org/dev/api/class_usd_geom_model_a_p_i.html) for more info.
+<video width="100%" height="100%" controls autoplay muted loop>
+  <source src="houdiniLoadingMechanismsDrawMode.mp4" type="video/mp4" alt="Houdini Draw Mode">
+</video>
 
 
 ## Traversing Data <a name="traverseData"></a>
