@@ -19,7 +19,10 @@ Data IO and Data Flow:
 - As a pipeline/software developer the core thing that has to work is data IO. This is something a user should never have to think about. What does this mean for you:
     - Make sure your UX experience isn't to far from what artists already know.
 - Make sure that your system of tracking layers and how your assets/shots are structured is solid enough to handle these cases:
+    - Assets with different layers (model/material/fx/lighting)
+    - FX (Asset and Shot FX, also make sure that you can also track non USD dependencies, like .bgeo, via metadata/other means)
+    - Assemblies (Assets that reference other assets)
     - Multi-Shot workflows (Optional)
-    - Re-times. Technically these are not possible via USD, so be aware of the restrictions and communicate these!
+    - Re-times (Technically these are not possible via USD (at least over a whole layer stack), so be aware of the restrictions and communicate these!)
 - It is very likely that you have to adjust certain aspects of how you handle composition at some point. In our [composition](../core/composition/overview.md) section we cover composition from an abstract implementation viewpoint, that should help keep your pipeline flexible down the line. It is one of the ways how you can be prepared for future eventualities, it does add a level of complexity though to your setups (pipeline wise, users should not have to worry about this).
 

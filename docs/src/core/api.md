@@ -15,6 +15,14 @@ Most tutorials focus primarily on the high level API, as it is a bit more conven
 We'd actually recommend starting out with the lower level API as soon as you can, as it will force you to write performant code from the start.
 ~~~
 
+Now there are also a few other base modules that supplement these two API levels, we also have contact with them in this guide:
+- **Gf**: The **G**raphics **F**oundations module provides all math related classes and utility functions (E.g matrix and vector data classes)
+- **Vt** : The **V**alue **T**ypes module provides the value types for what USD can store. Among these is also the `Vt.Array`, which allows us to efficiently map USD arrays (of various data types like int/float/vectors) to numpy arrays for fast data processing.
+- **Plug**: This module manages USD's [plugin framework](../core/plugins/overview.md).
+- **Tf**: The **T**ools **F**oundations module gives us access to profiling, debugging and C++ utilities (Python/Threading). It also houses our type registry (for a variety of USD classes).
+
+For a full overview, visit the excellently written [USD Architecture Overview - Official API Docs](https://openusd.org/release/api/_usd__overview_and_purpose.html#Usd_ArchitecturalOverview) section.
+
 ## TL;DR - API Overview In-A-Nutshell
 Here is the TL;DR version. Usd is made up of two main APIs:
 - High level API:
@@ -39,7 +47,8 @@ The high level API is often used with read ops, the low level with write ops or 
 ~~~
 
 ## Resources
-Check out a API overview here: [API Overview](./resources.md)
+- [USD Architecture Overview - Official API Docs](https://openusd.org/release/api/_usd__overview_and_purpose.html#Usd_ArchitecturalOverview)
+- [Common USD API Classes](./resources.md)
 
 ## When should I use what?
 As a rule of thumb, you use the high level API when:

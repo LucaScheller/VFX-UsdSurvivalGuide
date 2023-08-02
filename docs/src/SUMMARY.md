@@ -5,7 +5,7 @@
 
 - [Introduction](./introduction/overview.md)
     - [Motivation](./introduction/motivation.md) 
-    - [Guide Structure ⚒️](./introduction/structure.md)
+    - [Guide Structure](./introduction/structure.md)
     - [Building the guide locally](./introduction/docs.md)
     - [Future Development](./introduction/future.md)
 - [USD Essentials](./core/overview.md)
