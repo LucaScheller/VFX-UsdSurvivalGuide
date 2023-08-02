@@ -5,7 +5,7 @@ This page only covers how to compile/install custom schemas, as we cover what sc
 
 As there is a very well written documentation in the [official docs](https://openusd.org/release/api/_usd__page__generating_schemas.html), we only cover compilation(less) schema creation and installation here as a hands-on example and won't go into any customization details. You can also check out Colin's excellent [Usd-Cook-Book](https://github.com/ColinKennedy/USD-Cookbook/tree/master/plugins/custom_schemas_with_python_bindings) example.
 
-# Table of contents
+# Table of Contents
 1. [API Overview In-A-Nutshell](#summary)
 2. [What should I use it for?](#usage)
 3. [Resources](#resources)

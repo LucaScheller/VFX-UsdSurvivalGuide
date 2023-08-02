@@ -5,7 +5,7 @@ This page will focus on the most important performance related aspects of LOP HD
 
 You can find all the .hip files of our shown examples in our [USD Survival Guide - GitHub Repo](https://github.com/LucaScheller/VFX-UsdSurvivalGuide/tree/main/files/dcc/houdini).
 
-# Table of contents
+# Table of Contents
 1. [Overview](#overview)
 1. [HDA Template Setup](#hdaTemplate)
     1. [Order of operations](#hdaOrderOfOperations)

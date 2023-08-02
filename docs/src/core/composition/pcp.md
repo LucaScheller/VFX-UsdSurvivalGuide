@@ -14,7 +14,7 @@ To summarize: Composition (the process of calculating the value sources) is cach
 
 For a detailed explanation, checkout the [Value Resolution](https://openusd.org/release/glossary.html#usdglossary-valueresolution) docs page.
 
-# Table of contents
+# Table of Contents
 1. [Prim Cache Population (PCP) In-A-Nutshell](#summary)
 1. [What should I use it for?](#usage)
 1. [Resources](#resources)

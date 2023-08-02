@@ -3,7 +3,7 @@ USD allows us to extend the base metadata that is attached to every layer, prim 
 
 To get an overview of metadata in USD, check out our dedicated [metadata section](../elements/metadata.md).
 
-# Table of contents
+# Table of Contents
 1. [Metadata Plugins In-A-Nutshell](#summary)
 1. [What should I use it for?](#usage)
 1. [Resources](#resources)

@@ -5,7 +5,7 @@ Enter example intro.
 This sub-section is still under development, it is subject to change and needs extra validation.
 ~~~
 
-# Table of contents
+# Table of Contents
 1. [<Topic> In-A-Nutshell](#summary)
 1. [What should I use it for?](#usage)
 1. [Resources](#resources)

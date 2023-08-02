@@ -8,7 +8,7 @@ pxr.Sdf.Path("/My/Example/Path")
 ```
 ~~~
 
-# Table of contents
+# Table of Contents
 1. [API Overview In-A-Nutshell](#summary)
 2. [What should I use it for?](#usage)
 3. [Resources](#resources)

@@ -7,7 +7,7 @@ As composition is USD's most complicated topic, this section will be enhanced wi
 If you detect an error or have useful production examples, please [submit a ticket](https://github.com/LucaScheller/VFX-UsdSurvivalGuide/issues/new), so we can improve the guide!
 ~~~
 
-# Table of contents
+# Table of Contents
 1. [Composition Fundamentals In-A-Nutshell](#summary)
 1. [Why should I understand the editing fundamentals?](#usage)
 1. [Resources](#resources)

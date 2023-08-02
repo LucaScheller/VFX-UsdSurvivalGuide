@@ -42,7 +42,7 @@
         - [Performance Profiling](./core/profiling/profiling.md)
     - [Vocabulary Cheatsheet ⚒️](./core/glossary.md)
     - [Resources](./core/resources.md)
-- [USD in Production / General Tips & Tricks](./production/overview.md)
+- [USD in Production](./production/overview.md)
     - [Production Checklist before you start a USD pipeline](./production/prerequisites.md)
     - [A practical guide to composition](./production/composition.md)
     - [Common schemas ('Classes' in OOP terminology) for production](./production/schemas.md)

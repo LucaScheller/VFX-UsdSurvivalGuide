@@ -10,7 +10,7 @@ This page will focus on the basics of what you need to know before getting start
 
 Currently this is limited to LOPs basics and SOP geometry importing/exporting, we'll expand this in the future to other topics.
 
-# Table of contents
+# Table of Contents
 1. [Houdini LOPs In-A-Nutshell](#summary)
 1. [What should I use it for?](#usage)
 1. [Resources](#resources)

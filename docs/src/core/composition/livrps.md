@@ -5,7 +5,7 @@ In this section we'll cover how composition arcs work and interact with each oth
 We have a supplementary Houdini scene, that you can follow along with, available in this [site's repository](https://github.com/LucaScheller/VFX-UsdSurvivalGuide/tree/main/files/composition). All the examples below will walk through this file as it easier to prototype and showcase arcs in Houdini via nodes, than writing it all in code.
 ~~~
 
-# Table of contents
+# Table of Contents
 1. [Composition Strength Ordering In-A-Nutshell](#summary)
 1. [What should I use it for?](#usage)
 1. [Resources](#resources)

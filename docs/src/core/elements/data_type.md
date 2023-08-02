@@ -1,6 +1,6 @@
 # Data Types/Roles
 
-# Table of contents
+# Table of Contents
 1. [Data Types/Roles In-A-Nutshell](#summary)
 1. [What should I use it for?](#usage)
 1. [Resources](#resources)

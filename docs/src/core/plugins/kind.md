@@ -1,7 +1,7 @@
 # Kinds
 The [kind](https://openusd.org/release/glossary.html#usdglossary-kind) metadata is a special metadata entry on prims that can be written  to mark prims with data what "hierarchy level type" it is. This way we can quickly traverse and select parts of the hierarchy that are of interest to us, without traversing into every child prim. The most common types are `component` and `group`. We use these (or sub-kinds) of these to make our stage more easily browse-able, so that we can visually/programmatically easily detect where assets start.
 
-# Table of contents
+# Table of Contents
 1. [Kinds In-A-Nutshell](#summary)
 1. [What should I use it for?](#usage)
 1. [Resources](#resources)

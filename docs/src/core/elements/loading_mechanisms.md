@@ -1,6 +1,6 @@
 # Loading & Traversing Data
 
-# Table of contents
+# Table of Contents
 1. [Traversing & Loading Data In-A-Nutshell](#summary)
 1. [What should I use it for?](#usage)
 1. [Resources](#resources)
@@ -170,7 +170,7 @@ You can find more details in the [API docs](https://openusd.org/dev/api/class_us
 ```
 ~~~
 
-### GeomModelAPI->Draw Mode<a name="loadingMechanismsGeomModelAPIDrawMode"></a>
+### GeomModelAPI->Draw Mode <a name="loadingMechanismsGeomModelAPIDrawMode"></a>
 ~~~admonish tip title="Pro Tip | Draw Mode"
 The draw mode can be used to tell our Hydra render delegates to not render a prim and its child hierarchy. Instead it will only display a preview representation.
 

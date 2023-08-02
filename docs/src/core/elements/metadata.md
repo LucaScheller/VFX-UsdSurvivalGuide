@@ -1,7 +1,7 @@
 # Metadata
 Metadata is the smallest building block in Usd. It is part of the base class from which prims and properties inherit from and possesses a slightly different feature set than other parts of Usd.
 
-# Table of contents
+# Table of Contents
 1. [API Overview In-A-Nutshell](#summary)
 1. [What should I use it for?](#usage)
 1. [Resources](#resources)

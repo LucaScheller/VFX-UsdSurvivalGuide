@@ -4,7 +4,7 @@ In this section we'll cover how to create composition arcs via code. To check ou
 Please read out [fundamentals section](./fundamentals.md) as we often refer to it on this page. 
 
 
-# Table of contents
+# Table of Contents
 1. [Composition Arcs In-A-Nutshell](#summary)
 1. [What should I use it for?](#usage)
 1. [Resources](#resources)

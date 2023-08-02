@@ -1,6 +1,6 @@
 # FAQ (Frequently Asked Questions)
 
-# Table of contents
+# Table of Contents
 1. [Should I prefer assets with a lot of prims or prefer combined meshes?](#faqPrimCount)
 1. [How is "Frames Per Second" (FPS) handled in USD?](#faqFPS)
 1. [How is the scene scale unit handled in USD?](#faqSceneScale)

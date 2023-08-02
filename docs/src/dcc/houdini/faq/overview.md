@@ -1,7 +1,7 @@
 # Tips & Tricks
 You can find all the .hip files of our shown examples in our [USD Survival Guide - GitHub Repo](https://github.com/LucaScheller/VFX-UsdSurvivalGuide/tree/main/files/dcc/houdini).
 
-# Table of contents
+# Table of Contents
 1. [Composition](#compositionOverview)
     1. [Extracting payloads and references from an existing layer stack with anonymous layers](#compositionReferencePayloadLayerStack)
     1. [Efficiently re-writing existing hierarchies as variants](#compositionArcVariantReauthor)

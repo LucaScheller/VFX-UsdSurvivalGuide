@@ -2,7 +2,7 @@
 # Prims
 For an overview and summary please see the parent [Data Containers](./data_container.md) section.
 
-# Table of contents
+# Table of Contents
 1. [Prim Basics](#primBasics)
     1. [Specifier](#primSpecifier)
     2. [Type Name](#primTypeName)

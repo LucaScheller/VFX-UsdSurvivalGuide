@@ -8,7 +8,7 @@ Schemas are to USD what classes are to object orient programming. Let's explain 
 The examples on this page only talk about how to apply/remove schemas and how to inspect them. In our [production](../../production/overview.md) and [Houdini](../../dcc/houdini/overview.md) section we'll look into the most used ones and run through some production examples.
 ~~~
 
-# Table of contents
+# Table of Contents
 1. [API Overview In-A-Nutshell](#summary)
 2. [What should I use it for?](#usage)
 3. [Resources](#resources)

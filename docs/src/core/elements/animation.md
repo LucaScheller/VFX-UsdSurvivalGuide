@@ -6,7 +6,7 @@ Usd encodes time related data in a very simple format:
 }
 ```
 
-# Table of contents
+# Table of Contents
 1. [Animation/Time Varying Data In-A-Nutshell](#summary)
 2. [What should I use it for?](#usage)
 3. [Resources](#resources)

@@ -1,6 +1,6 @@
 # Advanced Concepts
 
-# Table of contents
+# Table of Contents
 1. [Edit Targets](#editTargets)
 1. [Utility functions in the Usd.Utils module](#usdUtils)
 1. [Utility functions in the Sdf module](#sdf)

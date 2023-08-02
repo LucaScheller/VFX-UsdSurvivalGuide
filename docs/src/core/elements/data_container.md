@@ -39,7 +39,7 @@ Let's do a little thought experiment:
 
 This is in very simplified terms how the Usd API works in terms of data storage.
 
-# Table of contents
+# Table of Contents
 1. [API Overview In-A-Nutshell](#summary)
 2. [What should I use it for?](#usage)
 3. [Resources](#resources)

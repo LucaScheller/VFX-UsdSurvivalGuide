@@ -32,7 +32,7 @@ All file based composition arcs use [asset paths](https://openusd.org/dev/api/cl
 
 An important thing to note is that asset resolvers only go in one direction (at least in the Usd API): From asset identifier to resolved asset path. I assume this is because you can have multiple asset identifiers that point the the same resolved asset path. Depending on your asset resolver implementation, you can also make it bidirectional.
 
-# Table of contents
+# Table of Contents
 1. [Asset Resolvers In-A-Nutshell](#summary)
 1. [What should I use it for?](#usage)
 1. [Resources](#resources)

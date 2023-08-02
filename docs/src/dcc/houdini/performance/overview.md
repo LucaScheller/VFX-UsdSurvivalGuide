@@ -1,7 +1,7 @@
 # Performance Optimizations
 You can find all the .hip files of our shown examples in our [USD Survival Guide - GitHub Repo](https://github.com/LucaScheller/VFX-UsdSurvivalGuide/tree/main/files/dcc/houdini).
 
-# Table of contents
+# Table of Contents
 1. [Selection Rules](#houLopSelectionRule)
 1. [How to get your stage to load and open fast](#loadingMechanisms)
 1. [Write full time sample ranges (with subsamples)](#timeSample) 

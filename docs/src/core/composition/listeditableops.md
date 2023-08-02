@@ -5,7 +5,7 @@ On this page we will have a look at list editable ops when not being used in com
 As mentioned in our [fundamentals](./fundamentals.md#compositionFundamentalsListEditableOps) section, list editable ops play a crucial role to understanding composition. Please read that section before this one, as we build on what was written there.
 ~~~
 
-# Table of contents
+# Table of Contents
 1. [List Editable Ops In-A-Nutshell](#summary)
 1. [What should I use it for?](#usage)
 1. [Resources](#resources)

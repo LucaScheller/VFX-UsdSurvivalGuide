@@ -16,7 +16,7 @@ flowchart TD
     property --> relationship([Sdf.RelationshipSpec])
 ```
 
-# Table of contents
+# Table of Contents
 1. [Properties](#propertyOverview)
 1. [Attributes](#attributeOverview)
     1. [Attribute Types (Detail/Prim/Vertex/Point) (USD Speak: **Interpolation**)](#attributeInterpolation)
