@@ -83,8 +83,9 @@ Here are a few things pipeline can/should cover to make things as easy going as 
 - Provide learning material in the form of documentation, follow along workshops and template scenes. We recommend putting a strong focus on this before going "live" as once a show is running, it can cause a high demand in one-on-one artist support. The more you prepare in advance, the more things will flow smoothly. We also recommend tieing artists into your development process, as this keeps you on your toes and also helps ease the transition.
 - A core element pipeline should always handle is data IO. We provide various tips on how to make exporting to LOPs similar to SOP workflows in this guide.
 - We recommend being more restrictive in different workflow aspects rather than allowing to mix'n'match all different styles of geometry import/export and node tree flow "designs". What we mean with this is, that we should "lock" down specific use cases like "What geo am I exporting (characters/water/debris/RBD/etc.)" and build specific HDAs around these. This way there is no ambiguity to how to load in geometry to USD. It also makes pre-flight checks easy to implement, because we know in advance what to expect.
+- In LOPs, we can often stick to building a "monolithic" node stream (as to SOPs where we often branch and merge). As order of operation in LOPs is important, there are fewer ways to merge data. This means we can/should pre-define how our node tree should be structured (model before material, material before lighting etc.). A good approach is to segment based on tasks and then merge their generated data into the "main" input stream. For example when creating lights, we can create a whole light rig and then merge it in.
 
-This made sound like a lot of work, but the benefits of USD are well worth it!
+These tips may sound like a lot of work, but the benefits of USD are well worth it!
 
 ~~~admonish question title="Still under construction!"
 We'll likely expand on this sub-section in the future.
