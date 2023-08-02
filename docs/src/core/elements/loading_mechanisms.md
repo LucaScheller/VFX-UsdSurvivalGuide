@@ -9,6 +9,7 @@
     1. [Layer Muting](#loadingMechanismsLayerMuting)
     1. [Prim Path Loading (USD speak: Prim Population Mask)](#loadingMechanismsLayerPrimPopulationMask)
     1. [Payload Loading](#loadingMechanismsLayerPayloadLoading)
+    1. [GeomModelAPI->Draw Mode](#loadingMechanismsGeomModelAPIDrawMode)
 1. [Traversing Data](#traverseData)
     1. [Traversing Stages](#traverseDataStage)
     1. [Traversing Layers](#traverseDataLayer)
@@ -21,6 +22,7 @@ There are three ways to influence the data load, from lowest to highest granular
 - **Layer Muting**: This controls what layers are allowed to contribute to the composition result.
 - **Prim Population Mask**: This controls what prim paths to consider for loading at all.
 - **Payload Loading**: This controls what prim paths, that have payloads, to load.
+- **GeomModelAPI->Draw Mode**: This controls per prim how it should be drawn by delegates. It can be one of "Full Geometry"/"Origin Axes"/"Bounding Box"/"Texture Cards". It requires the kind to be set on the prim and all its ancestors. Therefore it is "limited" to (asset-) root prims and ancestors.
 - **Activation**: Control per prim whether load itself and its child hierarchy. This is more a an artist facing mechanism, as we end up writing the data to the stage, which we don't do with the other methods.
 
 #### Traversing/Iterating over our stage/layer
@@ -69,6 +71,7 @@ There are three ways to influence the data load, from lowest to highest granular
 - **Layer Muting**: This controls what layers are allowed to contribute to the composition result.
 - **Prim Population Mask**: This controls what prim paths to consider for loading at all.
 - **Payload Loading**: This controls what prim paths, that have payloads, to load.
+- **GeomModelAPI->Draw Mode**: This controls per prim how it should be drawn by delegates. It can be one of "Full Geometry"/"Origin Axes"/"Bounding Box"/"Texture Cards". It requires the kind to be set on the prim and all its ancestors. Therefore it is "limited" to (asset-) root prims and ancestors.
 - **Activation**: Control per prim whether load itself and its child hierarchy. This is more a an artist facing mechanism, as we end up writing the data to the stage, which we don't do with the other methods.
 
 Stages are the controller of how our [Prim Cache Population (PCP)](../composition/pcp.md) cache loads our composed layers. Technically the stage just exposes the PCP cache in a nice API, that forwards its requests to the its pcp cache `stage._GetPcpCache()`, similar how all `Usd` ops are wrappers around `Sdf` calls.
@@ -166,6 +169,34 @@ You can find more details in the [API docs](https://openusd.org/dev/api/class_us
 {{#include ../../../../code/core/elements.py:loadingMechanismsLayerPayloadLoading}}
 ```
 ~~~
+
+### GeomModelAPI->Draw Mode<a name="loadingMechanismsGeomModelAPIDrawMode"></a>
+~~~admonish tip title="Pro Tip | Draw Mode"
+The draw mode can be used to tell our Hydra render delegates to not render a prim and its child hierarchy. Instead it will only display a preview representation.
+
+The preview representation can be one of:
+- Full Geometry
+- Origin Axes
+- Bounding Box
+- Texture Cards
+
+Like visibility, the draw mode is inherited downwards to its child prims. We can also set a draw mode color, to better differentiate the bounding boxes, this is not inherited though and must be set per prim.
+~~~
+
+~~~admonish danger title="Important | Draw Mode Requires Kind"
+In order for the draw mode to work, the prim and all its ancestors, must have a [kind](../plugins/kind.md) defined. Therefore it is "limited" to (asset-)root prims and its ancestors.
+~~~
+
+Here is how we can set it via Python, it is part of the `UsdGeomModelAPI`:
+
+~~~admonish tip title=""
+```python
+{{#include ../../../../code/core/elements.py:loadingMechanismsGeomModelAPIDrawMode}}
+```
+~~~
+
+See the [official docs](https://openusd.org/dev/api/class_usd_geom_model_a_p_i.html) for more info.
+
 
 ## Traversing Data <a name="traverseData"></a>
 When traversing (iterating) through our hierarchy, we commonly use these metadata and property entries on prims to pre-filter what we want to access:

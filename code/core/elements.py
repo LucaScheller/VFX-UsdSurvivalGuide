@@ -3842,6 +3842,36 @@ print(stage.GetLoadSet()) # Returns: []
 #// ANCHOR_END: loadingMechanismsLayerPayloadLoading
 
 
+#// ANCHOR: loadingMechanismsGeomModelAPIDrawMode
+from pxr import Gf, Sdf, Usd, UsdGeom, UsdShade
+stage = Usd.Stage.CreateInMemory()
+cone_prim = stage.DefinePrim(Sdf.Path("/set/yard/cone"), "Cone")
+cone_prim.GetAttribute("radius").Set(4)
+Usd.ModelAPI(cone_prim).SetKind("component")
+sphere_prim = stage.DefinePrim(Sdf.Path("/set/yard/sphere"), "Sphere")
+Usd.ModelAPI(sphere_prim).SetKind("component")
+for ancestor_prim_path in sphere_prim.GetParent() .GetPath().GetAncestorsRange():
+    ancestor_prim = stage.GetPrimAtPath(ancestor_prim_path)
+    ancestor_prim.SetTypeName("Xform")
+    Usd.ModelAPI(ancestor_prim).SetKind("group")
+# Enable on parent
+set_prim = stage.GetPrimAtPath("/set")
+set_geom_model_API = UsdGeom.ModelAPI.Apply(set_prim)
+set_geom_model_API.GetModelDrawModeAttr().Set(UsdGeom.Tokens.bounds)
+set_geom_model_API.GetModelDrawModeColorAttr().Set(Gf.Vec3h([1,0,0]))
+# If we enable "apply" on the parent, children will not be drawn anymore,
+# instead just a single combined bbox is drawn for all child prims.
+# set_geom_model_API.GetModelApplyDrawModeAttr().Set(1)
+# Enable on child
+sphere_geom_model_API = UsdGeom.ModelAPI.Apply(sphere_prim)
+# sphere_geom_model_API.GetModelDrawModeAttr().Set(UsdGeom.Tokens.default_)
+sphere_geom_model_API.GetModelDrawModeAttr().Set(UsdGeom.Tokens.cards)
+sphere_geom_model_API.GetModelDrawModeColorAttr().Set(Gf.Vec3h([0,1,0]))
+# For "component" (sub-)kinds, this is True by default
+# sphere_geom_model_API.GetModelApplyDrawModeAttr().Set(0)
+#// ANCHOR_END: loadingMechanismsGeomModelAPIDrawMode
+
+
 #// ANCHOR: traverseDataStage
 from pxr import Sdf, Usd
 stage = Usd.Stage.CreateInMemory()
