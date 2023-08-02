@@ -1,4 +1,4 @@
-# Production Elements
-- Scene Retimes/Freeze
-    - Currently nternal refernce receive double offest (which makes sense, as they live refer to a layer)
-- Purpose Swapping for preview, bake point color for preview
+# USD in Production
+In this section we'll take a look at USD from a production perspective.
+
+It aims to cover more higher level concepts and pitfalls that we should avoid when first starting out in USD.

@@ -15,6 +15,7 @@ Currently this is limited to LOPs basics and SOP geometry importing/exporting, w
 1. [What should I use it for?](#usage)
 1. [Resources](#resources)
 1. [Overview](#overview)
+1. [Artist Vs Pipeline](#artistVsPipeline)
 1. [Path Structure](#path)
 1. [How to convert between LOPs and SOPs](#IO)
     1. [Importing from LOPs to SOPs](#IOLopsToSops)
@@ -69,6 +70,25 @@ Now for pipeline developers, these are the nodes you'll primarily be interacting
 You favorite node will be the Python LOP node, as we have exposure to the full USD API and can modify the stage to our needs.
 
 Ready!?! Let's goooooooo!
+
+## Artist Vs Pipeline <a name="artistVsPipeline"></a>
+When switching to a USD backed pipeline, an important thing to not gloss over, is how to market USD to artists.
+
+Here are the most important things to keep in mind of what a pipeline should abstract away and what it should directly communicate to artists before getting started:
+- As USD is its own data format, we will not have the native file IO speeds of .bgeo(.sc). The huge benefit is that we can use our caches in any DCC that offers a USD implementation. The downside is, that we have to be more "explicit" of what data we are exporting. For example for packed geometry we have to define how to map it to USD, e.g. as "PointInstancers", "Xforms" or flattened geometry. This means there is now an additional step, that has to be made aware of, before each export. 
+- USD exposes other departments work to us directly through its layering mechanism. This a very positive aspect, but it also comes with more communication overhead. Make sure you have setup clear communication structures beforehand of who to contact should questions and issues arise.
+- USD comes with its own terminology. While we do recommend teaching and learning it, when first transitioning to USD, we should try to keep in familiar waters where possible to soften the blow.
+
+Here are a few things pipeline can/should cover to make things as easy going as possible:
+- Provide learning material in the form of documentation, follow along workshops and template scenes. We recommend putting a strong focus on this before going "live" as once a show is running, it can cause a high demand in one-on-one artist support. The more you prepare in advance, the more things will flow smoothly. We also recommend tieing artists into your development process, as this keeps you on your toes and also helps ease the transition.
+- A core element pipeline should always handle is data IO. We provide various tips on how to make exporting to LOPs similar to SOP workflows in this guide.
+- We recommend being more restrictive in different workflow aspects rather than allowing to mix'n'match all different styles of geometry import/export and node tree flow "designs". What we mean with this is, that we should "lock" down specific use cases like "What geo am I exporting (characters/water/debris/RBD/etc.)" and build specific HDAs around these. This way there is no ambiguity to how to load in geometry to USD. It also makes pre-flight checks easy to implement, because we know in advance what to expect.
+
+This made sound like a lot of work, but the benefits of USD are well worth it!
+
+~~~admonish question title="Still under construction!"
+We'll likely expand on this sub-section in the future.
+~~~
 
 ## Path Structure <a name="path"></a>
 As covered in our [composition section](../../core/composition/overview.md), composition arcs are centered around loading a specific prim (and its children) in the hierarchy. We usually design our path structure around "root" prims. That way we can load/unload a specific hierarchy selection effectively. With value clips (USD speak for per frame/chunk file loading) we also need to target a specific root prim, so that we can keep the hierarchy reference/payloadable and instanceable.

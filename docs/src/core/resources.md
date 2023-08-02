@@ -21,12 +21,12 @@ If you are interested in diving into topics yourself, here is a rough categoriza
             - [Utils](https://openusd.org/release/api/stitch_clips_8h.html)
         - [Flattening a stage to a layer]()
     - [Plugins](https://openusd.org/release/api/plug_page_front.html)
-    - Class (Schema) APIs
+    - Schemas (USD speak for classes)
         - [Collections](https://openusd.org/release/api/class_usd_collection_a_p_i.html)
         - [Lights](https://openusd.org/release/api/class_usd_lux_light_a_p_i.html)
         - [Node Graph Shader Connections](https://openusd.org/release/api/class_usd_shade_connectable_a_p_i.html)
         - [Value Clips](https://openusd.org/release/api/class_usd_clips_a_p_i.html)
-        - [Transforms](https://openusd.org/release/api/class_usd_geom_xform_common_a_p_i.html)
+        - [Transforms](https://openusd.org/dev/api/class_usd_geom_xformable.html)
     - Query/Lookup Caches
         - [Attributes](https://openusd.org/release/api/class_usd_attribute_query.html)
         - [Composition](https://openusd.org/release/api/class_usd_prim_composition_query.html)
