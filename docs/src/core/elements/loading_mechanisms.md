@@ -180,7 +180,7 @@ The preview representation can be one of:
 - Bounding Box
 - Texture Cards
 
-Like visibility, the draw mode is inherited downwards to its child prims. We can also set a draw mode color, to better differentiate the bounding boxes, this is not inherited though and must be set per prim.
+Like visibility, the draw mode is inherited downwards to its child prims. We can also set a draw mode color, to better differentiate the non full geometry draw modes, this is not inherited though and must be set per prim.
 ~~~
 
 ~~~admonish danger title="Important | Draw Mode Requires Kind"

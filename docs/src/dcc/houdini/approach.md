@@ -189,6 +189,20 @@ This means that we can validate our hierarchy and read stage metrics like shutte
 This ensures that the resulting cache is valid enough to work downstream in our pipeline.  Houdini's "SOP Import" node is also constructed to work against the input connected stage and does alot of this for you (e.g. material binding/local space correction ("Adjust Transforms for Input Hierarchy")).
 ~~~
 
+Another thing we have to keep in mind is that SOPs only represents the active frame, where as a written USD cache file represents the whole frame range.
+
+To emulate this we can add a cache LOPs node. If we have geometry "popping" in and out across the frame range, it will by default always be visible in the whole frame range cached file. When we write USD files on different machines (for example on a farm), each frame that is being cooked does not know of the other frames. 
+
+To solve this USD has two solutions:
+- If our output file is a single stitched USD file, then we have to manually check the layers before stitching them and author visibility values if we want to hide the prims on frames where they produced no data.
+- With value clips we have to write an "inherited" visibility time sample per prim for every time sample. If the hierarchy does not exist, it will fallback to the manifest, where we have to write a value of "invisible".
+
+Houdini has the option to track visibility for frame ranges (that are cooked in the same session) to prevent this. For large production scenes, we usually have to resort to the above to have better scalability.
+
+<video width="100%" height="100%" controls autoplay muted loop>
+  <source src="./houdiniLOPsSOPImportTimeVisibility.mp4" type="video/mp4" alt="Houdini SOP Import Time Visibility">
+</video>
+
 ### Stage/Layer Metrics <a name="IOLayerMetrics"></a>
 As mentioned in our [stage/layer](../../core/elements/layer.md#layerMetrics) and [animation](../../core/elements/animation.md#animationMetadata) sections, we can/should setup layer related metrics.
 

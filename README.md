@@ -1,4 +1,5 @@
-# VFX-UsdSurvivalGuide
+![Usd Survival Guide](https://raw.githubusercontent.com/LucaScheller/VFX-UsdSurvivalGuide/main/docs/src/UsdSurvivalGuide.png)
+
 [![Deploy Documentation to GitHub Pages](https://github.com/LucaScheller/VFX-UsdSurvivalGuide/actions/workflows/mdbook.yml/badge.svg)](https://github.com/LucaScheller/VFX-UsdSurvivalGuide/actions/workflows/mdbook.yml)
 
 This repository aims to be a practical onboarding guide to [USD](https://openusd.org/release/index.html) for software developers and pipeline TDs.
