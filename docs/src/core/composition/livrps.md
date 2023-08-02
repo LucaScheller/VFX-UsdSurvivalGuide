@@ -283,7 +283,9 @@ Value clips are written via metadata entries on prims. If you want to create/edi
 Here is a comparison between a layer with value clip metadata and time samples vs separate layers with each.
 Houdini's "Load Layer For Editing", simply does a `active_layer.TransferContent(Sdf.Layer.FindOrOpen("/Disk/Layer.usd"))`, in case you are wondering, so it fakes it as if we created the value clip metadata in the active layer.
 
-![Houdini Sublayer Value Clip](houdiniCompositionSublayerValueClip.gif)
+<video width="100%" height="100%" controls autoplay muted loop>
+  <source src="./houdiniCompositionSublayerValueClip.mp4" type="video/mp4" alt="Houdini Sublayer Value Clip">
+</video>
 
 ~~~admonish tip title="Pro Tip | How do we load value clipped files?"
 We cover a production based example of how to load value clips in our [Composition for production](../../production/composition.md) section. Here are some import things to keep in mind:
@@ -551,15 +553,18 @@ def Xform "root_grp" (
 
 Here is a comparison in Houdini with unloaded/loaded payloads with lofted variant data.
 
-![Houdini Composition Variant Loft](houdiniCompositionVariantLoft.gif)
-
+<video width="100%" height="100%" controls autoplay muted loop>
+  <source src="./houdiniCompositionVariantLoft.mp4" type="video/mp4" alt="Houdini Composition Variant Loft">
+</video>
 
 #### Sharing data among variants <a name="compositionArcVariantSharing"></a>
 To share data among variants, we can either payload/reference the same data into each variant. We can also write our data that should be shared outside of the variant and then only add hierarchy overrides/additions via the variants.
 
 Here is how it can be setup in Houdini:
 
-![Houdini Composition Variant Share](houdiniCompositionVariantShare.gif)
+<video width="100%" height="100%" controls autoplay muted loop>
+  <source src="./houdiniCompositionVariantShare.mp4" type="video/mp4" alt="Houdini Composition Variant Share">
+</video>
 
 #### Efficiently re-writing existing data as variants <a name="compositionArcVariantReauthor"></a>
 Via the low level API we can also copy or move content on a layer into a variant. This is super powerful to easily create variants from caches.

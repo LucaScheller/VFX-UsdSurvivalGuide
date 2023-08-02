@@ -107,7 +107,9 @@ The default metadata fields that ship with USD, are not of the list editable typ
  
 Here is a showcase from our composition example file that edits a custom string list op field which we registered via a [custom meta plugin](../plugins/metadata.md). 
 
-![Houdini Custom ListEditableOps Metadata](houdiniListEditableOpsMetadata.gif)
+<video width="100%" height="100%" controls autoplay muted loop>
+  <source src="./houdiniListEditableOpsMetadata.mp4" type="video/mp4" alt="Houdini Custom ListEditableOps Metadata">
+</video>
 
 As you can see the result is dynamic, even across encapsulated arcs and it always returns an explicit list op with the combined results.
 

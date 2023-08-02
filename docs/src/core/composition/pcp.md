@@ -76,7 +76,10 @@ These return us all value sources for a prim or attribute.
 
 In Houdini/USD view we can also view these stacks in the UI.
 
-![Houdini Prim/Property Stack](houdiniPrimPropertyStack.gif)
+<video width="100%" height="100%" controls autoplay muted loop>
+  <source src="./houdiniPrimPropertyStack.mp4" type="video/mp4" alt="Houdini Prim/Property Stack">
+</video>
+
 
 ### Prim Index <a name="pcpPrimIndex"></a>
 Next let's look at the prim index.
