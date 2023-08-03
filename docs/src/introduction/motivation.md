@@ -9,7 +9,7 @@ Oh no another guide! Do we really need this?
 
 This guide aims to solve the following 'niche':
 - It aims to be an onboarding guide for software developers & pipeline developers so that you can hit the ground running.
-- It aims be practical first (as to being an introduction guide that offers a high level overview). This means you'll find a lot of code examples from actual production scenarios as well as a more hands on approach instead of overviews/terminology explanations. We'll often link to resources you can look into before a certain section to have a better understanding should vocabulary issues arise.
+- It aims to be practical as opposed to offering a high-level overview. This means you'll find a lot of code examples from actual production scenarios as well as a more hands on approach instead of overviews/terminology explanations. We'll often link to resources you can look into before a certain section to have a better understanding should vocabulary issues arise.
 - It aims to soften the steep learning curve that some aspects of USD have by having a look at common production examples so you can have those sweet "aha, that's how it works" moments.  
 
 Basically think of it as a balance of links listed in the below resources section.
