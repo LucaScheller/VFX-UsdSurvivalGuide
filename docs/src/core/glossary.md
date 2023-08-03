@@ -1,5 +1,4 @@
 # Vocabulary Cheatsheet
-This page is a cheatsheet for USD vocabulary.
 
 | USD Terminology                       | Meaning                                  |
 |---------------------------------------|------------------------------------------|

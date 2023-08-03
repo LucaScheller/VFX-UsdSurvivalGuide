@@ -2598,6 +2598,14 @@ car_prim = stage.DefinePrim(Sdf.Path("/set/garage/car"), "Cube")
 set_prim = stage.GetPrimAtPath("/set")
 garage_prim = stage.GetPrimAtPath("/set/garage")
 tractor_prim = stage.DefinePrim(Sdf.Path("/set/yard/tractor"), "Cube")
+"""Hierarchy
+/set
+/set/garage
+/set/garage/bicycle
+/set/garage/car
+/set/yard
+/set/yard/tractor
+"""
 
 # Setup hierarchy primvars
 primvar_api = UsdGeom.PrimvarsAPI(set_prim)
@@ -4172,3 +4180,264 @@ def traversal_kernel(path):
         property_relationship_target_paths.append(path)
 layer.Traverse(layer.pseudoRoot.path, traversal_kernel)
 #// ANCHOR_END: traverseDataLayerTemplate
+
+
+
+#// ANCHOR: xformXformableOverview
+## Xformable Class
+# This is class is a wrapper around creating attributes that start with "xformOp".
+# When we run one of its "Add<XformOpName>Op" methods, it automatically adds
+# it to the "xformOpOrder" attribute. This attribute controls, what attributes
+# contribute to the xform of a prim. 
+# Has: 'TransformMightBeTimeVarying', 
+# Get: 'GetOrderedXformOps',  'GetXformOpOrderAttr', 'GetResetXformStack',
+# Add: 'AddTranslateOp', 'AddOrientOp', 'AddRotate<XYZ>op', 'AddScaleOp', 'AddTransformOp', 'AddXformOp',
+# Set: 'CreateXformOpOrderAttr', 'SetXformOpOrder', 'SetResetXformStack', 'MakeMatrixXform',
+# Clear: 'ClearXformOpOrder',
+## For querying we can use the following. For large queries we should resort to UsdGeom.XformCache/UsdGeom.BBoxCache
+# Get Xform: 'GetLocalTransformation', 'ComputeLocalToWorldTransform', 'ComputeParentToWorldTransform',
+# Get Bounds: 'ComputeLocalBound', 'ComputeUntransformedBound', 'ComputeWorldBound',
+import math
+from pxr import Gf,  Sdf, Usd, UsdGeom
+stage = Usd.Stage.CreateInMemory()
+root_prim_path = Sdf.Path("/root")
+root_prim = stage.DefinePrim(root_prim_path, "Xform")
+cone_prim_path = Sdf.Path("/root/cone")
+cone_prim = stage.DefinePrim(cone_prim_path, "Cone")
+
+# Set local transform of leaf prim
+cone_xformable = UsdGeom.Xformable(cone_prim)
+cone_translate_op = cone_xformable.AddTranslateOp(opSuffix="upAndDown")
+cone_rotate_op = cone_xformable.AddRotateXYZOp(opSuffix= "spinMeRound")
+for frame in range(1, 100):
+    cone_translate_op.Set(Gf.Vec3h([5, math.sin(frame * 0.1) * 3, 0]), frame)
+    #cone_rotate_op.Set(Gf.Vec3h([0, frame * 5, 0]), frame)
+# By clearing the xformOpOrder attribute, we keep the transforms, but don't apply it.
+cone_xformOpOrder_attr = cone_xformable.GetXformOpOrderAttr()
+cone_xformOpOrder_value = cone_xformOpOrder_attr.Get()
+#cone_xformable.ClearXformOpOrder()
+# Reverse the transform order
+#cone_xformOpOrder_attr.Set(cone_xformOpOrder_value[::-1])
+
+# A transform is combined with its parent prims' transforms
+root_xformable = UsdGeom.Xformable(root_prim)
+root_translate_op = root_xformable.AddTranslateOp(opSuffix="upAndDown")
+root_rotate_op = root_xformable.AddRotateZOp(opSuffix= "spinMeRound")
+for frame in range(1, 100):
+    # root_translate_op.Set(Gf.Vec3h([5, math.sin(frame * 0.5), 0]), frame)
+    root_rotate_op.Set(frame * 15, frame)
+#// ANCHOR_END: xformXformableOverview
+    
+    
+
+#// ANCHOR: xformResetXformStack
+import math
+from pxr import Gf,  Sdf, Usd, UsdGeom
+stage = Usd.Stage.CreateInMemory()
+root_prim_path = Sdf.Path("/root")
+root_prim = stage.DefinePrim(root_prim_path, "Xform")
+cone_prim_path = Sdf.Path("/root/cone")
+cone_prim = stage.DefinePrim(cone_prim_path, "Cone")
+# Set local transform of leaf prim
+cone_xformable = UsdGeom.Xformable(cone_prim)
+cone_translate_op = cone_xformable.AddTranslateOp(opSuffix="upAndDown")
+for frame in range(1, 100):
+    cone_translate_op.Set(Gf.Vec3h([5, math.sin(frame * 0.1) * 3, 0]), frame)
+# A transform is combined with its parent prims' transforms
+root_xformable = UsdGeom.Xformable(root_prim)
+root_rotate_op = root_xformable.AddRotateZOp(opSuffix= "spinMeRound")
+for frame in range(1, 100):
+    root_rotate_op.Set(frame * 15, frame)
+# If we only want the local stack transform, we can add the special
+# '!resetXformStack!' attribute to our xformOpOrder attribute.
+# We can add it anywhere in the list, any xformOps before it and on ancestor prims
+# will be ignored.
+cone_xformable.SetResetXformStack(True)
+#// ANCHOR_END: xformResetXformStack
+    
+#// ANCHOR: xformWorldSpaceLocalSpace
+import math
+from pxr import Gf,  Sdf, Usd, UsdGeom, UsdUtils
+
+# Stage A: A car animated in world space
+stage_a = Usd.Stage.CreateInMemory()
+#stage_a = stage
+car_prim_path = Sdf.Path("/set/stret/car")
+car_prim = stage_a.DefinePrim(car_prim_path, "Xform")
+car_body_prim_path = Sdf.Path("/set/stret/car/body/hull")
+car_body_prim = stage_a.DefinePrim(car_body_prim_path, "Cube")
+car_xformable = UsdGeom.Xformable(car_prim)
+car_translate_op = car_xformable.AddTranslateOp(opSuffix="carDrivingDownStreet")
+for frame in range(1, 100):
+    car_translate_op.Set(Gf.Vec3h([frame, 0, 0]), frame)
+
+# Stage A: A person animated in world space
+stage_b = Usd.Stage.CreateInMemory()
+#stage_b = stage
+mike_prim_path = Sdf.Path("/set/stret/car/person/mike")
+mike_prim = stage_b.DefinePrim(mike_prim_path, "Sphere")
+mike_xformable = UsdGeom.Xformable(mike_prim)
+mike_translate_op = mike_xformable.AddTranslateOp(opSuffix="mikeInWorldSpace")
+mike_xform_op = mike_xformable.AddTransformOp(opSuffix="mikeInLocalSpace")
+# Let's disable the transform op for now
+mike_xformable.GetXformOpOrderAttr().Set([mike_translate_op.GetOpName()])
+for frame in range(1, 100):
+    mike_translate_op.Set(Gf.Vec3h([frame, 1, 0]), frame)
+
+# How do we merge these?
+stage_a_xform_cache = UsdGeom.XformCache(0)
+stage_b_xform_cache = UsdGeom.XformCache(0)
+for frame in range(1, 100):
+    stage_a_xform_cache.SetTime(frame)
+    car_xform = stage_a_xform_cache.GetLocalToWorldTransform(car_prim)
+    stage_b_xform_cache.SetTime(frame)
+    mike_xform = stage_b_xform_cache.GetLocalToWorldTransform(mike_prim)
+    mike_xform = mike_xform * car_xform.GetInverse()
+    mike_xform_op.Set(mike_xform, frame)
+# Let's enable the transform op now and disable the translate op
+mike_xformable.GetXformOpOrderAttr().Set([mike_xform_op.GetOpName()])
+stage_c = Usd.Stage.CreateInMemory()
+
+# Combine stages
+stage_c = Usd.Stage.CreateInMemory()
+layer_a = stage_a.GetRootLayer()
+layer_b = stage_b.GetRootLayer()
+UsdUtils.StitchLayers(layer_a, layer_b)
+stage_c.GetEditTarget().GetLayer().TransferContent(layer_a)
+#// ANCHOR_END: xformWorldSpaceLocalSpace
+
+#// ANCHOR: xformCache
+import math
+from pxr import Gf,  Sdf, Usd, UsdGeom
+stage = Usd.Stage.CreateInMemory()
+root_prim_path = Sdf.Path("/root")
+root_prim = stage.DefinePrim(root_prim_path, "Xform")
+cone_prim_path = Sdf.Path("/root/cone")
+cone_prim = stage.DefinePrim(cone_prim_path, "Cone")
+# Set local transform of leaf prim
+cone_xformable = UsdGeom.Xformable(cone_prim)
+cone_translate_op = cone_xformable.AddTranslateOp(opSuffix="upAndDown")
+for frame in range(1, 100):
+    cone_translate_op.Set(Gf.Vec3h([5, math.sin(frame * 0.1) * 3, 0]), frame)
+# A transform is combined with its parent prims' transforms
+root_xformable = UsdGeom.Xformable(root_prim)
+root_rotate_op = root_xformable.AddRotateZOp(opSuffix= "spinMeRound")
+for frame in range(1, 100):
+    root_rotate_op.Set(frame * 15, frame)
+# For single queries we can use the xformable API
+print(cone_xformable.ComputeLocalToWorldTransform(Usd.TimeCode(15)))
+    
+## Xform Cache
+# Get: 'GetTime', 'ComputeRelativeTransform', 'GetLocalToWorldTransform', 'GetLocalTransformation', 'GetParentToWorldTransform'
+# Set: 'SetTime'
+# Clear: 'Clear'
+xform_cache = UsdGeom.XformCache(Usd.TimeCode(1))
+for prim in stage.Traverse():
+    print(xform_cache.GetLocalToWorldTransform(prim))
+"""Returns:
+( (0.9659258262890683, 0.25881904510252074, 0, 0), (-0.25881904510252074, 0.9659258262890683, 0, 0), (0, 0, 1, 0), (0, 0, 0, 1) )
+( (0.9659258262890683, 0.25881904510252074, 0, 0), (-0.25881904510252074, 0.9659258262890683, 0, 0), (0, 0, 1, 0), (4.7520971567527654, 1.5834484942764433, 0, 1) )
+"""
+xform_cache = UsdGeom.XformCache(Usd.TimeCode(1))
+for prim in stage.Traverse():
+    print(xform_cache.GetLocalTransformation(prim))
+"""Returns:
+(Gf.Matrix4d(0.9659258262890683, 0.25881904510252074, 0.0, 0.0,
+            -0.25881904510252074, 0.9659258262890683, 0.0, 0.0,
+            0.0, 0.0, 1.0, 0.0,
+            0.0, 0.0, 0.0, 1.0), False)
+(Gf.Matrix4d(1.0, 0.0, 0.0, 0.0,
+            0.0, 1.0, 0.0, 0.0,
+            0.0, 0.0, 1.0, 0.0,
+            5.0, 0.299560546875, 0.0, 1.0), False)
+"""
+#// ANCHOR_END: xformCache
+    
+#// ANCHOR: xformBake
+from pxr import Gf,  Sdf, Usd, UsdGeom
+stage = Usd.Stage.CreateInMemory()
+
+# Scene
+car_prim_path = Sdf.Path("/set/stret/car")
+car_prim = stage.DefinePrim(car_prim_path, "Xform")
+car_body_prim_path = Sdf.Path("/set/stret/car/body/hull")
+car_body_prim = stage.DefinePrim(car_body_prim_path, "Cube")
+car_xformable = UsdGeom.Xformable(car_prim)
+car_translate_op = car_xformable.AddTranslateOp(opSuffix="carDrivingDownStreet")
+for frame in range(1, 100):
+    car_translate_op.Set(Gf.Vec3h([frame, 0, 0]), frame)
+
+# Constraint Targets
+constraint_prim_path = Sdf.Path("/constraints/car")
+constraint_prim = stage.DefinePrim(constraint_prim_path)
+constraint_xformable = UsdGeom.Xformable(constraint_prim)
+constraint_xformable.SetResetXformStack(True)
+constraint_translate_op = constraint_xformable.AddTranslateOp(opSuffix="moveUp")
+constraint_translate_op.Set(Gf.Vec3h([0,5,0]))
+constraint_transform_op = constraint_xformable.AddTransformOp(opSuffix="constraint")
+xform_cache = UsdGeom.XformCache(Usd.TimeCode(0))
+for frame in range(1, 100):
+    xform_cache.SetTime(Usd.TimeCode(frame))
+    xform = xform_cache.GetLocalToWorldTransform(car_body_prim)
+    constraint_transform_op.Set(xform, frame)
+
+# Constrain
+balloon_prim_path = Sdf.Path("/objects/balloon")
+balloon_prim = stage.DefinePrim(balloon_prim_path, "Sphere")
+balloon_prim.GetAttribute("radius").Set(2)
+balloon_prim.GetReferences().AddInternalReference(constraint_prim_path)
+#// ANCHOR_END: xformBake
+
+
+#// ANCHOR: xformFull
+import math
+from pxr import Gf,  Sdf, Usd, UsdGeom
+#stage = Usd.Stage.CreateInMemory()
+root_prim_path = Sdf.Path("/root")
+root_prim = stage.DefinePrim(root_prim_path, "Xform")
+cone_prim_path = Sdf.Path("/root/cone")
+cone_prim = stage.DefinePrim(cone_prim_path, "Cone")
+
+# Set local transform of leaf prim
+cone_xformable = UsdGeom.Xformable(cone_prim)
+cone_translate_op = cone_xformable.AddTranslateOp(opSuffix="upAndDown")
+cone_rotate_op = cone_xformable.AddRotateXYZOp(opSuffix= "spinMeRound")
+for frame in range(1, 100):
+    cone_translate_op.Set(Gf.Vec3h([5, math.sin(frame * 0.1) * 3, 0]), frame)
+    #cone_rotate_op.Set(Gf.Vec3h([0, frame * 5, 0]), frame)
+# By clearing the xformOpOrder attribute, we keep the transforms, but don't apply it.
+cone_xformOpOrder_attr = cone_xformable.GetXformOpOrderAttr()
+cone_xformOpOrder_value = cone_xformOpOrder_attr.Get()
+#cone_xformable.ClearXformOpOrder()
+# Reverse the transform order
+#cone_xformOpOrder_attr.Set(cone_xformOpOrder_value[::-1])
+
+time_code = Usd.TimeCode(1)
+print(cone_xformable.ComputeLocalToWorldTransform(time_code))
+"""Returns:
+( (0.9961946980917455, 0, -0.08715574274765818, 0),
+  (0, 1, 0, 0), 
+  (0.08715574274765818, 0, 0.9961946980917455, 0), 
+  (4.9809734904587275, 0.4794921875, -0.4357787137382909, 1) )
+ """
+
+# A transform is combined with its parent prims' transforms
+root_xformable = UsdGeom.Xformable(root_prim)
+root_translate_op = root_xformable.AddTranslateOp(opSuffix="upAndDown")
+root_rotate_op = root_xformable.AddRotateZOp(opSuffix= "spinMeRound")
+for frame in range(1, 100):
+    # root_translate_op.Set(Gf.Vec3h([5, math.sin(frame * 0.5), 0]), frame)
+    root_rotate_op.Set(frame * 15, frame)
+
+# We can also force our local transform to be the world transform (ignoring any parent xforms)
+#cone_xformable.SetResetXformStack(1)
+
+# When payloading prims, we want to write an extentsHint attribute to give a bbox hint
+# We can either query it via UsdGeom.BBoxCache or for individual prims via UsdGeom.Xformable.ComputeLocalToWorldTransform
+root_geom_model_API =  UsdGeom.ModelAPI.Apply(root_prim)
+for frame in range(1, 100):
+    bbox_cache = UsdGeom.BBoxCache(frame, [UsdGeom.Tokens.default_])
+    extentsHint = root_geom_model_API.ComputeExtentsHint(bbox_cache)
+    root_geom_model_API.SetExtentsHint(extentsHint , frame)
+#// ANCHOR_END: xformFull
+    

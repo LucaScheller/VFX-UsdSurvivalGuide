@@ -37,6 +37,14 @@ car_prim = stage.DefinePrim(Sdf.Path("/set/garage/car"), "Cube")
 set_prim = stage.GetPrimAtPath("/set")
 garage_prim = stage.GetPrimAtPath("/set/garage")
 tractor_prim = stage.DefinePrim(Sdf.Path("/set/yard/tractor"), "Cube")
+"""Hierarchy
+/set
+/set/garage
+/set/garage/bicycle
+/set/garage/car
+/set/yard
+/set/yard/tractor
+"""
 
 # Setup hierarchy primvars
 primvar_api = UsdGeom.PrimvarsAPI(set_prim)
@@ -73,7 +81,7 @@ for prim in iterator:
     else:
         primvar_stack.pop(-1)
 # Returns:
-""" This works :)
+"""
 0x7fea12b349c0 0x7fea12b349c0 / [] 2
 0x7fea12b349c0 0x7fea12b349c0 /HoudiniLayerInfo [] 3
 0x7fea12b349c0 0x7fea12bfe980 /set ['/set.primvars:size'] 3
