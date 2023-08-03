@@ -13,10 +13,11 @@ Here is a list of the most used production schemas with a short explanation of w
             - [UsdVol.Volume](https://openusd.org/dev/api/class_usd_vol_volume.html): Volumes
                 - [UsdVol.OpenVDBAsset](https://openusd.org/dev/api/class_usd_vol_open_v_d_b_asset.html): VDB Volumes
             - [UsdGeom.Xformable](https://openusd.org/dev/api/class_usd_geom_xformable.html): Transforms
-            - [UsdGeom.ModelAPI](https://openusd.org/dev/api/class_usd_geom_model_a_p_i.html): Draw Mode, ExtentHint  
+            - [UsdGeom.Boundable](https://openusd.org/dev/api/class_usd_geom_boundable.html): Extents
             - [UsdGeom.Camera](https://openusd.org/dev/api/class_usd_geom_camera.html): Camera Attributes, Access to Gf.Camera
 - API:
     - [Usd.ModeAPI](https://openusd.org/dev/api/class_usd_model_a_p_i.html): Asset info, Kind 
+    - [UsdGeom.ModelAPI](https://openusd.org/dev/api/class_usd_geom_model_a_p_i.html): Draw Mode, ExtentHint
     - [Usd.ClipsAPI](https://openusd.org/dev/api/class_usd_clips_a_p_i.html): Value Clips (Metadata for per frame caches)
     - [Usd.CollectionAPI](https://openusd.org/dev/api/class_usd_collection_a_p_i.html): Collections
     - [Usd.PrimvarsAPI](https://openusd.org/dev/api/class_usd_geom_primvars_a_p_i.html): Primvars Attributes

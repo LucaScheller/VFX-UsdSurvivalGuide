@@ -4229,7 +4229,6 @@ for frame in range(1, 100):
 #// ANCHOR_END: xformXformableOverview
     
     
-
 #// ANCHOR: xformResetXformStack
 import math
 from pxr import Gf,  Sdf, Usd, UsdGeom

@@ -36,6 +36,8 @@ We rarely write the initial transforms ourselves, this is something our DCCs exc
 ## Overview <a name="overview"></a>
 Creating xforms is usually handled by our DCCS. Let's go over the basics how USD encodes them to understand what we are working with.
 
+All shown examples can be found in the [xforms .hip file](https://github.com/LucaScheller/VFX-UsdSurvivalGuide/tree/main/files/dcc/houdini/transforms) in our GitHub repo.
+
 ### Creating and animating transforms <a name="xformCreate"></a>
 USD evaluates xform attributes on all sub types of the xformable schema.
 
