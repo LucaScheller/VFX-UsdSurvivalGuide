@@ -38,7 +38,7 @@ Layers and stages are the main entry point to accessing our data stored in USD.
     - Standard identifiers: `Sdf.Layer.CreateNew("/file/path/or/URI/identifier.<ext(.usd/.usdc/.usda)>")`, these layers are backed by a file on disk
     - Anonymous identifiers: `Sdf.Find('anon:<someHash(MemoryLocation)>:<customName>'`, these are in-memory only layers
 
-**Shots**
+**Stages**
 - A stage is a view of a set of composed layers. You can think of it as the viewer in a view--model design. Each layer that the stage opens is a data source to the data model. When "asking" the stage for data, we ask the view for the combined (composed) data, which then queries into the layers based on the value source found by our composition rules.
 - When creating a stage we have two layers by default:
     - **Session Layer**: This is a temp layer than doesn't get applied on disk save. Here we usually put things like viewport overrides.
