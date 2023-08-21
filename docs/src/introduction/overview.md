@@ -19,7 +19,7 @@ This guide is licensed under the **Apache License 2.0**. For more information as
 Before starting our journey, make sure you are all packed:
 - It is expected to have a general notion of what Usd is. If this is your first contact with the topic, check out the links in [motivation](../introduction/motivation.md). The introduction resources there take 1-2 hours to consume for a basic understanding and will help with understanding this guide.
 - A background in VFX industry. Though not strictly necessary, it helps to know the general vocabulary of the industry to understand this guide. This guide aims to stay away from Usd specific vocabulary, where possible, to make it more accessible to the general VFX community.
-- Motivation to lean new stuff. Don't worry to much about all the custom Usd terminology being thrown at you at the beginning, you'll pick it up it no time once you start working with Usd!
+- Motivation to learn new stuff. Don't worry to much about all the custom Usd terminology being thrown at you at the beginning, you'll pick it up it no time once you start working with Usd!
 
 ## Next Steps
 To get started, let's head over to the [Core Elements](../core/overview.md) section!
