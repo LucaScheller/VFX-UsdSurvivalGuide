@@ -7,10 +7,12 @@ This repository aims to be a practical onboarding guide to [USD](https://openusd
 For more information what makes this guide unique, see the [motivation](../introduction/motivation.md) section.
 
 ```admonish success title="Siggraph Presentation"
-This guide will be officially introduced at [Siggraph 2023 - Houdini Hive](https://www.sidefx.com/houdini-hive/siggraph-2023/) on Wednesday, 9. of August 2023 at 11:00 AM PST.
+This guide was officially introduced at [Siggraph 2023 - Houdini Hive](https://www.sidefx.com/houdini-hive/siggraph-2023/#usd). Special thanks to SideFX for hosting me and throwing such a cool Houdini lounge and presentation line up!
+
+<iframe width="100%" height="540px" src="https://www.youtube-nocookie.com/embed/VSE7ayrRStg?si=Dnp1ozZH_fOwjn6O" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
 ```
 
-{{#include ../contributors.md}}
+{{#include contributors.md}}
 
 ## License 
 This guide is licensed under the **Apache License 2.0**. For more information as to how this affects copyright and distribution see our [license](https://github.com/LucaScheller/VFX-UsdSurvivalGuide/blob/main/LICENSE) page.
@@ -27,5 +29,3 @@ To get started, let's head over to the [Core Elements](../core/overview.md) sect
 ```admonish tip
 This guide primarly uses [Houdini](https://www.sidefx.com/) to explain concepts, as it is one of the most accessible and easiest ways to learn the ways of Usd with. You can install a non-commercial version for free from their website. It is highly recommended to use it when following this guide.
 ```
-
-

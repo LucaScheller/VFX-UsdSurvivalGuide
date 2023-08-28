@@ -27,6 +27,9 @@ additional-css = ["theme/ext/css/custom.css", "theme/ext/css/mdbook-admonish.css
 additional-js = ["theme/ext/js/mermaid.min.js", "theme/ext/js/mermaid-init.js", "theme/ext/js/custom.js"]
 line-numbers = true
 
+[output.html.redirect]
+"/introduction/overview.html" = "../index.html"
+
 [output.html.fold]
 enable = true
 level = 1
