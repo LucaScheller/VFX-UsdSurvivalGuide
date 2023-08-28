@@ -6,3 +6,27 @@ table {
     --sidebar-width: 485px;
     --content-max-width: 1300px;
 }
+
+.chapter li {
+    color: inherit;
+}
+
+.chapter > .chapter-item:first-child {
+    font-weight: bold;
+    font-size: 150%;
+}
+
+ol.chapter li ol.section li.chapter-item.expanded a.active {
+    font-size: 1em;
+    font-weight: 400;
+    display: inline-block;
+    border-left: .25rem solid transparent;
+    border-left-color: var(--inline-code-color);
+    padding: .35rem 1rem .35rem 1.25rem;
+    box-sizing: border-box;
+}
+
+.nav-chapters {
+max-width: 35px;
+min-width: 30px;
+}
