@@ -74,7 +74,7 @@ stage = Usd.Stage.CreateInMemory()
 stage = hou.pwd().editableStage()
 ## Layers
 # Native USD
-layer = Usd.Stage.CreateAnonymous()
+layer = Sdf.Layer.CreateAnonymous()
 # Houdini Python LOP
 layer = hou.pwd().editableLayer()
 ```
