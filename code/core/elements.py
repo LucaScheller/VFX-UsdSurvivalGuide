@@ -56,7 +56,7 @@ Sdf.Path.IsValidPathString("/some/_wrong!_/path") # Returns: (False, 'Error Mess
 path = Sdf.Path("/set/bicycle")
 path.AppendPath(Sdf.Path("frame/screws")) # Returns: Sdf.Path("/set/bicycle/frame/screws")
 # Manually join individual path elements
-path = Sdf.Path(Sdf.childDelimiter.join(["set", "bicycle"])) 
+path = Sdf.Path(Sdf.Path.childDelimiter.join(["set", "bicycle"])) 
 # Get the parent path
 parent_path = path.GetParentPath() # Returns Sdf.Path("/set")
 parent_path.IsRootPrimPath()       # Returns: True (Root prims are prims that only
@@ -105,7 +105,7 @@ property_name = path.name # Be aware, this will return 'size' (last element)
 # Append property to prim path
 Sdf.Path("/set/bicycle").AppendProperty("size") # Returns: Sdf.Path("/set/bicycle.size")
 # Properties can also be namespaced with ":" (Sdf.Path.namespaceDelimiter)
-path = Sdf.Path("/set/bicycle.tire:size").name 
+path = Sdf.Path("/set/bicycle.tire:size") 
 property_name = path.name                 # Returns: 'tire:size'
 property_name = path.ReplaceName("color") # Returns: Sdf.Path("/set/bicycle.color")
 # Check if path is a property path (and not a prim path)
@@ -116,10 +116,10 @@ Sdf.Path("/set/bicycle").IsPrimPropertyPath()            # Returns: False
 # Convenience methods
 path = Sdf.Path("/set/bicycle").AppendProperty(Sdf.Path.JoinIdentifier(["tire", "size"]))
 namespaced_elements = Sdf.Path.TokenizeIdentifier("tire:size")   # Returns: ["tire", "size"]
-last_element = Sdf.path.StripNamespace("/set/bicycle.tire:size") # Returns: 'size'
+last_element = Sdf.Path.StripNamespace("/set/bicycle.tire:size") # Returns: 'size'
 # With GetPrimPath we can strip away all property encodings
 path = Sdf.Path("/set/bicycle.tire:size")
-prim_path = path.GetPrimPath(path) # Returns: Sdf.Path('/set/bicycle')
+prim_path = path.GetPrimPath() # Returns: Sdf.Path('/set/bicycle')
 
 # We can't actually differentiate between a attribute and relationship based on the property path.
 # Hence the "Property" terminology.
@@ -150,7 +150,7 @@ variant_path = property_path.GetPrimOrPrimVariantSelectionPath() # Returns: Sdf.
 # Typical iteration example:
 variant_path = Sdf.Path('/set/bicycle{style=blue}frame/screws')
 if variant_path.ContainsPrimVariantSelection():          # Returns: True # For any variant selection in the whole path
-    for parent_path in variant_path.GetAncestorRange():
+    for parent_path in variant_path.GetAncestorsRange():
         if parent_path.IsPrimVariantSelectionPath():
             print(parent_path.GetVariantSelection())     # Returns: ('style', 'blue')
 
@@ -3858,7 +3858,7 @@ cone_prim.GetAttribute("radius").Set(4)
 Usd.ModelAPI(cone_prim).SetKind("component")
 sphere_prim = stage.DefinePrim(Sdf.Path("/set/yard/sphere"), "Sphere")
 Usd.ModelAPI(sphere_prim).SetKind("component")
-for ancestor_prim_path in sphere_prim.GetParent() .GetPath().GetAncestorsRange():
+for ancestor_prim_path in sphere_prim.GetParent().GetPath().GetAncestorsRange():
     ancestor_prim = stage.GetPrimAtPath(ancestor_prim_path)
     ancestor_prim.SetTypeName("Xform")
     Usd.ModelAPI(ancestor_prim).SetKind("group")
