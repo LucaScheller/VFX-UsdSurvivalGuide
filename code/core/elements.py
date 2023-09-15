@@ -183,7 +183,7 @@ attr_spec.default = 10
 
 
 #// ANCHOR: dataContainerPrimCoreHighLevel
-from pxr import Sdf, Usd
+from pxr import Kind, Sdf, Usd
 stage = Usd.Stage.CreateInMemory()
 prim_path = Sdf.Path("/cube")
 prim = stage.DefinePrim(prim_path, "Xform") # Here defining the prim uses a `Sdf.SpecifierDef` define op by default.
