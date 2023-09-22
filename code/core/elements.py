@@ -288,8 +288,10 @@ prim_path = Sdf.Path("/bicycle")
 # The .DefinePrim method uses a Sdf.SpecifierDef specifier by default
 prim = stage.DefinePrim(prim_path, "Xform")
 prim.SetSpecifier(Sdf.SpecifierOver)
+# or 
+prim = stage.OverridePrim(prim_path)
 # The prim class' IsDefined method checks if a prim (and all its parents) have the "def" specifier.
-print(prim.GetSpecifier() == Sdf.SpecifierSdf, prim.IsDefined())
+print(prim.GetSpecifier() == Sdf.SpecifierOver, not prim.IsDefined() and not prim.IsAbstract())
 
 ### Low Level ###
 from pxr import Sdf
@@ -307,7 +309,9 @@ stage = Usd.Stage.CreateInMemory()
 prim_path = Sdf.Path("/bicycle")
 # The .DefinePrim method uses a Sdf.SpecifierDef specifier by default
 prim = stage.DefinePrim(prim_path, "Xform")
-prim.SetSpecifier(Sdf.SpecifierOver)
+prim.SetSpecifier(Sdf.SpecifierClass)
+# or 
+prim = stage.CreateClassPrim(prim_path)
 # The prim class' IsAbstract method checks if a prim (and all its parents) have the "Class" specifier.
 print(prim.GetSpecifier() == Sdf.SpecifierClass, prim.IsAbstract())
 
@@ -484,7 +488,7 @@ r', 'purpose']
 """
 # You can also bake down the prim definition, this won't flatten custom properties though.
 dst_prim = stage.DefinePrim("/flattenedExample")
-dst_prim = prim_def.FlattenTo("/flattenedExample")
+dst_prim = prim_def.FlattenTo(dst_prim)
 # This will also flatten all metadata (docs etc.), this should only be used, if you need to export
 # a custom schema to an external vendor. (Not sure if this the "official" way to do it, I'm sure
 # there are better ones.)
@@ -729,12 +733,12 @@ stage.SetMetadata("customLayerData", {"myCustomStageData": 1})
 layer = stage.GetRootLayer()
 metadata = layer.customLayerData
 metadata["myCustomRootData"] = 1
-layer.metadata = metadata
+layer.customLayerData = metadata
 # Or:
 layer = stage.GetSessionLayer()
 metadata = layer.customLayerData
 metadata["myCustomSessionData"] = 1
-layer.metadata = metadata
+layer.customLayerData = metadata
 # To get the value from the session/root layer depending on the edit target:
 stage.GetMetadata("customLayerData")
 #// ANCHOR_END: metadataStage
