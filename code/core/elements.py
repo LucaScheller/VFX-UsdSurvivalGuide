@@ -1065,9 +1065,9 @@ layer.framesPerSecond = 25
 layer.startTimeCode = time_samples[0]
 layer.endTimeCode = time_samples[-1]
 # Scene Unit Scale
-layer.SetInfo(UsdGeom.Tokens.metersPerUnit, UsdGeom.LinearUnits.centimeters)
+layer.pseudoRoot.SetInfo(UsdGeom.Tokens.metersPerUnit, UsdGeom.LinearUnits.centimeters)
 # Scene Up Axis
-layer.SetInfo(UsdGeom.Tokens.upAxis, UsdGeom.Tokens.y) # Or  UsdGeom.Tokens.z
+layer.pseudoRoot.SetInfo(UsdGeom.Tokens.upAxis, UsdGeom.Tokens.y) # Or  UsdGeom.Tokens.z
 #// ANCHOR_END: metadataLayerMetrics
 
 #// ANCHOR: debuggingTokens
