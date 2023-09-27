@@ -1772,6 +1772,8 @@ layer_fps = 25
 layer_identifier = "ref_layer.usd"
 stage_fps = 24
 stage_identifier = "root_layer.usd"
+frame_start = 1001
+frame_end = 1025
 
 # Create layer
 reference_layer = Sdf.Layer.CreateAnonymous()
@@ -1780,9 +1782,14 @@ prim_spec = Sdf.CreatePrimInLayer(reference_layer, prim_path)
 prim_spec.specifier = Sdf.SpecifierDef
 prim_spec.typeName = "Cube"
 attr_spec = Sdf.AttributeSpec(prim_spec, "size", Sdf.ValueTypeNames.Double)
-for frame in range(1001, 1005):
-    value = float(frame - 1000)
+for frame in range(frame_start, frame_end + 1):
+    value = float(frame - frame_start) + 1
+    # If we work correctly in seconds everything works as expected.
     reference_layer.SetTimeSample(attr_spec.path, frame * (layer_fps/stage_fps), value)
+    # In VFX we often work frame based starting of at 1001 regardless of the FPS.
+    # If we then load the 25 FPS in 24 FPS, USD applies the correct scaling, but we have
+    # to apply the correct offset to our "custom" start frame.
+    # reference_layer.SetTimeSample(attr_spec.path, frame, value)
 # FPS Metadata
 time_samples = Sdf.Layer.ListAllTimeSamples(reference_layer)
 reference_layer.timeCodesPerSecond = layer_fps
@@ -1793,8 +1800,12 @@ reference_layer.endTimeCode = time_samples[-1]
 
 # Create stage
 stage = Usd.Stage.CreateInMemory()
-# Without scale
+# If we work correctly in seconds everything works as expected.
 reference_layer_offset = Sdf.LayerOffset(0, 1)
+# In VFX we often work frame based starting of at 1001.
+# If we then load the 25 FPS in 24 FPS, USD applies the correct scaling, but we have
+# to apply the correct offset to our "custom" start frame.
+# reference_layer_offset = Sdf.LayerOffset(frame_start * (stage_fps/layer_fps) - frame_start, 1)
 reference = Sdf.Reference(reference_layer.identifier, "/bicycle", reference_layer_offset)
 bicycle_prim_path = Sdf.Path("/bicycle")
 bicycle_prim = stage.DefinePrim(bicycle_prim_path)

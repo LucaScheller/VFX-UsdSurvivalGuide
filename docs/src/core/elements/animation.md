@@ -222,6 +222,12 @@ Therefore when writing layers, we should always write these layer metrics, so th
 the original intended FPS were and our caches work FPS independently.
 ~~~
 
+~~~admonish warning
+In VFX we often work starting from 1001 regardless of the FPS as it is easier for certain departments like FX to have pre-cache frames to init their sims as well as it also makes it easier to write frame based expressions. That means that when working with both 25 and 24 FPS caches, we have to adjust the offset of the incoming cache.
+
+Let's say we have an anim in 25 FPS starting off at 1001 that we want to bring into a 24 FPS scene. USD as mentioned above handles the scaling for us based on the metadata, but since we still want to start at 1001, we have to offset based on "frame_start * (stage_fps/layer_fps) - frame_start". See the below commented out code for a live example. That way we now have the same 25 FPS cache running in 24 FPS from the same "starting pivot" frame. If we work fully time based, we don't have this problem, as animation in the 25 FPS cache would have its time samples written at larger frames than the 24 FPS cache and USD's scaling would auto correct it.
+~~~
+
 ```python
 (
     timeCodesPerSecond = 24
