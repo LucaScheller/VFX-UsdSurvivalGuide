@@ -33,10 +33,6 @@ Our time samples that are written in the time unit-less `{<frame>: <value> }` fo
     timeCodesPerSecond = 24
 )
 ```
-~~~admonish warning
-If we want to load a let's say 24 FPS cache in a 25 FPS setup, we will have to apply a `Sdf.LayerOffset` when loading in the layer. This way we can move back the sample to the "correct" frame based times by scaling with a factor of 24/25.
-~~~
-
 You can find more details about the specific metadata priority and how to set the metadata in our [animation section](../core/elements/animation.html#animationMetadata).
 
 ## How is the scene scale unit and up axis handled in USD? <a name="faqSceneScale"></a>

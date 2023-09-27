@@ -208,7 +208,7 @@ When working with stages, we have the following [loading order of FPS](https://o
 1. framesPerSecond from root layer
 1. fallback value of 24
 
-These should match the FPS settings of your DCC. The 'framesPerSecond' is intended to be a hint for playback engines (e.g. your DCC/Usdview etc.) to set the FPS to when reading your file. The 'timeCodesPerSecond' describes the actual time sample intent. With the fallback behaviour we can also only specify the 'framesPerSecond' to keep both metadata entries in sync.
+These should match the FPS settings of your DCC. The 'framesPerSecond' is intended to be a hint for playback engines (e.g. your DCC/Usdview etc.) to set the FPS to when reading your file. The 'timeCodesPerSecond' describes the actual time sample intent. With the fallback behavior we can also only specify the 'framesPerSecond' to keep both metadata entries in sync.
 
 When working with layers, we have the following [loading order of FPS](https://openusd.org/dev/api/class_sdf_layer.html#a8c7a1ac2e85efa2aa4831123de576b7c):
 1. timeCodesPerSecond of layer
@@ -220,10 +220,6 @@ When loading samples from a sublayered/referenced or payloaded file, USD automat
 
 Therefore when writing layers, we should always write these layer metrics, so that we know what
 the original intended FPS were and our caches work FPS independently.
-~~~
-
-~~~admonish warning
-In the below code example, this doesn't seem to work (at least in Houdini/UsdView), we'll have to verify again with Pixar if this ia a bug, we are doing something wrong here or intended.
 ~~~
 
 ```python

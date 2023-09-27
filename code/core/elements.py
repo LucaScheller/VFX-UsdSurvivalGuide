@@ -1767,7 +1767,6 @@ layer.endTimeCode = time_samples[-1]
 
 ###### Stage vs Layer TimeSample Scaling ######
 from pxr import Sdf, Usd
-import os
 
 layer_fps = 25
 layer_identifier = "ref_layer.usd"
@@ -1783,7 +1782,7 @@ prim_spec.typeName = "Cube"
 attr_spec = Sdf.AttributeSpec(prim_spec, "size", Sdf.ValueTypeNames.Double)
 for frame in range(1001, 1005):
     value = float(frame - 1000)
-    reference_layer.SetTimeSample(attr_spec.path, frame, value)
+    reference_layer.SetTimeSample(attr_spec.path, frame * (layer_fps/stage_fps), value)
 # FPS Metadata
 time_samples = Sdf.Layer.ListAllTimeSamples(reference_layer)
 reference_layer.timeCodesPerSecond = layer_fps
@@ -1794,8 +1793,6 @@ reference_layer.endTimeCode = time_samples[-1]
 
 # Create stage
 stage = Usd.Stage.CreateInMemory()
-# With scale
-# reference_layer_offset = Sdf.LayerOffset(0, layer_fps/stage_fps)
 # Without scale
 reference_layer_offset = Sdf.LayerOffset(0, 1)
 reference = Sdf.Reference(reference_layer.identifier, "/bicycle", reference_layer_offset)
