@@ -201,18 +201,29 @@ You can also tell a time sample to block a value. Blocking means that the attrib
 ### Time Metrics (Frames Per Second & Frame Range) <a name="animationMetadata"></a>
 With what FPS the samples are interpreted is defined by the `timeCodesPerSecond`/`framesPerSecond` metadata.
 
-The [loading order of FPS](https://openusd.org/dev/api/class_usd_stage.html#a85092d7455ae894d50224e761dc6e840) is:
+When working with stages, we have the following [loading order of FPS](https://openusd.org/dev/api/class_usd_stage.html#a85092d7455ae894d50224e761dc6e840):
 1. timeCodesPerSecond from session layer
-2. timeCodesPerSecond from root layer
-3. framesPerSecond from session layer
-4. framesPerSecond from root layer
-5. fallback value of 24
+1. timeCodesPerSecond from root layer
+1. framesPerSecond from session layer
+1. framesPerSecond from root layer
+1. fallback value of 24
 
-When writing layers, we should always write these layer metrics, so that we know what
-the original intended FPS were. 
+These should match the FPS settings of your DCC. The 'framesPerSecond' is intended to be a hint for playback engines (e.g. your DCC/Usdview etc.) to set the FPS to when reading your file. The 'timeCodesPerSecond' describes the actual time sample intent. With the fallback behaviour we can also only specify the 'framesPerSecond' to keep both metadata entries in sync.
+
+When working with layers, we have the following [loading order of FPS](https://openusd.org/dev/api/class_sdf_layer.html#a8c7a1ac2e85efa2aa4831123de576b7c):
+1. timeCodesPerSecond of layer
+1. framesPerSecond of layer
+1. fallback value of 24
+
+~~~admonish info
+When loading samples from a sublayered/referenced or payloaded file, USD automatically uses the above mentioned metadata in the layer as a frame of reference of how to bring in the time samples. If the FPS settings mismatch it will automatically scale the time samples to match our stage FPS settings as mentioned above.
+
+Therefore when writing layers, we should always write these layer metrics, so that we know what
+the original intended FPS were and our caches work FPS independently.
+~~~
 
 ~~~admonish warning
-If we want to load a let's say 24 FPS cache in a 25 FPS setup, we will have to apply a `Sdf.LayerOffset` when loading in the layer. This way we can move back the sample to the "correct" frame based times by scaling with a factor of 24/25.
+In the below code example, this doesn't seem to work (at least in Houdini/UsdView), we'll have to verify again with Pixar if this ia a bug, we are doing something wrong here or intended.
 ~~~
 
 ```python

@@ -1764,6 +1764,51 @@ layer.timeCodesPerSecond = 25
 layer.framesPerSecond = 25
 layer.startTimeCode = time_samples[0]
 layer.endTimeCode = time_samples[-1]
+
+###### Stage vs Layer TimeSample Scaling ######
+from pxr import Sdf, Usd
+import os
+
+layer_fps = 25
+layer_identifier = "ref_layer.usd"
+stage_fps = 24
+stage_identifier = "root_layer.usd"
+
+# Create layer
+reference_layer = Sdf.Layer.CreateAnonymous()
+prim_path = Sdf.Path("/bicycle")
+prim_spec = Sdf.CreatePrimInLayer(reference_layer, prim_path)
+prim_spec.specifier = Sdf.SpecifierDef
+prim_spec.typeName = "Cube"
+attr_spec = Sdf.AttributeSpec(prim_spec, "size", Sdf.ValueTypeNames.Double)
+for frame in range(1001, 1005):
+    value = float(frame - 1000)
+    reference_layer.SetTimeSample(attr_spec.path, frame, value)
+# FPS Metadata
+time_samples = Sdf.Layer.ListAllTimeSamples(reference_layer)
+reference_layer.timeCodesPerSecond = layer_fps
+reference_layer.framesPerSecond = layer_fps
+reference_layer.startTimeCode = time_samples[0]
+reference_layer.endTimeCode = time_samples[-1]
+# reference_layer.Export(layer_identifier)
+
+# Create stage
+stage = Usd.Stage.CreateInMemory()
+# With scale
+# reference_layer_offset = Sdf.LayerOffset(0, layer_fps/stage_fps)
+# Without scale
+reference_layer_offset = Sdf.LayerOffset(0, 1)
+reference = Sdf.Reference(reference_layer.identifier, "/bicycle", reference_layer_offset)
+bicycle_prim_path = Sdf.Path("/bicycle")
+bicycle_prim = stage.DefinePrim(bicycle_prim_path)
+references_api = bicycle_prim.GetReferences()
+references_api.AddReference(reference, position=Usd.ListPositionFrontOfAppendList)
+# FPS Metadata (In Houdini we can't set this via python, use a 'configure layer' node instead.)
+stage.SetTimeCodesPerSecond(stage_fps)
+stage.SetFramesPerSecond(stage_fps)
+stage.SetStartTimeCode(1001)
+stage.SetEndTimeCode(1005)
+# stage.Export(stage_identifier)
 #// ANCHOR_END: animationFPS
 
 
@@ -3176,7 +3221,7 @@ print("Value Type Name Cpp Type Name", value_type_name.cppTypeName) # 'VtArray<G
 print("Value Type Name Role", value_type_name.role)                 # Returns: 'TextureCoordinate'
 ## Array vs Scalar (Single Value)
 print("Value Type Name IsArray", value_type_name.isArray)          # Returns: True
-print("Value Type Name IsArray", value_type_name.isScalar)         # Returns: False
+print("Value Type Name IsScalar", value_type_name.isScalar)         # Returns: False
 ## Convert type between Scalar <-> Array
 print("Value Type Name -> Get Array Type", value_type_name.arrayType)   # Returns: Sdf.ValueTypeName("texCoord2f[]") (Same as type_name in this case)
 print("Value Type Name -> Get Scalar Type", value_type_name.scalarType) # Returns: Sdf.ValueTypeName("texCoord2f")
