@@ -1,4 +1,6 @@
-REM Clean existing builds
-rmdir %~dp0docs\book /S /Q
+REM Source setup
+set REPO_ROOT=%~dp0
+REM Clean existing build
+rmdir %REPO_ROOT%docs\book /S /Q
 REM Build book
-mdbook serve --open %~dp0\docs
+mdbook serve --open %REPO_ROOT%docs
