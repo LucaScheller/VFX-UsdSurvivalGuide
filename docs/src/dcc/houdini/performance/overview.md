@@ -63,7 +63,7 @@ for pane in hou.ui.paneTabs():
 ~~~
 
 Houdini exposes these three loading mechanisms in two different ways:
-- **Configue Stage** LOP node: This is the same as setting it per code via the stage.
+- **Configure Stage** LOP node: This is the same as setting it per code via the stage.
 - **Scene Graph Tree** panel: In Houdini, that stage that gets rendered, is actually not the stage of your node (at least what we gather from reverse engineering). Instead it is a duplicate, that has overrides in the session layer and loading mechanisms listed above.
 
 ~~~admonish danger title="Scene Graph Tree vs Configure Stage"
