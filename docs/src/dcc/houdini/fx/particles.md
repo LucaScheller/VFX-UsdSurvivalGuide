@@ -26,7 +26,7 @@ For an exercise, let's build a simple SOP import ourselves. Should we use this i
 
 Why should we do it ourselves, you might ask? Because there are instances, where we can directly load in the array, because we know we are only editing a single prim. Some of Houdini's nodes actually use this mechanism in a few of the point instancer related nodes.
 
-## Render-Time Overrvides via (Numpy) Python Wrangles
+## Render-Time Overrides via (Numpy) Python Wrangles
 Now you might be thinking, is Python performant enough to actually manipulate geometry?
 
 In the context of points (also point instancers), we answer is yes. As we do not have to do geometry operations, manipulating points is "just" editing arrays. This can be done very efficiently via numpy, if we use it for final tweaking. So don't expect to have the power of vex, the below is a "cheap" solution to adding render time overrides, when you don't have the resources to write your own compiled language (looking at your [DNEG (OpenVDB AX)](https://www.openvdb.org/documentation/doxygen/openvdbax.html)).
