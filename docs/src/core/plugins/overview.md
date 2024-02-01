@@ -21,7 +21,7 @@ Typical plugins are:
 - Hydra Delegates (Render Delegates)
 - File Format Plugins (.abc/.vdb)
 
-You can inspect if whats plugins werwe registered by setting the `TF_DEBUG` variable as mentioned in the [debugging](../profiling/debug.md) section:
+You can inspect if whats plugins were registered by setting the `TF_DEBUG` variable as mentioned in the [debugging](../profiling/debug.md) section:
 ```bash
 export TF_DEBUG=PLUG_REGISTRATION
 ```
@@ -34,7 +34,7 @@ If you want to check via Python, you have to know under what registry the plugin
 - UsdImagingAdapterRegistry
 
 Colin Kennedy's USD-Cookbook has an excellent overview on this topic:
-[USD Cook-Book Plugins](ttps://github.com/ColinKennedy/USD-Cookbook/blob/33eac067a0a62578934105b19a2b9d8e4ea0646c/references/working_with_plugins.md)
+[USD Cook-Book Plugins](https://github.com/ColinKennedy/USD-Cookbook/blob/33eac067a0a62578934105b19a2b9d8e4ea0646c/references/working_with_plugins.md)
 
 Plugins are detected by looking at the `PXR_PLUGINPATH_NAME` environment variable for folders containing a`plugInfo.json` file.
 
