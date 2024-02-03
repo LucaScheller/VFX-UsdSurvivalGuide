@@ -452,7 +452,7 @@ prim.AddAppliedSchema("SkelBindingAPI")
 # you have to use this for codeless schemas.
 # prim.RemoveAppliedSchema("SkelBindingAPI")
 # Single-Apply API Schemas
-prim.ApplyAPI("UsdGeomModelAPI")
+prim.ApplyAPI("GeomModelAPI") # Older USD versions: prim.ApplyAPI("UsdGeomModelAPI")
 
 ### Low Level ###
 # To set applied API schemas via the low level API, we just 
@@ -465,7 +465,7 @@ prim_spec = Sdf.CreatePrimInLayer(layer, prim_path)
 prim_spec.typeName = "Xform"
 # Applied Schemas
 schemas = Sdf.TokenListOp.Create(
-    prependedItems=["SkelBindingAPI", "UsdGeomModelAPI"]
+    prependedItems=["SkelBindingAPI", "GeomModelAPI"]
 )
 prim_spec.SetInfo("apiSchemas", schemas)
 #// ANCHOR_END: dataContainerPrimSchemas
@@ -499,7 +499,7 @@ from pxr import Sdf, Tf, Usd, UsdGeom
 stage = Usd.Stage.CreateInMemory()
 prim_path = Sdf.Path("/bicycle")
 prim = stage.DefinePrim(prim_path, "Xform")
-prim.ApplyAPI("UsdGeomModelAPI")
+prim.ApplyAPI("GeomModelAPI")
 print(prim.IsA(UsdGeom.Xform)) # Returns: True
 print(prim.IsA(Tf.Type.FindByName('UsdGeomXform'))) # Returns: True
 prim_type_info = prim.GetPrimTypeInfo()
@@ -2093,7 +2093,7 @@ prim = stage.DefinePrim(prim_path, "Cube")
 # Check if it can be applied
 print(UsdGeom.MotionAPI.CanApply(prim)) # Returns True
 # Apply API schema (in active layer),
-prim.ApplyAPI("UsdGeomModelAPI") # Returns: True
+prim.ApplyAPI("GeomModelAPI") # Returns: True, older USD versions: prim.ApplyAPI("UsdGeomModelAPI")
 # Add applied schema
 # This does not check if the schema actually exists, 
 # you have to use this for codeless schemas.
@@ -2102,7 +2102,7 @@ prim.AddAppliedSchema("SkelBindingAPI") # Returns: True #
 applied_api_schema = UsdGeom.MotionAPI.Apply(prim)
 # Remove applied schema (in active layer)
 # prim.RemoveAppliedSchema("SkelBindingAPI")
-# prim.RemoveAPI("UsdGeomModelAPI")
+# prim.RemoveAPI("GeomModelAPI")
 # For multi-apply schemas, we can feed in our custom name,
 # for example for collections it drives the collection name.
 prim.ApplyAPI("UsdCollectionAPI", "myCoolCollectionName")

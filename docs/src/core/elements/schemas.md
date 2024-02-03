@@ -121,7 +121,7 @@ Here is an example of the inheritance graph of the [UsdGeom.Imageable](https://o
     - Adds additional metadata/properties to prim and provides methods to manipulate these.
     - The schema name is added to the `apiSchemas` metadata, it contributes to the prim definition.
     - We can check if it is applied to a prim via `prim.HasAPI(<APISchemaType>)`
-    - Applied via `SchemaClassAPI.Apply(prim)` e.g. `UsdGeom.ModelAPI.Apply(prim)`/`prim_spec.SetInfo("apiSchemas", Sdf.TokenListOp.Create(prependedItems=["UsdGeomModelAPI"]))`
+    - Applied via `SchemaClassAPI.Apply(prim)` e.g. `UsdGeom.ModelAPI.Apply(prim)`/`prim_spec.SetInfo("apiSchemas", Sdf.TokenListOp.Create(prependedItems=["GeomModelAPI"]))`
 - `API Schemas (Usd.APISchemaBase)` -> `Applied API Schemas` -> `Single Apply API Schemas`:
     - Can only be applied once per prim
 - `API Schemas (Usd.APISchemaBase)` -> `Applied API Schemas` -> `Multi Apply API Schemas`:

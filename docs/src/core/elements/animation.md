@@ -22,7 +22,7 @@ Usd encodes time related data in a very simple format:
 ~~~admonish tip
 - Terminology: A single time/value pair is called `time sample`, if an attribute doesn't have time samples, it has `default` value (Which just means it has a single static value).
 - Time samples are encoded in a simple {\<time(frame)\>: \<value\>} dict.
-- If a frame is requested where no time samples exist, it will be interpolated if the data type allows it and non changing array lengths in neighbour time samples exist. Value queries before/after the first/last time sample will be clamped to these time samples, if you want a cache in a different FPS format to match a certain frame range.
+- If a frame is requested where no time samples exist, it will be interpolated if the data type allows it and non changing array lengths in neighbour time samples exist. Value queries before/after the first/last time sample will be clamped to these time samples.
 - Time samples are encoded unitless/per frame and not in time units. This means they have to be shifted depending on the current frames per second.
 - Only attributes can carry time sample data. (So composition arcs can not be time animated, only offset/scaled (see the LayerOffset section on this page)).
 
