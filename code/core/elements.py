@@ -1819,6 +1819,124 @@ stage.SetEndTimeCode(1005)
 # stage.Export(stage_identifier)
 #// ANCHOR_END: animationFPS
 
+#// ANCHOR: animationMotionVelocityAcceleration
+import numpy as np
+
+from pxr import Sdf, Usd, UsdGeom
+
+
+MOTION_ATTRIBUTE_NAMES_BY_TYPE_NAME = {
+    UsdGeom.Tokens.Mesh: (UsdGeom.Tokens.points, UsdGeom.Tokens.velocities, UsdGeom.Tokens.accelerations),
+    UsdGeom.Tokens.Points: (UsdGeom.Tokens.points, UsdGeom.Tokens.velocities, UsdGeom.Tokens.accelerations),
+    UsdGeom.Tokens.BasisCurves: (UsdGeom.Tokens.points, UsdGeom.Tokens.velocities, UsdGeom.Tokens.accelerations),
+    UsdGeom.Tokens.PointInstancer: (UsdGeom.Tokens.positions, UsdGeom.Tokens.velocities, UsdGeom.Tokens.accelerations)
+}
+# To lookup schema specific names
+# schema_registry = Usd.SchemaRegistry()
+# schema = schema_registry.FindConcretePrimDefinition("Mesh")
+# print(schema.GetPropertyNames())
+
+def compute_time_derivative(layer, prim_spec, attr_name, ref_attr_name, time_code_inc, multiplier=1.0):
+    ref_attr_spec = prim_spec.attributes.get(ref_attr_name)
+    if not ref_attr_spec:
+        return
+    attr_spec = prim_spec.attributes.get(attr_name)
+    if attr_spec:
+        return
+    time_codes = layer.ListTimeSamplesForPath(ref_attr_spec.path)
+    if len(time_codes) == 1:
+        return
+    center_time_codes = {idx: t for idx, t in enumerate(time_codes) if int(t) == t}
+    if not center_time_codes:
+        return
+    attr_spec = Sdf.AttributeSpec(prim_spec, attr_name, Sdf.ValueTypeNames.Vector3fArray)
+    time_code_count = len(time_codes)
+    for time_code_idx, time_code in center_time_codes.items():
+        if time_code_idx == 0:
+            time_code_prev = time_code
+            time_code_next = time_codes[time_code_idx+1]
+        elif time_code_idx == time_code_count - 1:
+            time_code_prev = time_codes[time_code_idx-1]
+            time_code_next = time_code
+        else:
+            time_code_prev = time_codes[time_code_idx-1]
+            time_code_next = time_codes[time_code_idx+1]
+        time_interval_scale = 1.0/(time_code_next - time_code_prev)
+        ref_prev = layer.QueryTimeSample(ref_attr_spec.path, time_code_prev)
+        ref_next = layer.QueryTimeSample(ref_attr_spec.path, time_code_next)
+        if not ref_prev or not ref_next:
+            continue
+        if len(ref_prev) != len(ref_next):
+            continue
+        ref_prev = np.array(ref_prev)
+        ref_next = np.array(ref_next)
+        value = ((ref_next - ref_prev) * time_interval_scale) / (time_code_inc * 2.0)
+        layer.SetTimeSample(attr_spec.path, time_code, value * multiplier)
+
+def compute_velocities(layer, prim_spec, time_code_fps, multiplier=1.0):
+    # Time Code
+    time_code_inc = 1.0/time_code_fps
+    prim_type_name = prim_spec.typeName
+    if prim_type_name:
+        # Defined prim type name
+        attr_type_names = MOTION_ATTRIBUTE_NAMES_BY_TYPE_NAME.get(prim_type_name)
+        if not attr_type_names:
+            return
+        pos_attr_name, vel_attr_name, _ = attr_type_names
+    else:
+        # Fallback
+        pos_attr_name, vel_attr_name, _ = MOTION_ATTRIBUTE_NAMES_BY_TYPE_NAME[UsdGeom.Tokens.Mesh]
+    pos_attr_spec = prim_spec.attributes.get(pos_attr_name)
+    if not pos_attr_spec:
+        return
+    # Velocities
+    compute_time_derivative(layer,
+                            prim_spec,
+                            vel_attr_name,
+                            pos_attr_name,
+                            time_code_inc, 
+                            multiplier)
+    
+def compute_accelerations(layer, prim_spec, time_code_fps, multiplier=1.0):
+    # Time Code
+    time_code_inc = 1.0/time_code_fps
+    prim_type_name = prim_spec.typeName
+    if prim_type_name:
+        # Defined prim type name
+        attr_type_names = MOTION_ATTRIBUTE_NAMES_BY_TYPE_NAME.get(prim_type_name)
+        if not attr_type_names:
+            return
+        _, vel_attr_name, accel_attr_name = attr_type_names
+    else:
+        # Fallback
+        _, vel_attr_name, accel_attr_name = MOTION_ATTRIBUTE_NAMES_BY_TYPE_NAME[UsdGeom.Tokens.Mesh]
+    vel_attr_spec = prim_spec.attributes.get(vel_attr_name)
+    if not vel_attr_spec:
+        return
+    # Acceleration
+    compute_time_derivative(layer,
+                            prim_spec,
+                            accel_attr_name,
+                            vel_attr_name,
+                            time_code_inc, 
+                            multiplier)
+
+### Run this on a layer with time samples ###
+layer = Sdf.Layer.CreateAnonymous()
+time_code_fps = layer.timeCodesPerSecond or 24.0
+multiplier = 5
+
+def traversal_kernel(path):
+    if not path.IsPrimPath():
+        return
+    prim_spec = layer.GetPrimAtPath(path)
+    compute_velocities(layer, prim_spec, time_code_fps, multiplier)
+    compute_accelerations(layer, prim_spec, time_code_fps, multiplier)
+
+with Sdf.ChangeBlock(): 
+    layer.Traverse(layer.pseudoRoot.path, traversal_kernel)
+#// ANCHOR_END: animationMotionVelocityAcceleration
+
 
 #// ANCHOR: animationStitchCmdlineTool
 ...
@@ -2149,7 +2267,7 @@ print(plugin.metadata)
 
 #// ANCHOR: schemasRegistry
 from pxr import Plug, Sdf, Tf, Usd
-registry = Usd.Schema.Registry()
+registry = Usd.SchemaRegistry()
 
 ## Get Tf.Type registry entry (which allows us to get the Python class)
 ## The result can also be used to run IsA checks for typed schemas.
@@ -2179,7 +2297,7 @@ print(registry.GetAPITypeFromSchemaTypeName("SkelBindingAPI")) # Returns: Tf.Typ
 
 #// ANCHOR: schemasRegistryToPrimDefinition
 from pxr import Usd
-registry = Usd.Schema.Registry()
+registry = Usd.SchemaRegistry()
 ## Useful inspection lookups ##
 # Find API schemas. This uses the `Schema Type Name` syntax:
 cube_def = registry.FindConcretePrimDefinition("Cube")

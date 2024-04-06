@@ -67,5 +67,6 @@
 [comment]:# - [Volumes ⚒️](./dcc/houdini/fx/volumes.md)
 [comment]:# - [Transform Space (Local/World Space) ⚒️](./dcc/houdini/fx/transformspace.md)
         - [Frustum Culling](./dcc/houdini/fx/frustumCulling.md)
+        - [Motion Blur (Deforming/Xforms/Velocity/Acceleration)](./dcc/houdini/fx/motionblur.md)
     - [Tips & Tricks](./dcc/houdini/faq/overview.md)
     - [Performance Optimizations](./dcc/houdini/performance/overview.md)

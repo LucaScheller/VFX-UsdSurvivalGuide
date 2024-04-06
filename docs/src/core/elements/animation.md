@@ -15,8 +15,9 @@ Usd encodes time related data in a very simple format:
     2. [Layer Offset (A Non-Animateable Time Offset/Scale for Composition Arcs)](#animationLayerOffset)
     3. [Reading & Writing default values, time samples and value blocks](#animationReadWrite)
     4. [Time Metrics (Frames Per Second & Frame Range)](#animationMetadata)
-    5. [Stitching/Combining time samples](#animationStitch)
-    6. [Value Clips (Loading time samples from multiple files)](#animationValueClips)
+    5. [Motionblur - Computing Velocities and Accelerations](#animationMotionVelocityAcceleration)
+    6. [Stitching/Combining time samples](#animationStitch)
+    7. [Value Clips (Loading time samples from multiple files)](#animationValueClips)
 
 ## TL;DR - Animation/Time Varying Data In-A-Nutshell <a name="summary"></a>
 ~~~admonish tip
@@ -245,6 +246,27 @@ The `startTimeCode` and `endTimeCode` entries give intent hints on what the (use
 {{#include ../../../../code/core/elements.py:animationFPS}}
 ```
 ~~~
+
+
+
+
+
+### Motion Blur - Computing Velocities and Accelerations <a name="animationMotionVelocityAcceleration"></a>
+Motion blur is computed by the hydra delegate of your choice using either the interpolated position data or by making use of velocity/acceleration data.
+Depending on the image-able schema, the attribute namings slightly differ, e.g. for meshes the names are 'UsdGeom.Tokens.points', 'UsdGeom.Tokens.velocities', 'UsdGeom.Tokens.accelerations'. Check the specific schema for the property names.
+
+~~~admonish warning
+Depending on the delegate, you will likely have to set specific primvars that control the sample rate of the position/acceleration data.
+~~~
+
+We can also easily derive velocities/accelerations from position data, if our point count doesn't change:
+~~~admonish info title=""
+```python
+{{#include ../../../../code/core/elements.py:animationMotionVelocityAcceleration}}
+```
+~~~
+
+You can find a interactive Houdini demo of this in our [Houdini - Motion Blur](../../dcc/houdini/fx/motionblur.md) section.
 
 ### Stitching/Combining time samples<a name="animationStitch"></a>
 When working with Usd in DCCs, we often have a large amount of data that needs to be exported per frame. To speed this up, a common practice is to have a render farm, where multiple machines render out different frame ranges of scene. The result then needs to be combined into a single file or loaded via value clips for heavy data (as described in the next section below).
