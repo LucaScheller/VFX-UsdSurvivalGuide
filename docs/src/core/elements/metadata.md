@@ -26,8 +26,9 @@ Metadata is the smallest building block in Usd. It is part of the base class fro
         1. [Support for animation (USD speak **variability**)](#metadataVariability)
         1. [Custom vs schema defined properties](#metadataCustom)
     1. [Special metadata fields for layers and stages](#metadataLayerStage)
-        1. [Reading/writing stage and layer metrics (FPS/Scene Unit Scale/Up Axis) (High/Low level API)](#metadataMetricsLayer)
-        2. [Reading/writing stage and layer customData metadata (High/Low level API)](#metadataCustomDataLayer)
+        1. [Stage/Root Layer Default Render Settings (High/Low level API)](#metadataRenderSettingsPrimPath)
+        1. [Stage and layer metrics (FPS/Scene Unit Scale/Up Axis) (High/Low level API)](#metadataMetricsLayer)
+        1. [Stage and layer customData metadata (High/Low level API)](#metadataCustomDataLayer)
 
 
 ## TL;DR - Metadata In-A-Nutshell <a name="summary"></a>
@@ -269,7 +270,22 @@ With the lower level API, we have to mark it ourselves.
 ### Special metadata fields for layers and stages <a name="metadataLayerStage"></a>
 For stages (root layer/session layer) and layers, we can also write a few special fields as covered below.
 
-#### Reading/writing stage and layer metrics (FPS/Scene Unit Scale/Up Axis) (High/Low level API) <a name="metadataMetricsLayer"></a>
+#### Stage/Root Layer Default Render Settings (High/Low level API) <a name="metadataRenderSettingsPrimPath"></a>
+
+We can supply a default render settings prim path on our root layer. This will be used in DCCs as the default render settings to drive Hydra rendering.
+
+~~~admonish info title=""
+```python
+{{#include ../../../../code/core/elements.py:metadataRenderSettingsPrimPath}}
+```
+~~~
+
+For example in Houdini we can then see it marked with the "Default" prefix in our viewport display options.
+
+![Houdini Viewport Display Options - Default Render Settings](metadataRenderSettingsPrimPath.jpg)
+
+
+#### Stage and layer metrics (FPS/Scene Unit Scale/Up Axis) (High/Low level API) <a name="metadataMetricsLayer"></a>
 
 For more info about the FPS, see our [animation](./animation.md#frames-per-second) section.
 
@@ -279,14 +295,13 @@ The default scene `metersPerUnit` value is centimeters (0.01) and the default `u
 
 See [Scene Up Axis API Docs](https://openusd.org/dev/api/group___usd_geom_up_axis__group.html) and [Scene Unit API Docs](https://openusd.org/dev/api/group___usd_geom_linear_units__group.html) for more info.
 
-
 ~~~admonish info title=""
 ```python
 {{#include ../../../../code/core/elements.py:metadataLayerMetrics}}
 ```
 ~~~
 
-#### Reading/writing stage and layer customData metadata (High/Low level API) <a name="metadataCustomDataLayer"></a>
+#### Stage and layer customData metadata (High/Low level API) <a name="metadataCustomDataLayer"></a>
 ~~~admonish tip
 This is often used to track pipeline relevant data in DCCs. For node based DCCs, this is a convenient way to pass general data down through the node network. For layer based DCCs, this can be used to tag layers (for example to anonymous layers that carry specific pipeline data).
 ~~~

@@ -18,13 +18,14 @@ Layers and stages are the main entry point to accessing our data stored in USD.
     1. [Traversal and Prim/Property Access](#layerTraversal)
     1. [Time Samples](#layerTimeSamples)
     1. [Metadata](#layerMetadata)
-1. [Stages](#exampleA)
+1. [Stages](#stageOverview)
     1. [Configuration](#stageConfiguration)
         1. [Asset Resolver](#stageAssetResolver)
         1. [Stage Metrics](#stageMetrics)
         1. [Stage Time Sample Interpolation](#stageTimeSampleInterpolation)
         1. [Variant/Prim Type Fallbacks](#stageFallbacks)
         1. [Color Management](#stageColormanagement)
+        1. [Default Render Settings](#stageRenderSettingsDefault)
         1. [Metadata](#stageMetadata)
     1. [Composition](#stageComposition)
     1. [Loading mechanisms ](#stageLoadingMechanisms)
@@ -383,6 +384,13 @@ This sub-section is still under development, it is subject to change and needs e
 # Set: 'SetColorConfiguration', 'SetColorManagementSystem', 'SetColorConfigFallbacks'
 ```
 ~~~
+
+#### Default Render Settings <a name="stageRenderSettingsDefault"></a>
+
+We can supply a render settings prim path on our root layer that can be used as a default by applications.
+
+See our [Metadata](./metadata.md#metadataRenderSettingsPrimPath) section for more information.
+
 
 #### Metadata <a name="stageMetadata"></a>
 Setting metadata on the stage, redirects the edits to the root layer.

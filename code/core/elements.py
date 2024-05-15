@@ -1030,8 +1030,25 @@ attr_spec = Sdf.AttributeSpec(prim_spec, "height", Sdf.ValueTypeNames.Double)
 attr_spec.SetInfo("custom", True)
 #// ANCHOR_END: metadataCustom
 
-#// ANCHOR: metadataLayerMetrics
+# // ANCHOR: metadataRenderSettingsPrimPath
+### High Level ###
+from pxr import Usd
+
+stage = Usd.Stage.CreateInMemory()
+stage.GetRootLayer().pseudoRoot.SetInfo(
+    "renderSettingsPrimPath", "/Render/rendersettings"
+)
+### Low Level ###
+from pxr import Sdf
+
+layer = Sdf.Layer.CreateAnonymous()
+layer.pseudoRoot.SetInfo("renderSettingsPrimPath", "/Render/rendersettings")
+# // ANCHOR_END: metadataRenderSettingsPrimPath
+
+
+# // ANCHOR: metadataLayerMetrics
 from pxr import Sdf, Usd, UsdGeom
+
 ### High Level ###
 stage = Usd.Stage.CreateInMemory()
 prim_path = Sdf.Path("/bicycle")
@@ -1050,10 +1067,11 @@ stage.SetEndTimeCode(time_samples[-1])
 UsdGeom.SetStageMetersPerUnit(stage, UsdGeom.LinearUnits.centimeters)
 # To map 24 fps (default) to 25 fps we have scale by 24/25 when loading the layer in the Sdf.LayerOffset
 # Scene Up Axis
-UsdGeom.SetStageUpAxis(stage, UsdGeom.Tokens.y) # Or  UsdGeom.Tokens.z
+UsdGeom.SetStageUpAxis(stage, UsdGeom.Tokens.y)  # Or  UsdGeom.Tokens.z
 
 ### Low Level ###
 from pxr import Sdf
+
 layer = Sdf.Layer.CreateAnonymous()
 prim_path = Sdf.Path("/bicycle")
 prim_spec = Sdf.CreatePrimInLayer(layer, prim_path)
@@ -1071,8 +1089,10 @@ layer.endTimeCode = time_samples[-1]
 # Scene Unit Scale
 layer.pseudoRoot.SetInfo(UsdGeom.Tokens.metersPerUnit, UsdGeom.LinearUnits.centimeters)
 # Scene Up Axis
-layer.pseudoRoot.SetInfo(UsdGeom.Tokens.upAxis, UsdGeom.Tokens.y) # Or  UsdGeom.Tokens.z
-#// ANCHOR_END: metadataLayerMetrics
+layer.pseudoRoot.SetInfo(
+    UsdGeom.Tokens.upAxis, UsdGeom.Tokens.y
+)  # Or  UsdGeom.Tokens.z
+# // ANCHOR_END: metadataLayerMetrics
 
 #// ANCHOR: debuggingTokens
 from pxr import Tf
@@ -3691,7 +3711,7 @@ stage.SetMetadata("customLayerData", {"myCustomStageData": 1})
 layer = stage.GetRootLayer()
 metadata = layer.customLayerData
 metadata["myCustomRootData"] = 1
-layer.metadata = metadata
+layer.customLayerData = metadata
 # As with layers, we can also set the default prim
 stage.SetDefaultPrim(bicycle_prim)
 # Is the same as:
