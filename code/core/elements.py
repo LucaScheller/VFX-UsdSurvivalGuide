@@ -2422,13 +2422,16 @@ schemas.Complex.CreateIntAttrAttr()
 
 #// ANCHOR: metadataPlugin
 from pxr import Usd, Sdf
-# To see all the globally registered fields for the metadata on prim specs:
-print(Sdf.PrimSpec.GetMetaDataInfoKeys(prim_spec))
+
 # Here we test it in an example stage:
 stage = Usd.Stage.CreateInMemory()
 layer = stage.GetEditTarget().GetLayer()
 prim = stage.DefinePrim("/prim")
 prim_spec = layer.GetPrimAtPath(prim.GetPath())
+
+# To see all the globally registered fields for the metadata on prim specs:
+print(Sdf.PrimSpec.GetMetaDataInfoKeys(prim_spec))
+
 # Float field
 metadata_name = "usdSurvivalGuideFloat"
 print(prim.GetMetadata(metadata_name)) # Returns: None
