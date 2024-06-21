@@ -475,7 +475,7 @@ from pxr import Sdf, Tf, Usd, UsdGeom
 stage = Usd.Stage.CreateInMemory()
 prim_path = Sdf.Path("/bicycle")
 prim = stage.DefinePrim(prim_path, "Xform")
-prim.ApplyAPI("UsdGeomModelAPI")
+prim.ApplyAPI("GeomModelAPI") # Older USD versions: prim.ApplyAPI("UsdGeomModelAPI")
 prim_def = prim.GetPrimDefinition()
 print(prim_def.GetAppliedAPISchemas()) # Returns: ['GeomModelAPI']
 print(prim_def.GetPropertyNames()) 
@@ -533,7 +533,7 @@ purpose_attr.Set(UsdGeom.Tokens.render)
 ## Payload loading: Control payload loading (High Level only as it redirects the request to the stage).
 # In our example stage here, we have no payloads, so we don't see a difference.
 prim.Load()
-prim.UnLoad()
+prim.Unload()
 # Calling this on the prim is the same thing.
 prim = stage.GetPrimAtPath(prim_path)
 prim.GetStage().Load(prim_path)
@@ -2422,13 +2422,16 @@ schemas.Complex.CreateIntAttrAttr()
 
 #// ANCHOR: metadataPlugin
 from pxr import Usd, Sdf
-# To see all the globally registered fields for the metadata on prim specs:
-print(Sdf.PrimSpec.GetMetaDataInfoKeys(prim_spec))
+
 # Here we test it in an example stage:
 stage = Usd.Stage.CreateInMemory()
 layer = stage.GetEditTarget().GetLayer()
 prim = stage.DefinePrim("/prim")
 prim_spec = layer.GetPrimAtPath(prim.GetPath())
+
+# To see all the globally registered fields for the metadata on prim specs:
+print(Sdf.PrimSpec.GetMetaDataInfoKeys(prim_spec))
+
 # Float field
 metadata_name = "usdSurvivalGuideFloat"
 print(prim.GetMetadata(metadata_name)) # Returns: None
@@ -2474,7 +2477,7 @@ attr.FlattenTo(prim, "someNewName")
 # Note the method signature takes a time code as an input. If you supply a default time code
 # value clips will be stripped from the result.
 time_code = Usd.TimeCode(1001)
-print(prim.GetPropertyStack(time_code))
+print(attr.GetPropertyStack(time_code))
 ### Low Level ###
 # The low level API does not offer any "extras" worthy of noting.
 #// ANCHOR_END: propertyOverview
@@ -3093,6 +3096,7 @@ material_prim.GetParent().SetTypeName("Xform")
 # Bind materials via direct binding
 material = UsdShade.Material(material_prim)
 mat_bind_api = UsdShade.MaterialBindingAPI.Apply(render_prim)
+mat_bind_api.Bind(material)
 # Unbind all
 mat_bind_api.UnbindAllBindings()
 # Bind via collection
