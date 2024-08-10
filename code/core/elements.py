@@ -1235,7 +1235,7 @@ resolver.RefreshContext(context_collection)
 #// ANCHOR: assetResolverStageContextResolve
 resolved_path = stage.ResolveIdentifierToEditTarget("someAssetIdentifier")
 # Get the Python string
-resolved_path_str = path.GetPathString() # Or str(resolved_path)
+resolved_path_str = resolved_path.GetPathString() # Or str(resolved_path)
 #// ANCHOR_END: assetResolverStageContextResolve
 
 #// ANCHOR: assetResolverResolve
@@ -1243,7 +1243,7 @@ from pxr import Ar
 resolver = Ar.GetResolver()
 resolved_path = resolver.Resolve("someAssetIdentifier")
 # Get the Python string
-resolved_path_str = path.GetPathString() # Or str(resolved_path)
+resolved_path_str = resolved_path.GetPathString() # Or str(resolved_path)
 #// ANCHOR_END: assetResolverResolve
 
 #// ANCHOR: assetResolverAssetPath
