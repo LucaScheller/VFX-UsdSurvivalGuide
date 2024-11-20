@@ -43,4 +43,4 @@ Please consider contributing back to the Usd project in the  official [Usd Repos
 Feel free to fork this repository and share further examples/improvements.
 If you run into issues, please flag them by [submitting a ticket](https://github.com/LucaScheller/VFX-UsdSurvivalGuide/issues/new).
 
-{{#include ../../contributors.md}}
+{{#include ../contributors.md}}
