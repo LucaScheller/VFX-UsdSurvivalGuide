@@ -8,8 +8,6 @@ For more information what makes this guide unique, see the [motivation](./introd
 
 ```admonish success title="Siggraph Presentation"
 This guide was officially introduced at [Siggraph 2023 - Houdini Hive](https://www.sidefx.com/houdini-hive/siggraph-2023/#usd). Special thanks to SideFX for hosting me and throwing such a cool Houdini lounge and presentation line up!
-
-<iframe width="100%" height="540px" src="https://www.youtube-nocookie.com/embed/VSE7ayrRStg?si=Dnp1ozZH_fOwjn6O" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
 ```
 
 {{#include contributors.md}}
@@ -27,5 +25,5 @@ Before starting our journey, make sure you are all packed:
 To get started, let's head over to the [Core Elements](./core/overview.md) section!
 
 ```admonish tip
-This guide primarly uses [Houdini](https://www.sidefx.com/) to explain concepts, as it is one of the most accessible and easiest ways to learn the ways of Usd with. You can install a non-commercial version for free from their website. It is highly recommended to use it when following this guide.
+This guide primarily uses [Houdini](https://www.sidefx.com/) to explain concepts, as it is one of the most accessible and easiest ways to learn the ways of Usd with. You can install a non-commercial version for free from their website. It is highly recommended to use it when following this guide.
 ```

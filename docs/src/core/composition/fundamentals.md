@@ -107,13 +107,13 @@ This is probably the most confusing part of USD in my opinion when first startin
 In Houdini the list editable ops are exposed on the `reference` node. The "Reference Operation" parm sets what sub-array (prepend,append,delete) to use, the "Pre-Operation" sets it to `.Clear()` in `Clear Reference Edits in active layer` mode and to `.ClearAndMakeExplicit()` in "Clear All References" mode.
 
 <video width="100%" height="100%" controls autoplay muted loop>
-  <source src="./houdiniReferenceComposition.mp4" type="video/mp4" alt="Houdini - Reference Node - List Editable Ops">
+  <source src="../../../media/core/composition/houdiniReferenceComposition.mp4" type="video/mp4" alt="Houdini - Reference Node - List Editable Ops">
 </video>
 
 Here is how Houdini (but also the USD view) displays the references metadata field with different layers, as this is how the stage sees it.
 
 <video width="100%" height="100%" controls autoplay muted loop>
-  <source src="./houdiniReferenceListEditableOpsLayers.mp4" type="video/mp4" alt="Houdini - List Editable Ops with layers">
+  <source src="../../../media/core/composition/houdiniReferenceListEditableOpsLayers.mp4" type="video/mp4" alt="Houdini - List Editable Ops with layers">
 </video>
 
 You can see, as soon as we have our reference list editable op on different layers, the metadata only show the top most layer. To inspect all the references that are being loaded, we therefore need to look at the layer stack (the "Scene Graph Layers" panel) or perform a [compsition query](../../production/caches/composition.md).
