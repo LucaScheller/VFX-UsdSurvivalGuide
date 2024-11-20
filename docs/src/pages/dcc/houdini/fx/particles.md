@@ -16,7 +16,7 @@ For an exercise, let's build a simple SOP import ourselves. Should we use this i
 
 ~~~admonish tip title=""
 ```python
-{{#include ../../../../../code/dcc/houdini.py:houdiniPointsNativeStream}}
+{{#include ../../../../../../code/dcc/houdini.py:houdiniPointsNativeStream}}
 ```
 ~~~
 
@@ -92,7 +92,7 @@ The code for our "python kernel" executor:
 
 ~~~admonish tip title="Python Wrangle Hda | Python Kernel | Click to expand!" collapsible=true
 ```python
-{{#include ../../../../../files/dcc/houdini/points/pythonWrangle.py}}
+{{#include ../../../../../../files/dcc/houdini/points/pythonWrangle.py}}
 ```
 ~~~
 
@@ -100,6 +100,6 @@ The code for our pre render script:
 
 ~~~admonish tip title="Python Wrangle Hda | Pre-Render Script | Click to expand!" collapsible=true
 ```python
-{{#include ../../../../../files/dcc/houdini/points/renderPreFrame.py}}
+{{#include ../../../../../../files/dcc/houdini/points/renderPreFrame.py}}
 ```
 ~~~

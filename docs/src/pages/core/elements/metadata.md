@@ -42,7 +42,7 @@ Metadata is the smallest building block in Usd. It is part of the base class fro
 In production, you'll use the `assetInfo`/`customData` prim metadata fields to track any production related data.
 You can also use metadata to edit composition arcs, though the high level API offers nice class wrappers that wrap this for you.
 ```python
-{{#include ../../../../code/core/elements.py:metadataSummary}}
+{{#include ../../../../../code/core/elements.py:metadataSummary}}
 ```
 ~~~
 
@@ -109,7 +109,7 @@ Let's look at some actual code examples on how to modify metadata.
 ### Basics (High level API) <a name="metadataBasics"></a>
 ~~~admonish info title=""
 ```python
-{{#include ../../../../code/core/elements.py:metadataBasics}}
+{{#include ../../../../../code/core/elements.py:metadataBasics}}
 ```
 ~~~
 
@@ -117,7 +117,7 @@ Let's look at some actual code examples on how to modify metadata.
 To create a valid metadata compatible dict, you can validate it:
 ~~~admonish info title=""
 ```python
-{{#include ../../../../code/core/elements.py:metadataValidateDict}}
+{{#include ../../../../../code/core/elements.py:metadataValidateDict}}
 ```
 ~~~
 This is useful if you expose setting metadata to your user facing UIs. This will auto-cast Python arrays to VtArray and other Usd internal types. You can also skip this step, it might error later on when setting the data then though. 
@@ -126,7 +126,7 @@ This is useful if you expose setting metadata to your user facing UIs. This will
 To access nested dict keys, we use the `:` symbol as the path separator.
 ~~~admonish info title=""
 ```python
-{{#include ../../../../code/core/elements.py:metadataNestedKeyPath}}
+{{#include ../../../../../code/core/elements.py:metadataNestedKeyPath}}
 ```
 ~~~
 
@@ -140,13 +140,13 @@ We can easily extend metadata fields via plugins. We cover this in detail in out
 This is quite useful if you need to expose docs in UIs.
 ~~~admonish info title=""
 ```python
-{{#include ../../../../code/core/elements.py:metadataDocs}}
+{{#include ../../../../../code/core/elements.py:metadataDocs}}
 ```
 ~~~
 
 ~~~admonish note title="Click here to view the result" collapsible=true
 ```python
-{{#include ../../../../code/core/elements.py:metadataDocsResult}}
+{{#include ../../../../../code/core/elements.py:metadataDocsResult}}
 ```
 ~~~
 
@@ -154,7 +154,7 @@ This is quite useful if you need to expose docs in UIs.
 The getters offer the distinction between retrieving authored or fallback values provided by the schemas that registered the metadata.
 ~~~admonish info title=""
 ```python
-{{#include ../../../../code/core/elements.py:metadataAuthored}}
+{{#include ../../../../../code/core/elements.py:metadataAuthored}}
 ```
 ~~~
 
@@ -163,7 +163,7 @@ Same as with the layer customData, the lower level APIs on prim/property specs e
 
 ~~~admonish info title=""
 ```python
-{{#include ../../../../code/core/elements.py:metadataPrimPropertySpec}}
+{{#include ../../../../../code/core/elements.py:metadataPrimPropertySpec}}
 ```
 ~~~
 As you can see the higher level API gives us fallback info via the Get(authored) methods. In the lower level API we have to process this data logic ourselves.
@@ -179,7 +179,7 @@ We only cover here how to set the metadata, for more info checkout our [Loading 
 
 ~~~admonish info title=""
 ```python
-{{#include ../../../../code/core/elements.py:metadataActive}}
+{{#include ../../../../../code/core/elements.py:metadataActive}}
 ```
 ~~~
 
@@ -195,7 +195,7 @@ to manage the content of this list to be synced with the actual payload(s) conte
 
 ~~~admonish info title=""
 ```python
-{{#include ../../../../code/core/elements.py:metadataAssetInfo}}
+{{#include ../../../../../code/core/elements.py:metadataAssetInfo}}
 ```
 ~~~
 
@@ -203,7 +203,7 @@ to manage the content of this list to be synced with the actual payload(s) conte
 The `customData` field can be for any data you want, a kind of scratch space, so you don't need to add you own schema. If you catch yourself misusing it too much, you should probably generate your own schema.
 ~~~admonish info title=""
 ```python
-{{#include ../../../../code/core/elements.py:metadataCustomData}}
+{{#include ../../../../../code/core/elements.py:metadataCustomData}}
 ```
 ~~~
 
@@ -211,7 +211,7 @@ The `customData` field can be for any data you want, a kind of scratch space, so
 There is also a special key to track user comments:
 ~~~admonish info title=""
 ```python
-{{#include ../../../../code/core/elements.py:metadataComment}}
+{{#include ../../../../../code/core/elements.py:metadataComment}}
 ```
 ~~~
 
@@ -219,7 +219,7 @@ There is also a special key to track user comments:
 You can also write an `icon` key into the `customData` dict, which UI applications can then optionally use to draw the prim icon with.
 ~~~admonish info title=""
 ```python
-{{#include ../../../../code/core/elements.py:metadataComment}}
+{{#include ../../../../../code/core/elements.py:metadataComment}}
 ```
 ~~~
 
@@ -230,7 +230,7 @@ This also exists for properties, but is not read by most UIs in apps/DCCs.
 
 ~~~admonish info title=""
 ```python
-{{#include ../../../../code/core/elements.py:metadataHidden}}
+{{#include ../../../../../code/core/elements.py:metadataHidden}}
 ```
 ~~~
 
@@ -249,7 +249,7 @@ The variability actually only declares the intent of time capabilities of the pr
 
 ~~~admonish info title=""
 ```python
-{{#include ../../../../code/core/elements.py:metadataVariability}}
+{{#include ../../../../../code/core/elements.py:metadataVariability}}
 ```
 ~~~
 
@@ -263,7 +263,7 @@ With the lower level API, we have to mark it ourselves.
 
 ~~~admonish info title=""
 ```python
-{{#include ../../../../code/core/elements.py:metadataCustom}}
+{{#include ../../../../../code/core/elements.py:metadataCustom}}
 ```
 ~~~
 
@@ -276,7 +276,7 @@ We can supply a default render settings prim path on our root layer. This will b
 
 ~~~admonish info title=""
 ```python
-{{#include ../../../../code/core/elements.py:metadataRenderSettingsPrimPath}}
+{{#include ../../../../../code/core/elements.py:metadataRenderSettingsPrimPath}}
 ```
 ~~~
 
@@ -297,7 +297,7 @@ See [Scene Up Axis API Docs](https://openusd.org/dev/api/group___usd_geom_up_axi
 
 ~~~admonish info title=""
 ```python
-{{#include ../../../../code/core/elements.py:metadataLayerMetrics}}
+{{#include ../../../../../code/core/elements.py:metadataLayerMetrics}}
 ```
 ~~~
 
@@ -310,7 +310,7 @@ Layer metadata, like some other classes in the low level API, uses the lower cam
 
 ~~~admonish info title=""
 ```python
-{{#include ../../../../code/core/elements.py:metadataLayer}}
+{{#include ../../../../../code/core/elements.py:metadataLayer}}
 ```
 ~~~
 
@@ -321,6 +321,6 @@ It writes the metadata to the session or root layer. So you won't see any compos
 
 ~~~admonish info title=""
 ```python
-{{#include ../../../../code/core/elements.py:metadataStage}}
+{{#include ../../../../../code/core/elements.py:metadataStage}}
 ```
 ~~~

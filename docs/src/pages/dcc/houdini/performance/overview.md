@@ -76,7 +76,7 @@ Why does Houdini do this? As mentioned hierarchy loading is fast, streaming the 
 Let's have a look at the differences, as you can see anything we do with the configure stage node actually affects our hierarchy, whereas scene graph tree panel edits are only for the viewport:
 
 <video width="100%" height="100%" controls autoplay muted loop>
-  <source src="../../../../media/dcc/houdini/hda/loadingMechanisms.mp4" type="video/mp4" alt="Scene Graph Tree vs Configure Stage">
+  <source src="../../../../media/core/elements/houdiniLoadingMechanisms.mp4" type="video/mp4" alt="Scene Graph Tree vs Configure Stage">
 </video>
 
 Another great tip is to disable tieing the scene graph panel to the active selected node:

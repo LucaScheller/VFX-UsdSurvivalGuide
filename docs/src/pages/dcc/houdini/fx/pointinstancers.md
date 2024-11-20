@@ -60,7 +60,7 @@ Here is the tracker script:
 
 ~~~admonish tip title="PointInstancer | Re-Order Prototypes | Track Prototypes | Click to expand" collapsible=true
 ```python
-{{#include ../../../../../code/dcc/houdini.py:houdiniPointInstancerReorderTracker}}
+{{#include ../../../../../../code/dcc/houdini.py:houdiniPointInstancerReorderTracker}}
 ```
 ~~~
 
@@ -68,7 +68,7 @@ And here the post processing script. You'll usually want to trigger this after t
 
 ~~~admonish tip title="PointInstancer | Re-Order Prototypes | Track Prototypes | Click to expand" collapsible=true
 ```python
-{{#include ../../../../../code/dcc/houdini.py:houdiniPointInstancerReorderPostProcess}}
+{{#include ../../../../../../code/dcc/houdini.py:houdiniPointInstancerReorderPostProcess}}
 ```
 ~~~
 
@@ -105,6 +105,6 @@ On LOP level:
 
 ~~~admonish tip title="PointInstancer | Custom Import | Click to expand" collapsible=true
 ```python
-{{#include ../../../../../code/dcc/houdini.py:houdiniPointInstancerNativeStream}}
+{{#include ../../../../../../code/dcc/houdini.py:houdiniPointInstancerNativeStream}}
 ```
 ~~~

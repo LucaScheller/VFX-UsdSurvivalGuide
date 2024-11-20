@@ -15,6 +15,6 @@ Depending on the delegate, you will likely have to set specific primvars that co
 We can also easily derive velocities/accelerations from position data, if our point count doesn't change:
 ~~~admonish tip title="Motionblur | Compute | Velocity/Acceleration | Click to expand" collapsible=true
 ```python
-{{#include ../../../../../code/core/elements.py:animationMotionVelocityAcceleration}}
+{{#include ../../../../../../code/core/elements.py:animationMotionVelocityAcceleration}}
 ```
 ~~~

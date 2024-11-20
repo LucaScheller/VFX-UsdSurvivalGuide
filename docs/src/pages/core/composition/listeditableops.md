@@ -53,7 +53,7 @@ These are 100% identical in terms of list ordering functionality, the only diffe
 
 ~~~admonish tip title=""
 ```python
-{{#include ../../../../code/core/composition.py:listEditableOpsLowLevelAPI}}
+{{#include ../../../../../code/core/composition.py:listEditableOpsLowLevelAPI}}
 ```
 ~~~
 
@@ -66,7 +66,7 @@ When working with the high level API, all the function signatures that work on l
 
 ~~~admonish tip title=""
 ```python
-{{#include ../../../../code/core/composition.py:listEditableOpsHighLevelAPI}}
+{{#include ../../../../../code/core/composition.py:listEditableOpsHighLevelAPI}}
 ```
 ~~~
 
@@ -86,7 +86,7 @@ Let's mock how USD does this (without using `Sdf.Layer`s to keep it simple):
 
 ~~~admonish tip title=""
 ```python
-{{#include ../../../../code/core/composition.py:listEditableOpsMerging}}
+{{#include ../../../../../code/core/composition.py:listEditableOpsMerging}}
 ```
 ~~~
 

@@ -9,6 +9,6 @@ That means if the binding came from a parent prim, we'll get the `material:bindi
 
 ~~~admonish info title=""
 ```python
-{{#include ../../../../code/production/caches.py:stageQueryMaterialBinding}}
+{{#include ../../../../../code/production/caches.py:stageQueryMaterialBinding}}
 ```
 ~~~

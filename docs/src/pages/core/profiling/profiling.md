@@ -29,7 +29,7 @@ Via the C++ API, you can customize the behavior further, for Python 'only' the g
 First you mark what to trace. You can also mark nothing, you'll still have access to all the default profiling:
 ~~~admonish info title=""
 ```python
-{{#include ../../../../code/core/elements.py:profilingTraceAttach}}
+{{#include ../../../../../code/core/elements.py:profilingTraceAttach}}
 ```
 ~~~
 
@@ -37,7 +37,7 @@ First you mark what to trace. You can also mark nothing, you'll still have acces
 Then you enable the collector during the runtime of what you want to trace and write the result to the disk.
 ~~~admonish info title=""
 ```python
-{{#include ../../../../code/core/elements.py:profilingTraceCollect}}
+{{#include ../../../../../code/core/elements.py:profilingTraceCollect}}
 ```
 ~~~
 
@@ -70,7 +70,7 @@ Here is an example of a report to a Google Chrome trace .json file opened at [`c
 Usd ships with a simpel stop watch class that offers high precision time deltas.
 ~~~admonish info title=""
 ```python
-{{#include ../../../../code/core/elements.py:profilingStopWatch}}
+{{#include ../../../../../code/core/elements.py:profilingStopWatch}}
 ```
 ~~~
 

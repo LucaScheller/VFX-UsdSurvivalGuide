@@ -80,7 +80,7 @@ These are 100% identical in terms of list ordering functionality, the only diffe
 
 ~~~admonish tip title=""
 ```python
-{{#include ../../../../code/core/composition.py:compositionListEditableOpsBasics}}
+{{#include ../../../../../code/core/composition.py:compositionListEditableOpsBasics}}
 ```
 ~~~
 
@@ -90,7 +90,7 @@ Let's mock how USD does this without layers:
 
 ~~~admonish tip title=""
 ```python
-{{#include ../../../../code/core/composition.py:compositionListEditableOpsMerging}}
+{{#include ../../../../../code/core/composition.py:compositionListEditableOpsMerging}}
 ```
 ~~~
 
@@ -193,7 +193,7 @@ stage.SetEditTarget(stage.GetEditTargetForLocalLayer(layer))
 
 ~~~admonish tip title=""
 ```python
-{{#include ../../../../code/core/composition.py:compositionEditTarget}}
+{{#include ../../../../../code/core/composition.py:compositionEditTarget}}
 ```
 ~~~
 
@@ -201,6 +201,6 @@ For convenience, USD also offers a context manager for variants, so that we don'
 
 ~~~admonish tip title=""
 ```python
-{{#include ../../../../code/core/composition.py:compositionEditTargetContext}}
+{{#include ../../../../../code/core/composition.py:compositionEditTargetContext}}
 ```
 ~~~

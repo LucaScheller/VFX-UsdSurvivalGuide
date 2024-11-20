@@ -70,7 +70,7 @@ These return us all value sources for a prim or attribute.
 
 ~~~admonish tip title=""
 ```python
-{{#include ../../../../code/core/composition.py:pcpPrimPropertyStack}}
+{{#include ../../../../../code/core/composition.py:pcpPrimPropertyStack}}
 ```
 ~~~
 
@@ -86,7 +86,7 @@ Next let's look at the prim index.
 
 ~~~admonish tip title=""
 ```python
-{{#include ../../../../code/core/composition.py:pcpPrimIndex}}
+{{#include ../../../../../code/core/composition.py:pcpPrimIndex}}
 ```
 ~~~
 
@@ -226,7 +226,7 @@ These are the sub-filters that can be set. We can only set a single token value 
 
 ~~~admonish tip title=""
 ```python
-{{#include ../../../../code/core/composition.py:pcpPrimCompositionQuery}}
+{{#include ../../../../../code/core/composition.py:pcpPrimCompositionQuery}}
 ```
 ~~~
 

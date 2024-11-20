@@ -89,7 +89,7 @@ For more info about the load order (how collection based bindings win over direc
 
 ~~~admonish tip title=""
 ```python
-{{#include ../../../../code/core/elements.py:relationshipMaterialBinding}}
+{{#include ../../../../../code/core/elements.py:relationshipMaterialBinding}}
 ```
 ~~~
 

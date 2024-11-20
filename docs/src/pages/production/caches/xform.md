@@ -7,6 +7,6 @@ Checkout the [official API docs](https://openusd.org/dev/api/class_usd_geom_xfor
 
 ~~~admonish info title=""
 ```python
-{{#include ../../../../code/production/caches.py:stageQueryTransform}}
+{{#include ../../../../../code/production/caches.py:stageQueryTransform}}
 ```
 ~~~

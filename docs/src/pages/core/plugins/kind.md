@@ -52,7 +52,7 @@ So this means you should have `group` kinds set for all parent prims of `model` 
 Kinds can be easily set via the high and low level APIs:
 ~~~admonish info title=""
 ```python
-{{#include ../../../../code/core/elements.py:dataContainerPrimBasicsKinds}}
+{{#include ../../../../../code/core/elements.py:dataContainerPrimBasicsKinds}}
 ```
 ~~~
 
@@ -93,7 +93,7 @@ We can register kinds via the [plugin system](./overview.md).
 
 ~~~admonish info title=""
 ```python
-{{#include ../../../../files/plugins/kinds/plugInfo.json}}
+{{#include ../../../../../files/plugins/kinds/plugInfo.json}}
 ```
 ~~~
 
@@ -110,7 +110,7 @@ If you downloaded this repo, we provide an example kind plugin [here](https://gi
 We can also check if a plugin with kind data was registered via Python.
 ~~~admonish info title=""
 ```python
-{{#include ../../../../code/core/elements.py:kindRegistry}}
+{{#include ../../../../../code/core/elements.py:kindRegistry}}
 ```
 ~~~
 
@@ -125,6 +125,6 @@ Make sure that your whole hierarchy has kinds defined (to the prim you want to s
 
 ~~~admonish info title=""
 ```python
-{{#include ../../../../code/core/elements.py:kindTraversal}}
+{{#include ../../../../../code/core/elements.py:kindTraversal}}
 ```
 ~~~

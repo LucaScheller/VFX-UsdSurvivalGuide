@@ -45,7 +45,7 @@ We'll be using schema classes a lot in production, so we recommend familiarizing
 They are the main interface for your prims in the high level API that gives you getters/setters for all the standard properties that ship with Usd.
 
 ```python
-{{#include ../../../../code/core/elements.py:schemasOverview}}
+{{#include ../../../../../code/core/elements.py:schemasOverview}}
 ```
 
 The schema classes then give you access to all of the schemas Get/Set methods and utility functions.
@@ -155,13 +155,13 @@ To summarize the below code:
 
 ~~~admonish tip title="Pro Tip | Best practices how to apply schemas"
 ```python
-{{#include ../../../../code/core/elements.py:schemasOverview}}
+{{#include ../../../../../code/core/elements.py:schemasOverview}}
 ```
 ~~~
 
 ~~~admonish info title=""
 ```python
-{{#include ../../../../code/core/elements.py:schemasTyped}}
+{{#include ../../../../../code/core/elements.py:schemasTyped}}
 ```
 ~~~
 
@@ -173,7 +173,7 @@ And the API schemas:
 
 ~~~admonish info title=""
 ```python
-{{#include ../../../../code/core/elements.py:schemasAPI}}
+{{#include ../../../../../code/core/elements.py:schemasAPI}}
 ```
 ~~~
 
@@ -183,7 +183,7 @@ In production, you won't be using this a lot, it is good to be aware of it thoug
 
 ~~~admonish info title=""
 ```python
-{{#include ../../../../code/core/elements.py:dataContainerPrimTypeDefinition}}
+{{#include ../../../../../code/core/elements.py:dataContainerPrimTypeDefinition}}
 ```
 ~~~
 
@@ -192,7 +192,7 @@ The [prim type info](https://openusd.org/dev/api/class_usd_prim_type_info.html) 
 
 ~~~admonish info title=""
 ```python
-{{#include ../../../../code/core/elements.py:dataContainerPrimTypeInfo}}
+{{#include ../../../../../code/core/elements.py:dataContainerPrimTypeInfo}}
 ```
 ~~~
 
@@ -219,7 +219,7 @@ registry.GetSchemaTypeName("UsdGeomCube") # Returns: "Cube"
 Let's list all the schemas:
 ~~~admonish info title=""
 ```python
-{{#include ../../../../code/core/elements.py:schemasPluginRegistry}}
+{{#include ../../../../../code/core/elements.py:schemasPluginRegistry}}
 ```
 ~~~
 
@@ -228,7 +228,7 @@ which we can then use in `IsA()` checks.
 
 ~~~admonish info title=""
 ```python
-{{#include ../../../../code/core/elements.py:schemasRegistry}}
+{{#include ../../../../../code/core/elements.py:schemasRegistry}}
 ```
 ~~~
 
@@ -236,7 +236,7 @@ A practical use case of looking thru the registry, is that we can grab the prim 
 
 ~~~admonish info title=""
 ```python
-{{#include ../../../../code/core/elements.py:schemasRegistryToPrimDefinition}}
+{{#include ../../../../../code/core/elements.py:schemasRegistryToPrimDefinition}}
 ```
 ~~~
 
@@ -254,6 +254,6 @@ The kind can be one of:
 
 ~~~admonish info title=""
 ```python
-{{#include ../../../../code/core/elements.py:schemasKind}}
+{{#include ../../../../../code/core/elements.py:schemasKind}}
 ```
 ~~~

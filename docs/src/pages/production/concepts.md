@@ -48,7 +48,7 @@ we have to be careful what order we add removes/renames if they interfere with e
 
 ~~~admonish tip title="Sdf.BatchNamespaceEdit | Moving/renaming/removing prim/property specs | Click to expand!" collapsible=true
 ```python
-{{#include ../../../code/production/production.py:productionConceptsSdfBatchNamespaceMoveRenameDelete}}
+{{#include ../../../../code/production/production.py:productionConceptsSdfBatchNamespaceMoveRenameDelete}}
 ```
 ~~~
 
@@ -57,7 +57,7 @@ We can create variant via the namespace edit, because variants are in-line USD n
 
 ~~~admonish tip title="Sdf.BatchNamespaceEdit | Moving prim specs into variants | Click to expand!" collapsible=true
 ```python
-{{#include ../../../code/production/production.py:productionConceptsSdfBatchNamespaceEditVariant}}
+{{#include ../../../../code/production/production.py:productionConceptsSdfBatchNamespaceEditVariant}}
 ```
 ~~~
 
@@ -80,7 +80,7 @@ We'll add some examples for custom filtering at a later time.
 
 ~~~admonish tip title="Sdf.CopySpec | Copying prim/property specs | Click to expand!" collapsible=true
 ```python
-{{#include ../../../code/production/production.py:productionConceptsSdfCopySpecStandard}}
+{{#include ../../../../code/production/production.py:productionConceptsSdfCopySpecStandard}}
 ```
 ~~~
 
@@ -89,7 +89,7 @@ We can also use `Sdf.CopySpec` for copying content into a variant.
 
 ~~~admonish tip title="Sdf.CopySpec | Copying prim specs into variants | Click to expand!" collapsible=true
 ```python
-{{#include ../../../code/production/production.py:productionConceptsSdfCopySpecVariant}}
+{{#include ../../../../code/production/production.py:productionConceptsSdfCopySpecVariant}}
 ```
 ~~~
 
@@ -115,7 +115,7 @@ For more info see the [Sdf.ChangeBlock](https://openusd.org/dev/api/class_sdf_ch
 
 ~~~admonish tip title=""
 ```python
-{{#include ../../../code/production/production.py:productionConceptsSdfChangeBlock}}
+{{#include ../../../../code/production/production.py:productionConceptsSdfChangeBlock}}
 ```
 ~~~
 

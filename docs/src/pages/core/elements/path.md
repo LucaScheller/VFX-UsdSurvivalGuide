@@ -29,7 +29,7 @@ Paths can encode the following path data:
 
 ~~~admonish info title=""
 ```python
-{{#include ../../../../code/core/elements.py:pathSummary}}
+{{#include ../../../../../code/core/elements.py:pathSummary}}
 ```
 ~~~
 
@@ -52,7 +52,7 @@ We recommend going through these small examples (5-10 min), just to get used to 
 
 ~~~admonish info title=""
 ```python
-{{#include ../../../../code/core/elements.py:pathBasics}}
+{{#include ../../../../../code/core/elements.py:pathBasics}}
 ```
 ~~~
 
@@ -60,7 +60,7 @@ We recommend going through these small examples (5-10 min), just to get used to 
 
 ~~~admonish info title=""
 ```python
-{{#include ../../../../code/core/elements.py:pathSpecialPaths}}
+{{#include ../../../../../code/core/elements.py:pathSpecialPaths}}
 ```
 ~~~
 
@@ -69,7 +69,7 @@ We can also encode variants into the path via the {variantSetName=variantName} s
 
 ~~~admonish info title=""
 ```python
-{{#include ../../../../code/core/elements.py:pathVariants}}
+{{#include ../../../../../code/core/elements.py:pathVariants}}
 ```
 ~~~
 
@@ -83,7 +83,7 @@ When using Usd, we'll rarely run into the relationship `[]` encoded targets path
 
 ~~~admonish info title=""
 ```python
-{{#include ../../../../code/core/elements.py:pathProperties}}
+{{#include ../../../../../code/core/elements.py:pathProperties}}
 ```
 ~~~
 

@@ -36,7 +36,7 @@ Another important feature is stopping traversal into child hierarchies. This can
 
 ~~~admonish tip title="Stage/Prim Traversal"
 ```python
-{{#include ../../../../code/core/elements.py:traverseDataStageTemplate}}
+{{#include ../../../../../code/core/elements.py:traverseDataStageTemplate}}
 ```
 ~~~
 
@@ -44,7 +44,7 @@ Layer traversal is a bit different. Instead of iterating, we provide a function,
 
 ~~~admonish tip title="Layer Traversal"
 ```python
-{{#include ../../../../code/core/elements.py:traverseDataLayerTemplate}}
+{{#include ../../../../../code/core/elements.py:traverseDataLayerTemplate}}
 ```
 ~~~
 
@@ -107,7 +107,7 @@ Sdf.Layer.RemoveFromMutedLayers(layer.identifier)
 Muting layers per stage is done via the `Usd.Stage` object, all function signatures work with the layer identifier string. If the layer is muted globally, the stage will not override the muting and it stays muted.
 ~~~admonish tip title=""
 ```python
-{{#include ../../../../code/core/elements.py:loadingMechanismsLayerMuting}}
+{{#include ../../../../../code/core/elements.py:loadingMechanismsLayerMuting}}
 ```
 ~~~
 
@@ -138,7 +138,7 @@ The population mask is managed via the `Usd.StagePopulationMask` class.
 
 ~~~admonish tip title=""
 ```python
-{{#include ../../../../code/core/elements.py:loadingMechanismsLayerPrimPopulationMask}}
+{{#include ../../../../../code/core/elements.py:loadingMechanismsLayerPrimPopulationMask}}
 ```
 ~~~
 
@@ -166,7 +166,7 @@ You can find more details in the [API docs](https://openusd.org/dev/api/class_us
 
 ~~~admonish tip title=""
 ```python
-{{#include ../../../../code/core/elements.py:loadingMechanismsLayerPayloadLoading}}
+{{#include ../../../../../code/core/elements.py:loadingMechanismsLayerPayloadLoading}}
 ```
 ~~~
 
@@ -192,7 +192,7 @@ Here is how we can set it via Python, it is part of the `UsdGeomModelAPI`:
 
 ~~~admonish tip title=""
 ```python
-{{#include ../../../../code/core/elements.py:loadingMechanismsGeomModelAPIDrawMode}}
+{{#include ../../../../../code/core/elements.py:loadingMechanismsGeomModelAPIDrawMode}}
 ```
 ~~~
 
@@ -252,7 +252,7 @@ By default the Usd.PrimDefaultPredicate is used, if we don't specify one.
 ~~~admonish tip title="Pro Tip | Usd Prim Range"
 Here is the most common syntax you'll be using:
 ```python
-{{#include ../../../../code/core/elements.py:traverseDataStageTemplate}}
+{{#include ../../../../../code/core/elements.py:traverseDataStageTemplate}}
 ```
 ~~~
 
@@ -262,7 +262,7 @@ To enable it we can either run `pxr.Usd.TraverseInstanceProxies(<existingPredica
 Within instances we can get the prototype as follows, for more info see our [instanceable section](../composition/livrps.md#compositionInstance):
 ~~~admonish tip title=""
 ```python
-{{#include ../../../../code/core/composition.py:compositionInstanceable}}
+{{#include ../../../../../code/core/composition.py:compositionInstanceable}}
 ```
 ~~~
 
@@ -270,7 +270,7 @@ Let's look at some traversal examples:
 
 ~~~admonish tip title="Stage/Prim Traversal | Click to expand" collapsible=true
 ```python
-{{#include ../../../../code/core/elements.py:traverseDataStage}}
+{{#include ../../../../../code/core/elements.py:traverseDataStage}}
 ```
 ~~~
 
@@ -285,7 +285,7 @@ The traversal for layers works differently. Instead of an iterator, we have to p
 "kernel" like function, that gets an `Sdf.Path` as an input.
 Here is the most common syntax you'll be using:
 ```python
-{{#include ../../../../code/core/elements.py:traverseDataLayerTemplate}}
+{{#include ../../../../../code/core/elements.py:traverseDataLayerTemplate}}
 ```
 ~~~
 
@@ -299,14 +299,14 @@ The output will be something like this:
 
 ~~~admonish tip title=""
 ```python
-{{#include ../../../../code/core/elements.py:traverseSampleData}}
+{{#include ../../../../../code/core/elements.py:traverseSampleData}}
 ```
 ~~~
 
 Here is how we can run profiling (this is kept very simple, check out our [profiling](../profiling/overview.md) section how to properly trace the stats) on the sample data:
 ~~~admonish tip title=""
 ```python
-{{#include ../../../../code/core/elements.py:traverseSampleDataProfiling}}
+{{#include ../../../../../code/core/elements.py:traverseSampleDataProfiling}}
 ```
 ~~~
 

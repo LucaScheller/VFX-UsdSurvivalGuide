@@ -60,7 +60,7 @@ The final world transform is computed based on a prims local transform and that 
 
 ~~~admonish info title=""
 ```python
-{{#include ../../../../code/core/elements.py:xformXformableOverview}}
+{{#include ../../../../../code/core/elements.py:xformXformableOverview}}
 ```
 ~~~
 
@@ -81,7 +81,7 @@ This should only be used as a last resort to enforce a prim to have a specific t
 
 ~~~admonish info title=""
 ```python
-{{#include ../../../../code/core/elements.py:xformResetXformStack}}
+{{#include ../../../../../code/core/elements.py:xformResetXformStack}}
 ```
 ~~~
 
@@ -96,7 +96,7 @@ The preferred way should always be the xform cache, as it re-uses ancestor xform
 
 ~~~admonish info title=""
 ```python
-{{#include ../../../../code/core/elements.py:xformCache}}
+{{#include ../../../../../code/core/elements.py:xformCache}}
 ```
 ~~~
 
@@ -110,7 +110,7 @@ Here's how we can achieve that (This example is a bit abstract, we'll add someth
 
 ~~~admonish info title=""
 ```python
-{{#include ../../../../code/core/elements.py:xformWorldSpaceLocalSpace}}
+{{#include ../../../../../code/core/elements.py:xformWorldSpaceLocalSpace}}
 ```
 ~~~
 
@@ -123,7 +123,7 @@ If we want a parent constraint like behavior, we have to bake down the transform
 
 ~~~admonish info title=""
 ```python
-{{#include ../../../../code/core/elements.py:xformBake}}
+{{#include ../../../../../code/core/elements.py:xformBake}}
 ```
 ~~~
 

@@ -16,7 +16,7 @@ These are the sub-filters that can be set. We can only set a single token value 
 
 ~~~admonish tip title=""
 ```python
-{{#include ../../../../code/core/composition.py:pcpPrimCompositionQuery}}
+{{#include ../../../../../code/core/composition.py:pcpPrimCompositionQuery}}
 ```
 ~~~
 

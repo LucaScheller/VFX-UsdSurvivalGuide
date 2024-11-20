@@ -29,7 +29,7 @@ Usd encodes time related data in a very simple format:
 
 Reading and writing is quite straight forward:
 ```python
-{{#include ../../../../code/core/elements.py:animationOverview}}
+{{#include ../../../../../code/core/elements.py:animationOverview}}
 ```
 ~~~
 
@@ -120,7 +120,7 @@ The `Usd.TimeCode` class is a small wrapper class for handling time encoding. Cu
 
 ~~~admonish info title=""
 ```python
-{{#include ../../../../code/core/elements.py:animationTimeCode}}
+{{#include ../../../../../code/core/elements.py:animationTimeCode}}
 ```
 ~~~
 
@@ -141,7 +141,7 @@ Instead you have to create new ones and re-write the arc/assign the new layer of
 
 ~~~admonish info title=""
 ```python
-{{#include ../../../../code/core/elements.py:animationLayerOffset}}
+{{#include ../../../../../code/core/elements.py:animationLayerOffset}}
 ```
 ~~~
 
@@ -158,7 +158,7 @@ When writing a large amount of samples, you should use the low level API as it i
 
 ~~~admonish info title=""
 ```python
-{{#include ../../../../code/core/elements.py:animationWrite}}
+{{#include ../../../../../code/core/elements.py:animationWrite}}
 ```
 ~~~
 
@@ -178,7 +178,7 @@ To read data we recommend using the high level API. That way you can also reques
 ~~~admonish tip
 If you need to check if an attribute is time sampled, run the following:
 ```python
-{{#include ../../../../code/core/elements.py:animationTimeVarying}}
+{{#include ../../../../../code/core/elements.py:animationTimeVarying}}
 ```
 If you know the whole layer is in memory, then running GetNumTimeSamples()
 is fine, as it doesn't have t open any files.
@@ -186,7 +186,7 @@ is fine, as it doesn't have t open any files.
 
 ~~~admonish info title=""
 ```python
-{{#include ../../../../code/core/elements.py:animationRead}}
+{{#include ../../../../../code/core/elements.py:animationRead}}
 ```
 ~~~
 
@@ -195,7 +195,7 @@ You can also tell a time sample to block a value. Blocking means that the attrib
 
 ~~~admonish info title=""
 ```python
-{{#include ../../../../code/core/elements.py:animationSpecialValues}}
+{{#include ../../../../../code/core/elements.py:animationSpecialValues}}
 ```
 ~~~
 
@@ -243,7 +243,7 @@ The `startTimeCode` and `endTimeCode` entries give intent hints on what the (use
 
 ~~~admonish info title=""
 ```python
-{{#include ../../../../code/core/elements.py:animationFPS}}
+{{#include ../../../../../code/core/elements.py:animationFPS}}
 ```
 ~~~
 
@@ -262,7 +262,7 @@ Depending on the delegate, you will likely have to set specific primvars that co
 We can also easily derive velocities/accelerations from position data, if our point count doesn't change:
 ~~~admonish info title=""
 ```python
-{{#include ../../../../code/core/elements.py:animationMotionVelocityAcceleration}}
+{{#include ../../../../../code/core/elements.py:animationMotionVelocityAcceleration}}
 ```
 ~~~
 
@@ -288,7 +288,7 @@ In Houdini you can find it in the `$HFS/bin`folder, e.g. `/opt/hfs19.5/bin`.
 Here is an excerpt:
 ~~~admonish info title=""
 ```python
-{{#include ../../../../code/core/elements.py:animationStitchCmdlineTool}}
+{{#include ../../../../../code/core/elements.py:animationStitchCmdlineTool}}
 ```
 ~~~
 
@@ -375,7 +375,7 @@ Technically you can remove all default attributes from the per frame files after
 
 ~~~admonish info title=""
 ```python
-{{#include ../../../../code/core/elements.py:animationStitchClipsUtils}}
+{{#include ../../../../../code/core/elements.py:animationStitchClipsUtils}}
 ```
 ~~~
 
@@ -386,7 +386,7 @@ Since in production (see the next section), we usually want to put the metadata 
 And then create the clip metadata in the cache_layer ourselves:
 ~~~admonish info title=""
 ```python
-{{#include ../../../../code/core/elements.py:animationStitchClipsAPI}}
+{{#include ../../../../../code/core/elements.py:animationStitchClipsAPI}}
 ```
 ~~~
 

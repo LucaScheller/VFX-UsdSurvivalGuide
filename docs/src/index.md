@@ -10,7 +10,7 @@ For more information what makes this guide unique, see the [motivation](./pages/
 This guide was officially introduced at [Siggraph 2023 - Houdini Hive](https://www.sidefx.com/houdini-hive/siggraph-2023/#usd). Special thanks to SideFX for hosting me and throwing such a cool Houdini lounge and presentation line up!
 ```
 
-{{#include contributors.md}}
+{{#include pages/contributors.md}}
 
 ## License 
 This guide is licensed under the **Apache License 2.0**. For more information as to how this affects copyright and distribution see our [license](https://github.com/LucaScheller/VFX-UsdSurvivalGuide/blob/main/LICENSE) page.

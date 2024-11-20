@@ -42,7 +42,7 @@ External plugins (like asset resolvers) often register own debug symbols which y
 To get a list of value `TF_DEBUG`values you can run:
 ~~~admonish info title=""
 ```python
-{{#include ../../../../code/core/elements.py:debuggingTokens}}
+{{#include ../../../../../code/core/elements.py:debuggingTokens}}
 ```
 ~~~
 

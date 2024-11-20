@@ -65,7 +65,7 @@ In our [Composition Strength Ordering (LIVRPS)](./livrps.md#compositionArcSublay
 
 ~~~admonish tip title=""
 ```python
-{{#include ../../../../code/core/composition.py:compositionArcSublayer}}
+{{#include ../../../../../code/core/composition.py:compositionArcSublayer}}
 ```
 ~~~
 
@@ -73,7 +73,7 @@ When working in Houdini, we can't directly sublayer onto the root layer as with 
 
 ~~~admonish tip title=""
 ```python
-{{#include ../../../../code/core/composition.py:compositionArcSublayerHoudini}}
+{{#include ../../../../../code/core/composition.py:compositionArcSublayerHoudini}}
 ```
 ~~~
 
@@ -99,7 +99,7 @@ Inherits, like specializes, don't have a object representation, they directly ed
 
 ~~~admonish tip title=""
 ```python
-{{#include ../../../../code/core/composition.py:compositionArcInherit}}
+{{#include ../../../../../code/core/composition.py:compositionArcInherit}}
 ```
 ~~~
 
@@ -170,7 +170,7 @@ def Xform "car" (
 
 ~~~admonish tip title=""
 ```python
-{{#include ../../../../code/core/composition.py:compositionArcVariant}}
+{{#include ../../../../../code/core/composition.py:compositionArcVariant}}
 ```
 ~~~
 
@@ -179,7 +179,7 @@ def Xform "car" (
 When editing variants, we can also move layer content into a (nested) variant very easily via the `Sdf.CopySpec` command. This is a very powerful feature!
 
 ```python
-{{#include ../../../../code/core/composition.py:compositionArcVariantCopySpec}}
+{{#include ../../../../../code/core/composition.py:compositionArcVariantCopySpec}}
 ```
 ~~~
 
@@ -187,7 +187,7 @@ Here is how we can created nested variant sets via the high level and low level 
 
 ~~~admonish tip title=""
 ```python
-{{#include ../../../../code/core/composition.py:compositionArcVariantNested}}
+{{#include ../../../../../code/core/composition.py:compositionArcVariantNested}}
 ```
 ~~~
 
@@ -200,7 +200,7 @@ In our [Composition Strength Ordering (LIVRPS)](./livrps.md#compositionArcRefere
 The `Sdf.Reference` class creates a read-only reference description object:
 ~~~admonish tip title=""
 ```python
-{{#include ../../../../code/core/composition.py:compositionArcReferenceClass}}
+{{#include ../../../../../code/core/composition.py:compositionArcReferenceClass}}
 ```
 ~~~
 
@@ -208,7 +208,7 @@ The `Sdf.Reference` class creates a read-only reference description object:
 Here is how we add external references (references that load data from other files):
 ~~~admonish tip title=""
 ```python
-{{#include ../../../../code/core/composition.py:compositionArcReferenceExternal}}
+{{#include ../../../../../code/core/composition.py:compositionArcReferenceExternal}}
 ```
 ~~~
 
@@ -217,7 +217,7 @@ Here is how we add external references (references that load data from other fil
 Here is how we add internal references (references that load data from another part of the hierarchy) :
 ~~~admonish tip title=""
 ```python
-{{#include ../../../../code/core/composition.py:compositionArcReferenceInternal}}
+{{#include ../../../../../code/core/composition.py:compositionArcReferenceInternal}}
 ```
 ~~~
 
@@ -229,14 +229,14 @@ In our [Composition Strength Ordering (LIVRPS)](./livrps.md#compositionArcPayloa
 The `Sdf.Payload` class creates a read-only payload description object:
 ~~~admonish tip title=""
 ```python
-{{#include ../../../../code/core/composition.py:compositionArcPayloadClass}}
+{{#include ../../../../../code/core/composition.py:compositionArcPayloadClass}}
 ```
 ~~~
 
 Here is how we add payloads. Payloads always load data from other files:
 ~~~admonish tip title=""
 ```python
-{{#include ../../../../code/core/composition.py:compositionArcPayload}}
+{{#include ../../../../../code/core/composition.py:compositionArcPayload}}
 ```
 ~~~
 
@@ -249,6 +249,6 @@ Specializes, like inherits, don't have a object representation, they directly ed
 
 ~~~admonish tip title=""
 ```python
-{{#include ../../../../code/core/composition.py:compositionArcSpecialize}}
+{{#include ../../../../../code/core/composition.py:compositionArcSpecialize}}
 ```
 ~~~

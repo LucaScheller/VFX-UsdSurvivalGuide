@@ -54,7 +54,7 @@ Here are the UsdUtils.ComputeCollectionIncludesAndExcludes [API docs](https://op
 
 ~~~admonish tip title=""
 ```python
-{{#include ../../../../code/core/elements.py:collectionOverview}}
+{{#include ../../../../../code/core/elements.py:collectionOverview}}
 ```
 ~~~
 
@@ -65,6 +65,6 @@ This is very fast and "sparse" as we don't edit leaf prims, instead we find the 
 
 ~~~admonish tip title=""
 ```python
-{{#include ../../../../code/core/elements.py:collectionInvert}}
+{{#include ../../../../../code/core/elements.py:collectionInvert}}
 ```
 ~~~

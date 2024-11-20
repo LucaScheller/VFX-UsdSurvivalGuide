@@ -3,7 +3,7 @@
 
 ----------------------
 
-- [Introduction](./pages/index.md)
+- [Introduction](./index.md)
     - [Motivation](./pages/introduction/motivation.md) 
     - [Guide Structure](./pages/introduction/structure.md)
     - [Building the guide locally](./pages/introduction/docs.md)

@@ -11,6 +11,6 @@ The "extensHint" attribute is managed via the `UsdGeom.ModeAPI`, you can find th
 
 ~~~admonish info title=""
 ```python
-{{#include ../../../../code/production/caches.py:stageQueryBBox}}
+{{#include ../../../../../code/production/caches.py:stageQueryBBox}}
 ```
 ~~~

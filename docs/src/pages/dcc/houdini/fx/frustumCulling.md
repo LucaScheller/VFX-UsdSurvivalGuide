@@ -19,6 +19,6 @@ Here is the code shown in the video.
 
 ~~~admonish tip title=""
 ```python
-{{#include ../../../../../code/dcc/houdini.py:houdiniFrustumCulling}}
+{{#include ../../../../../../code/dcc/houdini.py:houdiniFrustumCulling}}
 ```
 ~~~

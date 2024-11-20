@@ -70,7 +70,7 @@ You can find all the supported data types on this page in the official docs: [US
 Here is an example `plugInfo.json` file for metadata, it also ships with this repo [here](https://github.com/LucaScheller/VFX-UsdSurvivalGuide/tree/main/files/plugins/metadata).
 ~~~admonish info title=""
 ```python
-{{#include ../../../../files/plugins/metadata/plugInfo.json}}
+{{#include ../../../../../files/plugins/metadata/plugInfo.json}}
 ```
 ~~~
 
@@ -91,6 +91,6 @@ Custom metadata fields on the `Sdf.Layer` are not exposed via Python (as far as 
 
 ~~~admonish info title=""
 ```python
-{{#include ../../../../code/core/elements.py:metadataPlugin}}
+{{#include ../../../../../code/core/elements.py:metadataPlugin}}
 ```
 ~~~

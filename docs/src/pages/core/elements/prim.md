@@ -39,7 +39,7 @@ the getters/setters come in part from schemas or schema APIs. For example settin
 ##### High Level
 ~~~admonish info title=""
 ```python
-{{#include ../../../../code/core/elements.py:dataContainerPrimCoreHighLevel}}
+{{#include ../../../../../code/core/elements.py:dataContainerPrimCoreHighLevel}}
 ```
 ~~~
 
@@ -49,7 +49,7 @@ We are also a few "shortcuts" that check specifiers/kinds (`.IsAbstract`, `.IsDe
 The Python lower level Sdf.PrimSpec offers quick access to setting common core metadata via standard class instance attributes:
 ~~~admonish info title=""
 ```python
-{{#include ../../../../code/core/elements.py:dataContainerPrimCoreLowLevel}}
+{{#include ../../../../../code/core/elements.py:dataContainerPrimCoreLowLevel}}
 ```
 ~~~
 
@@ -86,7 +86,7 @@ class Cube "classCube" ()
 This is how it affects traversal:
 ~~~admonish info title=""
 ```python
-{{#include ../../../../code/core/elements.py:dataContainerPrimBasicsSpecifierTraversal}}
+{{#include ../../../../../code/core/elements.py:dataContainerPrimBasicsSpecifierTraversal}}
 ```
 ~~~
 
@@ -95,7 +95,7 @@ This is how it affects traversal:
 This specifier is used to specify a prim in a hierarchy, so that is it always visible to traversals.
 ~~~admonish info title=""
 ```python
-{{#include ../../../../code/core/elements.py:dataContainerPrimBasicsSpecifierDef}}
+{{#include ../../../../../code/core/elements.py:dataContainerPrimBasicsSpecifierDef}}
 ```
 ~~~
 
@@ -108,7 +108,7 @@ By default stage traversals will skip over `over` only prims. Prims that only ha
 
 ~~~admonish info title=""
 ```python
-{{#include ../../../../code/core/elements.py:dataContainerPrimBasicsSpecifierOver}}
+{{#include ../../../../../code/core/elements.py:dataContainerPrimBasicsSpecifierOver}}
 ```
 ~~~
 
@@ -123,7 +123,7 @@ The `class` specifier gets used to define "template" hierarchies that can then g
 
 ~~~admonish info title=""
 ```python
-{{#include ../../../../code/core/elements.py:dataContainerPrimBasicsSpecifierClass}}
+{{#include ../../../../../code/core/elements.py:dataContainerPrimBasicsSpecifierClass}}
 ```
 ~~~
 
@@ -134,7 +134,7 @@ In plain english: Usd has the concept of schemas, which are like OOP classes. Ea
 
 ~~~admonish info title=""
 ```python
-{{#include ../../../../code/core/elements.py:dataContainerPrimBasicsTypeName}}
+{{#include ../../../../../code/core/elements.py:dataContainerPrimBasicsTypeName}}
 ```
 ~~~
 
@@ -146,7 +146,7 @@ For a full explanation we have a dedicated section: [Kinds](../plugins/kind.md)
 Here is the reference code on how to set kinds. For a practical example with stage traversals, check out the kinds page.
 ~~~admonish info title=""
 ```python
-{{#include ../../../../code/core/elements.py:dataContainerPrimBasicsKinds}}
+{{#include ../../../../../code/core/elements.py:dataContainerPrimBasicsKinds}}
 ```
 ~~~
 
@@ -156,7 +156,7 @@ We only cover here how to set the metadata, for more info checkout our [Loading 
 
 ~~~admonish info title=""
 ```python
-{{#include ../../../../code/core/elements.py:metadataActive}}
+{{#include ../../../../../code/core/elements.py:metadataActive}}
 ```
 ~~~
 
@@ -172,7 +172,7 @@ Prim (as well as property, attribute and relationship) specs also have the token
 These 'Key' attributes are the token names that can be set on the spec via `SetInfo`, for example prim_spec.SetInfo(prim_spec.KindKey, "group")
 ~~~admonish info title=""
 ```python
-{{#include ../../../../code/core/elements.py:dataContainerPrimBasicsTokens}}
+{{#include ../../../../../code/core/elements.py:dataContainerPrimBasicsTokens}}
 ```
 ~~~
 
@@ -180,7 +180,7 @@ These 'Key' attributes are the token names that can be set on the spec via `SetI
 You can also print a spec as its ascii representation (as it would be written to .usda files):
 ~~~admonish info title=""
 ```python
-{{#include ../../../../code/core/elements.py:dataContainerPrimBasicsDebugging}}
+{{#include ../../../../../code/core/elements.py:dataContainerPrimBasicsDebugging}}
 ```
 ~~~
 
@@ -189,7 +189,7 @@ From any prim you can navigate to its hierarchy neighbors via the path related m
 The lower level API is dict based when accessing children, the high level API returns iterators or lists.
 ~~~admonish info title=""
 ```python
-{{#include ../../../../code/core/elements.py:dataContainerPrimHierarchy}}
+{{#include ../../../../../code/core/elements.py:dataContainerPrimHierarchy}}
 ```
 ~~~
 
@@ -205,7 +205,7 @@ The 'IsA' check is a very valueable check to see if something is an instance of 
 
 ~~~admonish info title=""
 ```python
-{{#include ../../../../code/core/elements.py:dataContainerPrimSchemas}}
+{{#include ../../../../../code/core/elements.py:dataContainerPrimSchemas}}
 ```
 ~~~
 
@@ -215,7 +215,7 @@ In production, you won't be using this a lot, it is good to be aware of it thoug
 
 ~~~admonish info title=""
 ```python
-{{#include ../../../../code/core/elements.py:dataContainerPrimTypeDefinition}}
+{{#include ../../../../../code/core/elements.py:dataContainerPrimTypeDefinition}}
 ```
 ~~~
 
@@ -228,7 +228,7 @@ The prim's `prim.IsA(<typeName>)` checks are highly performant, you should use t
 
 ~~~admonish info title=""
 ```python
-{{#include ../../../../code/core/elements.py:dataContainerPrimTypeInfo}}
+{{#include ../../../../../code/core/elements.py:dataContainerPrimTypeInfo}}
 ```
 ~~~
 
@@ -241,7 +241,7 @@ We cover this in detail in our [Loading Data](./loading_mechanisms.md) section.
 
 ~~~admonish info title=""
 ```python
-{{#include ../../../../code/core/elements.py:dataContainerPrimLoading}}
+{{#include ../../../../../code/core/elements.py:dataContainerPrimLoading}}
 ```
 ~~~
 
@@ -263,7 +263,7 @@ Here are the basics for both API levels:
 #### High Level API
 ~~~admonish info title=""
 ```python
-{{#include ../../../../code/core/elements.py:dataContainerPrimPropertiesHighLevel}}
+{{#include ../../../../../code/core/elements.py:dataContainerPrimPropertiesHighLevel}}
 ```
 ~~~
 
@@ -274,7 +274,7 @@ Here is an example of what is returned when you create cube with a size attribut
 
 ~~~admonish info title=""
 ```python
-{{#include ../../../../code/core/elements.py:dataContainerPrimPropertiesLowLevel}}
+{{#include ../../../../../code/core/elements.py:dataContainerPrimPropertiesLowLevel}}
 ```
 ~~~
 

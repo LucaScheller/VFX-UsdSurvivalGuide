@@ -62,13 +62,13 @@ Contexts are handled per stage: They are optionally given on stage open and can 
 To resolve an asset identifier you can call:
 ~~~admonish tip title=""
 ```python
-{{#include ../../../../code/core/elements.py:assetResolverStageContextResolve}}
+{{#include ../../../../../code/core/elements.py:assetResolverStageContextResolve}}
 ```
 ~~~
 If you don't want to use any context you can call:
 ~~~admonish tip title=""
 ```python
-{{#include ../../../../code/core/elements.py:assetResolverResolve}}
+{{#include ../../../../../code/core/elements.py:assetResolverResolve}}
 ```
 ~~~
 
@@ -77,7 +77,7 @@ The `Sdf.AssetPath` is the class you instantiate when you set any asset path rel
 
 ~~~admonish tip title=""
 ```python
-{{#include ../../../../code/core/elements.py:assetResolverAssetPath}}
+{{#include ../../../../../code/core/elements.py:assetResolverAssetPath}}
 ```
 ~~~
 
@@ -183,14 +183,14 @@ The rest is up to you to implement and Python expose.
 Contexts are handled per stage: They are optionally given on stage open and can also be shared between stages. If you do not provide a context, your resolver will provide a default fallback context. You can not change the context without re-opening the stage, but you can implement methods to modify the active stages and then signal a change notification to the stages. The resolvers listed above implement different methods to modify the mapping pairs. Are refresh can be called as follows:
 ~~~admonish tip title=""
 ```python
-{{#include ../../../../code/core/elements.py:assetResolverContextRefresh}}
+{{#include ../../../../../code/core/elements.py:assetResolverContextRefresh}}
 ```
 ~~~
 
 As you can see the ```stage.GetPathResolverContext()``` actually returns a list and not a single resolver context. This is because there can be multiple resolvers running at the same time. As stated above a single primary resolver and multiple URI-resolvers, you therefore have a resolver context per resolver.
 ~~~admonish tip title=""
 ```python
-{{#include ../../../../code/core/elements.py:assetResolverContextAccess}}
+{{#include ../../../../../code/core/elements.py:assetResolverContextAccess}}
 ```
 ~~~
 
@@ -239,7 +239,7 @@ For more information about debugging, check out our [Debugging & Performance Pro
 To check what the active primary resolver is, you can also run:
 ~~~admonish tip title=""
 ```python
-{{#include ../../../../code/core/elements.py:assetResolverBound}}
+{{#include ../../../../../code/core/elements.py:assetResolverBound}}
 ```
 ~~~
 It is important that you import the Python module of your resolver first, otherwise you won't get your Python object when calling `Ar.GetUnderlyingResolver()`.
@@ -248,14 +248,14 @@ It is important that you import the Python module of your resolver first, otherw
 To ensure that we always get the same resolved paths, you can use a scoped resolver cache. When working in DCCs, you don't have to worry about this as the DCC should handle this for you.
 ~~~admonish tip title=""
 ```python
-{{#include ../../../../code/core/elements.py:assetResolverScopedCache}}
+{{#include ../../../../../code/core/elements.py:assetResolverScopedCache}}
 ```
 ~~~
 
 #### Creating/Opening a stage with a resolver context <a name="assetResolverAPIStageContext"></a>
 ~~~admonish tip title=""
 ```python
-{{#include ../../../../code/core/elements.py:assetResolverContextCreation}}
+{{#include ../../../../../code/core/elements.py:assetResolverContextCreation}}
 ```
 ~~~
 
@@ -263,14 +263,14 @@ To ensure that we always get the same resolved paths, you can use a scoped resol
 This is probably most used resolved method you'll use. It resolves the asset identifier using the active stage's context.
 ~~~admonish tip title=""
 ```python
-{{#include ../../../../code/core/elements.py:assetResolverStageContextResolve}}
+{{#include ../../../../../code/core/elements.py:assetResolverStageContextResolve}}
 ```
 ~~~
 
 If you don't want to use any context you can call:
 ~~~admonish tip title=""
 ```python
-{{#include ../../../../code/core/elements.py:assetResolverResolve}}
+{{#include ../../../../../code/core/elements.py:assetResolverResolve}}
 ```
 ~~~
 
@@ -280,7 +280,7 @@ The `Sdf.AssetPath` is the class you instantiate when you set any asset path rel
 
 ~~~admonish tip title=""
 ```python
-{{#include ../../../../code/core/elements.py:assetResolverAssetPath}}
+{{#include ../../../../../code/core/elements.py:assetResolverAssetPath}}
 ```
 ~~~
 

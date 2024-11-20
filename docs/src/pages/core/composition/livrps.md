@@ -578,14 +578,14 @@ Here is how it can be setup in Houdini:
 Here is the code for moving variants:
 ~~~admonish tip title=""
 ```python
-{{#include ../../../../code/core/composition.py:compositionArcVariantMoveHoudini}}
+{{#include ../../../../../code/core/composition.py:compositionArcVariantMoveHoudini}}
 ```
 ~~~
 
 And for copying:
 ~~~admonish tip title=""
 ```python
-{{#include ../../../../code/core/composition.py:compositionArcVariantCopyHoudini}}
+{{#include ../../../../../code/core/composition.py:compositionArcVariantCopyHoudini}}
 ```
 ~~~
 
@@ -775,7 +775,7 @@ In Houdini we can show the implicit prototypes by enabling the "Show Implicit Pr
 Here is how we can check if a prim is inside an instance or inside a prototype:
 ~~~admonish tip title=""
 ```python
-{{#include ../../../../code/core/composition.py:compositionInstanceable}}
+{{#include ../../../../../code/core/composition.py:compositionInstanceable}}
 ```
 ~~~
 

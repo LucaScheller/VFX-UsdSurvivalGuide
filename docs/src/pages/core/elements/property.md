@@ -55,7 +55,7 @@ Let's first have a look at the shared base class `Usd.Property`. This inherits m
 So let's inspect what else the class offers:
 ~~~admonish info title=""
 ```python
-{{#include ../../../../code/core/elements.py:propertyOverview}}
+{{#include ../../../../../code/core/elements.py:propertyOverview}}
 ```
 ~~~
 
@@ -90,7 +90,7 @@ To summarize:
 
 ~~~admonish info title=""
 ```python
-{{#include ../../../../code/core/elements.py:attributeInterpolation}}
+{{#include ../../../../../code/core/elements.py:attributeInterpolation}}
 ```
 ~~~
 
@@ -105,7 +105,7 @@ We cover how to work with data classes in detail in our [data types/roles](./dat
 
 ~~~admonish info title=""
 ```python
-{{#include ../../../../code/core/elements.py:attributeDataTypeRole}}
+{{#include ../../../../../code/core/elements.py:attributeDataTypeRole}}
 ```
 ~~~
 
@@ -123,7 +123,7 @@ Attributes are the only part of USD than can encode time varying data.
 
 ~~~admonish info title=""
 ```python
-{{#include ../../../../code/core/elements.py:animationOverview}}
+{{#include ../../../../../code/core/elements.py:animationOverview}}
 ```
 ~~~
 
@@ -131,7 +131,7 @@ We can set an attribute with a static value (USD speak `default`) or with time s
 
 ~~~admonish info title=""
 ```python
-{{#include ../../../../code/core/elements.py:animationDefaultTimeSampleBlock}}
+{{#include ../../../../../code/core/elements.py:animationDefaultTimeSampleBlock}}
 ```
 For more examples (also for the lower level API) check out the [animation](./animation.md) section.
 ~~~
@@ -145,7 +145,7 @@ An important thing to note is that when we want to re-write the data of an attri
 Let's demonstrate this:
 ~~~admonish info title="Change existing values | Click to expand code" collapsible=true
 ```python
-{{#include ../../../../code/core/elements.py:attributeReauthor}}
+{{#include ../../../../../code/core/elements.py:attributeReauthor}}
 ```
 ~~~
 
@@ -158,7 +158,7 @@ In a production pipeline you usually do this via a DCC that imports the data, ed
 To edit the time samples directly, we can open the layer as a stage or edit the layer directly. To find the layers you can inspect the layer stack or value clips, but most of the time you know the layers, as you just wrote to them:
 ~~~admonish info title=""
 ```python
-{{#include ../../../../code/core/elements.py:attributeReauthorPerLayer}}
+{{#include ../../../../../code/core/elements.py:attributeReauthorPerLayer}}
 ```
 ~~~
 
@@ -167,7 +167,7 @@ If we want to time freeze a prim (where the data comes from composed layers), we
 
 ~~~admonish tip title="Pro Tip | Time Freeze | Click to expand code" collapsible=true
 ```python
-{{#include ../../../../code/core/elements.py:attributeReauthorTimeSampleToStatic}}
+{{#include ../../../../../code/core/elements.py:attributeReauthorTimeSampleToStatic}}
 ```
 ~~~
 
@@ -233,7 +233,7 @@ Here is how connections are managed on the high and low API level. Note as menti
 
 ~~~admonish info title=""
 ```python
-{{#include ../../../../code/core/elements.py:attributeConnections}}
+{{#include ../../../../../code/core/elements.py:attributeConnections}}
 ```
 ~~~
 
@@ -254,7 +254,7 @@ To deal with primvars, the high level API has the `UsdGeom.PrimvarsAPI` [(API Do
 
 ~~~admonish info title=""
 ```python
-{{#include ../../../../code/core/elements.py:attributePrimvarAPI}}
+{{#include ../../../../../code/core/elements.py:attributePrimvarAPI}}
 ```
 ~~~
 
@@ -263,7 +263,7 @@ To speed up the lookup of inherited primvars see this guide [API Docs](https://o
 
 ~~~admonish danger title="High performance primvars inheritance calculation | Click to expand code" collapsible=true
 ```python
-{{#include ../../../../code/core/elements.py:attributePrimvarInherited}}
+{{#include ../../../../../code/core/elements.py:attributePrimvarInherited}}
 ```
 ~~~
 
@@ -294,7 +294,7 @@ We can also flatten the index, when looking up the values. It should be preferre
 
 ~~~admonish info title=""
 ```python
-{{#include ../../../../code/core/elements.py:attributePrimvarIndexed}}
+{{#include ../../../../../code/core/elements.py:attributePrimvarIndexed}}
 ```
 ~~~
 
@@ -332,7 +332,7 @@ There are 4 different purposes:
 
 ~~~admonish tip title=""
 ```python
-{{#include ../../../../code/core/elements.py:attributePurpose}}
+{{#include ../../../../../code/core/elements.py:attributePurpose}}
 ```
 ~~~
 
@@ -345,7 +345,7 @@ The attribute data type is `Sdf.Token` and can have two values:
 
 ~~~admonish tip title=""
 ```python
-{{#include ../../../../code/core/elements.py:attributeVisibility}}
+{{#include ../../../../../code/core/elements.py:attributeVisibility}}
 ```
 ~~~
 
@@ -376,7 +376,7 @@ We cover how to use the a bounding box cache in detail in our [stage API query c
 
 ~~~admonish tip title=""
 ```python
-{{#include ../../../../code/core/elements.py:attributeExtent}}
+{{#include ../../../../../code/core/elements.py:attributeExtent}}
 ```
 ~~~
 
@@ -409,7 +409,7 @@ When we start looking at composition (aka loading nested USD files), you'll noti
 
 ~~~admonish tip title=""
 ```python
-{{#include ../../../../code/core/elements.py:relationshipOverview}}
+{{#include ../../../../../code/core/elements.py:relationshipOverview}}
 ```
 ~~~
 
@@ -440,7 +440,7 @@ To edit and query the `proxyPrim`, we use the `UsdGeom.Imageable` schema class.
 
 ~~~admonish tip title=""
 ```python
-{{#include ../../../../code/core/elements.py:relationshipProxyPrim}}
+{{#include ../../../../../code/core/elements.py:relationshipProxyPrim}}
 ```
 ~~~
 

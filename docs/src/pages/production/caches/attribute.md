@@ -9,7 +9,7 @@ For more information, check out the [official API docs](https://openusd.org/dev/
 
 ~~~admonish info title=""
 ```python
-{{#include ../../../../code/production/caches.py:stageQueryAttribute}}
+{{#include ../../../../../code/production/caches.py:stageQueryAttribute}}
 ```
 ~~~
 
@@ -20,6 +20,6 @@ It's also a great example of when to use `.PreAndPostVisit()` prim range iterato
 
 ~~~admonish info title=""
 ```python
-{{#include ../../../../code/production/caches.py:stageQueryInheritedPrimvars}}
+{{#include ../../../../../code/production/caches.py:stageQueryInheritedPrimvars}}
 ```
 ~~~

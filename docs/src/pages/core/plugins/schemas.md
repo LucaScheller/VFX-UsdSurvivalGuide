@@ -116,7 +116,7 @@ over "GLOBAL" (
 
 ~~~admonish info title="Result | Click to expand content" collapsible=true
 ```python
-{{#include ../../../../files/plugins/schemas/codelessSchema/schema.usda}}
+{{#include ../../../../../files/plugins/schemas/codelessSchema/schema.usda}}
 ```
 ~~~
 
@@ -172,7 +172,7 @@ To:
 
 ~~~admonish info title="Result | Click to expand content" collapsible=true
 ```python
-{{#include ../../../../files/plugins/schemas/codelessSchema/dist/plugInfo.json}}
+{{#include ../../../../../files/plugins/schemas/codelessSchema/dist/plugInfo.json}}
 ```
 ~~~
 
@@ -199,7 +199,7 @@ If you run Houdini and then create a primitive, you can now choose the `ComplexP
 Or if you want to test it in Python:
 ~~~admonish info title=""
 ```python
-{{#include ../../../../code/core/elements.py:schemasPluginCodelessTest}}
+{{#include ../../../../../code/core/elements.py:schemasPluginCodelessTest}}
 ```
 ~~~
 
@@ -284,7 +284,7 @@ Here is the content of the CMakeLists.txt file. We might make a CMake intro late
 
 ~~~admonish info title="CMakeLists.txt | Click to expand content" collapsible=true
 ```python
-{{#include ../../../../files/plugins/schemas/compiledSchema/CMakeLists.txt}}
+{{#include ../../../../../files/plugins/schemas/compiledSchema/CMakeLists.txt}}
 ```
 ~~~
 
@@ -315,7 +315,7 @@ If we now run Houdini and then create a primitive, you can now choose the `Compl
 Or if you want to test it in Python:
 ~~~admonish info title=""
 ```python
-{{#include ../../../../code/core/elements.py:schemasPluginCompiledTest}}
+{{#include ../../../../../code/core/elements.py:schemasPluginCompiledTest}}
 ```
 ~~~
 

@@ -36,7 +36,7 @@ Individual components of Usd are loaded via a [plugin based system](./plugins/ov
 Here is a simple comparison:
 ~~~admonish info title=""
 ```python
-{{#include ../../../code/core/elements.py:apiHighVsLowLevel}}
+{{#include ../../../../code/core/elements.py:apiHighVsLowLevel}}
 ```
 ~~~
 

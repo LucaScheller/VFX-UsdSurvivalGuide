@@ -47,14 +47,14 @@ Here is how it can be setup in Houdini:
 Here is the code for moving variants:
 ~~~admonish tip title=""
 ```python
-{{#include ../../../../../code/core/composition.py:compositionArcVariantMoveHoudini}}
+{{#include ../../../../../../code/core/composition.py:compositionArcVariantMoveHoudini}}
 ```
 ~~~
 
 And for copying:
 ~~~admonish tip title=""
 ```python
-{{#include ../../../../../code/core/composition.py:compositionArcVariantCopyHoudini}}
+{{#include ../../../../../../code/core/composition.py:compositionArcVariantCopyHoudini}}
 ```
 ~~~
 
@@ -65,7 +65,7 @@ We typically drive the prim selection through a user defined [prim pattern/lop s
 
 ~~~admonish tip title=""
 ```python
-{{#include ../../../../../code/dcc/houdini.py:houdiniCompositionInheritInstanceable}}
+{{#include ../../../../../../code/dcc/houdini.py:houdiniCompositionInheritInstanceable}}
 ```
 ~~~
 
@@ -83,7 +83,7 @@ Here is how we get a correct value:
 
 ~~~admonish tip title=""
 ```python
-{{#include ../../../../../code/dcc/houdini.py:houdiniTimeDependency}}
+{{#include ../../../../../../code/dcc/houdini.py:houdiniTimeDependency}}
 ```
 ~~~
 

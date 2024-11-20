@@ -152,7 +152,7 @@ If we write our own [file format plugin](https://openusd.org/dev/api/_sdf__page_
 
 ~~~admonish tip title=""
 ```python
-{{#include ../../../../code/core/elements.py:layerIdentifier}}
+{{#include ../../../../../code/core/elements.py:layerIdentifier}}
 ```
 ~~~
 
@@ -168,7 +168,7 @@ Here is an overview of how we can create layers:
 
 ~~~admonish tip title=""
 ```python
-{{#include ../../../../code/core/elements.py:layerImportExport}}
+{{#include ../../../../../code/core/elements.py:layerImportExport}}
 ```
 ~~~
 
@@ -184,7 +184,7 @@ The most important methods are:
 In our example below, we assume that the code is run in Houdini.
 ~~~admonish tip title=""
 ```python
-{{#include ../../../../code/core/elements.py:layerDependencies}}
+{{#include ../../../../../code/core/elements.py:layerDependencies}}
 ```
 ~~~
 
@@ -221,7 +221,7 @@ Anonymous layers can't be saved to disk, therefore for them `layer.permissionToS
 
 ~~~admonish tip title=""
 ```python
-{{#include ../../../../code/core/elements.py:layerPermissions}}
+{{#include ../../../../../code/core/elements.py:layerPermissions}}
 ```
 ~~~
 
@@ -233,7 +233,7 @@ More info on this topic in our [loading data](./loading_mechanisms.md) section.
 
 ~~~admonish tip title=""
 ```python
-{{#include ../../../../code/core/elements.py:layerMuting}}
+{{#include ../../../../../code/core/elements.py:layerMuting}}
 ```
 ~~~
 
@@ -242,7 +242,7 @@ All composition arcs, excepts sublayers, are created on prim(specs). Here is how
 
 ~~~admonish tip title=""
 ```python
-{{#include ../../../../code/core/composition.py:compositionArcSublayer}}
+{{#include ../../../../../code/core/composition.py:compositionArcSublayer}}
 ```
 ~~~
 
@@ -256,7 +256,7 @@ We typically use this in asset layers to specify the root prim that is the asset
 
 ~~~admonish info title=""
 ```python
-{{#include ../../../../code/core/elements.py:layerDefaultPrim}}
+{{#include ../../../../../code/core/elements.py:layerDefaultPrim}}
 ```
 ~~~
 
@@ -267,7 +267,7 @@ Traversing and accessing prims/properties works a tad different:
 
 ~~~admonish tip title=""
 ```python
-{{#include ../../../../code/core/elements.py:layerTraversal}}
+{{#include ../../../../../code/core/elements.py:layerTraversal}}
 ```
 ~~~
 
@@ -276,7 +276,7 @@ In the high level API, reading and writing time samples is handled via the `attr
 
 ~~~admonish info title=""
 ```python
-{{#include ../../../../code/core/elements.py:layerTimeSamples}}
+{{#include ../../../../../code/core/elements.py:layerTimeSamples}}
 ```
 ~~~
 
@@ -289,7 +289,7 @@ Layers, like prims and properties, can store metadata. Apart from the above ment
 
 ~~~admonish info title=""
 ```python
-{{#include ../../../../code/core/elements.py:metadataLayer}}
+{{#include ../../../../../code/core/elements.py:metadataLayer}}
 ```
 ~~~
 
@@ -398,7 +398,7 @@ We discuss this in detail in our [metadata section](./metadata.md).
 
 ~~~admonish tip title=""
 ```python
-{{#include ../../../../code/core/elements.py:stageMetadata}}
+{{#include ../../../../../code/core/elements.py:stageMetadata}}
 ```
 ~~~
 
@@ -449,7 +449,7 @@ Let's first look at layer access, there are two methods of special interest to u
 The following example is run in Houdini:
 ~~~admonish tip title=""
 ```python
-{{#include ../../../../code/core/elements.py:stageLayerStackUsedLayers}}
+{{#include ../../../../../code/core/elements.py:stageLayerStackUsedLayers}}
 ```
 ~~~
 
@@ -457,7 +457,7 @@ As you might have noticed, when calling `stage.GetLayerStack()`, we didn't get t
 
 ~~~admonish tip title=""
 ```python
-{{#include ../../../../code/core/elements.py:stageLayerStackUsedLayers}}
+{{#include ../../../../../code/core/elements.py:stageLayerStackUsedLayers}}
 ```
 ~~~
 
@@ -467,7 +467,7 @@ Let's have a look at stage creation and export:
 
 ~~~admonish tip title=""
 ```python
-{{#include ../../../../code/core/elements.py:stageLayerManagement}}
+{{#include ../../../../../code/core/elements.py:stageLayerManagement}}
 ```
 ~~~
 
@@ -483,6 +483,6 @@ Here are the basics:
 
 ~~~admonish tip title=""
 ```python
-{{#include ../../../../code/core/elements.py:stageTraversal}}
+{{#include ../../../../../code/core/elements.py:stageTraversal}}
 ```
 ~~~

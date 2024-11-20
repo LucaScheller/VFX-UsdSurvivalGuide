@@ -66,7 +66,7 @@ To access the base data classes there are three modules:
 The `Vt.Type` registry also handles all on run-time registered types, so not only data types, but also custom types like `Sdf.Spec`,`SdfReference`, etc. that is registered by plugins.
 ~~~admonish info title=""
 ```python
-{{#include ../../../../code/core/elements.py:tfTypeRegistry}}
+{{#include ../../../../../code/core/elements.py:tfTypeRegistry}}
 ```
 ~~~
 
@@ -114,6 +114,6 @@ We won't be looking at specific data classes on this page, instead we'll have a 
 Let's look at this in practice:
 ~~~admonish info title=""
 ```python
-{{#include ../../../../code/core/elements.py:dataTypeRoleOverview}}
+{{#include ../../../../../code/core/elements.py:dataTypeRoleOverview}}
 ```
 ~~~

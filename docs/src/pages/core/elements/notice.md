@@ -21,21 +21,21 @@ In production, the mose common use case you'll use the notification system for i
 #### Register/Revoke notice
 ~~~admonish info title=""
 ```python
-{{#include ../../../../code/core/elements.py:noticeRegisterRevoke}}
+{{#include ../../../../../code/core/elements.py:noticeRegisterRevoke}}
 ```
 ~~~
 
 #### Overview of built-in standard notices for stage change events
 ~~~admonish info title=""
 ```python
-{{#include ../../../../code/core/elements.py:noticeCommon}}
+{{#include ../../../../../code/core/elements.py:noticeCommon}}
 ```
 ~~~
 
 If we run this on a simple example stage, we get the following results:
 ~~~admonish info title=""
 ```python
-{{#include ../../../../code/core/elements.py:noticeCommonApplied}}
+{{#include ../../../../../code/core/elements.py:noticeCommonApplied}}
 ```
 ~~~
 
@@ -43,13 +43,13 @@ If we run this on a simple example stage, we get the following results:
 The plugin system sends a notice whenever a new plugin was registered.
 ~~~admonish info title=""
 ```python
-{{#include ../../../../code/core/elements.py:noticePlugins}}
+{{#include ../../../../../code/core/elements.py:noticePlugins}}
 ```
 ~~~
 
 #### Setup a custom notice:
 ~~~admonish info title=""
 ```python
-{{#include ../../../../code/core/elements.py:noticeCustom}}
+{{#include ../../../../../code/core/elements.py:noticeCustom}}
 ```
 ~~~
