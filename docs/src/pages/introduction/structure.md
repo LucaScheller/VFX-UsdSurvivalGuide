@@ -7,7 +7,6 @@ On this page will talk about how this guide is structured and what the best appr
 1. [Learning Path](#learningPath)
 1. [How To Run Our Code Examples](#code)
 
-
 ## Structure <a name="structure"></a>
 Most of our sections follow this simple template:
 - **Table of Contents**: Here we show the structure of the individual page, so we can jump to what we are interested in.

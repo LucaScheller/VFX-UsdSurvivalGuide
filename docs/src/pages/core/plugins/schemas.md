@@ -194,7 +194,7 @@ Yes, that's right! It was that easy. (Puts on sunglass, ah yeeaah! 😎)
 
 If you run Houdini and then create a primitive, you can now choose the `ComplexPrim` as well as assign the `ParamAPI` API schema.
 
-!["test"](./schemaCodelessHoudini.jpg#center)
+!["test"](../../../media/core/plugins/schemaCodelessHoudini.jpg#center)
 
 Or if you want to test it in Python:
 ~~~admonish info title=""
@@ -310,7 +310,7 @@ For Windows, specifying the linked .dll search path is different. We'll add more
 #### Step 4: Run your Usd (capable) application. <a name="usdGenSchemaCompiledSchemaStep4"></a>
 If we now run Houdini and then create a primitive, you can now choose the `ComplexPrim` as well as assign the `ParamAPI` API schema.
 
-![""](./schemaCodelessHoudini.jpg#center)
+![""](../../../media/core/plugins/schemaCodelessHoudini.jpg#center)
 
 Or if you want to test it in Python:
 ~~~admonish info title=""

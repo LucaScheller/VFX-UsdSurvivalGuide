@@ -77,7 +77,7 @@ These return us all value sources for a prim or attribute.
 In Houdini/USD view we can also view these stacks in the UI.
 
 <video width="100%" height="100%" controls autoplay muted loop>
-  <source src="./houdiniPrimPropertyStack.mp4" type="video/mp4" alt="Houdini Prim/Property Stack">
+  <source src="../../../media/core/composition/houdiniPrimPropertyStack.mp4" type="video/mp4" alt="Houdini Prim/Property Stack">
 </video>
 
 
@@ -182,7 +182,7 @@ Pcp Node Ref
 ```
 ~~~
 
-![Alt text](pcpPrimIndexPig.png)
+![Alt text](../../../media/core/composition/pcpPrimIndexPig.png)
 
 ~~~admonish tip
 We can also access the `Pcp.Cache` of the stage via: `pcp_cache = stage._GetPcpCache()`

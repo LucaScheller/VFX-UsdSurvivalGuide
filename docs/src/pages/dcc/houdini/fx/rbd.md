@@ -34,7 +34,7 @@ Let's first take a look at what Houdini supports out of the box:
 Here is a video showing both methods:
 
 <video width="100%" height="100%" controls autoplay muted loop>
-  <source src="./media/rbdKineFXCrowdAgent.mp4" type="video/mp4" alt="Houdini Character Skeleton Import">
+  <source src="../../../../media/dcc/houdini/fx/rbdKineFXCrowdAgent.mp4" type="video/mp4" alt="Houdini Character Skeleton Import">
 </video>
 
 This works great, if we have a character like approach. 
@@ -46,7 +46,7 @@ The problem is with RBD sims this is not the case: We usually have a large hiera
 Let's take a look how that works:
 
 <video width="100%" height="100%" controls autoplay muted loop>
-  <source src="./media/rbdSkeleton.mp4" type="video/mp4" alt="Houdini Skeleton Custom Import">
+  <source src="../../../../media/dcc/houdini/fx/rbdSkeleton.mp4" type="video/mp4" alt="Houdini Skeleton Custom Import">
 </video>
 
 Now we won't breakdown how skelton's themselves work, as this is a topic on its own. You can read up on it in the [official API docs](https://openusd.org/dev/api/_usd_skel__intro.html).
@@ -74,13 +74,13 @@ We use Houdini's super fast SOP import to our benefit. The whole thing that make
 Our joint name to index mapping is driven by a simple "Enumerate" node that runs per skeleton target prim path.
 
  <video width="100%" height="100%" controls autoplay muted loop>
-  <source src="./media/rbdSkeletonJointIndexName.mp4" type="video/mp4" alt="Houdini Skeleton Joint Index Name">
+  <source src="../../../../media/dcc/houdini/fx/rbdSkeletonJointIndexName.mp4" type="video/mp4" alt="Houdini Skeleton Joint Index Name">
 </video>
 
 Our joint xforms then create the same skeleton target prim path. We don't have to enumerate, because on LOP import our geometry is segmented based on the skeleton prim path. This slices the arrays the exact same way as the enumerate node. 
 
  <video width="100%" height="100%" controls autoplay muted loop>
-  <source src="./media/rbdSkeletonJointXforms.mp4" type="video/mp4" alt="Houdini Skeleton Joint Xforms">
+  <source src="../../../../media/dcc/houdini/fx/rbdSkeletonJointXforms.mp4" type="video/mp4" alt="Houdini Skeleton Joint Xforms">
 </video>
 
 The outcome is that we let Houdini do all the heavy data operations like mesh importing and attribute segmentation by path.

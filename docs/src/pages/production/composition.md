@@ -46,7 +46,7 @@ As a best practice we always want to keep everything [instanceable](../core/comp
 Let's have a look how we can set it up in Houdini while prototyping, in production you should do this via code, see our [animation](../core/elements/animation.md#animationValueClips) section for how to do this.
 
 <video width="100%" height="100%" controls autoplay muted loop>
-  <source src="compositionValueClipAbstraction.mp4" type="video/mp4" alt="Houdini Value Clip Composition">
+  <source src="../../media/production/compositionValueClipAbstraction.mp4" type="video/mp4" alt="Houdini Value Clip Composition">
 </video>
 
 The simplest version is to write the value clips, stitch them and load the resulting file as a payload per asset root prim. This doesn't work though, if you have to layer over a hierarchy that already exists, for example an asset.
@@ -56,7 +56,7 @@ We therefore go for the "API" like approach as discussed above: We first load th
 Let's also take a look at why this doesn't work when trying to write value clips at non asset root prims:
 
 <video width="100%" height="100%" controls autoplay muted loop>
-  <source src="compositionValueClipAbstractionStageRoot.mp4" type="video/mp4" alt="Houdini Value Clip Composition">
+  <source src="../../media/production/compositionValueClipAbstractionStageRoot.mp4" type="video/mp4" alt="Houdini Value Clip Composition">
 </video>
 
 Loading a payload for a whole cache file works, the problem you then run into though is, that the inherit arcs don't see the parent prims value clip metadata. So we'd have to load the whole layer as a value clip. While this is possible, we highly don't recommend it, as it is not clear where the data source is coming from and we are making the scene structure messy by not having clear points of data loading. We also can't make it instanceable (unles we intend on making the whole hierarchy instanceable, which in shots doesn't work because we need per prim overrides (on at least asset (parent) prims)).

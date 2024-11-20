@@ -80,7 +80,7 @@ All arcs, except sublayers, make use of list editing, see our [fundamentals](./f
 
 Let's look at the order:
 
-![LIVRPS Order Visualized](compositionLIVRPS.svg)
+![LIVRPS Order Visualized](../../../media/core/composition/compositionLIVRPS.svg)
 ~~~admonish quote title="Credits"
 All credits for this info graphic go to [Remedy-Entertainment - Book Of USD](https://remedy-entertainment.github.io/USDBook/terminology/LIVRPS.html). Check out their site, it is another great value source for USD.
 ~~~
@@ -261,15 +261,15 @@ To summarize how Houdini makes node editing a layer based system possible (at le
 
 Every node stashes a copy of the top most layer (Houdini calls it the **active layer**), that way, when we switch from node to node, it transfers back the content as soon as it needs to be displayed/cooked. This does have a performance hit (as covered in our [Houdini performance](../../dcc/houdini/performance/overview.md)) section. It also spawns a new stage per node when necessary, for example when a python LOP node or python parm expression accesses the previous node's stage. This mechanism gives the user the control to spawn new layers when needed. By default your network is color coded by what the active layer is.
 
-![Houdini Layer Stack](houdiniCompositionSublayerRootLayerStack.jpg)
+![Houdini Layer Stack](../../../media/core/composition/houdiniCompositionSublayerRootLayerStack.jpg)
 
 Houdini writes all your scene graph panel viewport overrides into session layer sublayers. By default these are not shown in the UI, you can view them by looking at the layer content though.
 
-![Alt text](houdiniCompositionSublayerSessionLayer.jpg)
+![Alt text](../../../media/core/composition/houdiniCompositionSublayerSessionLayer.jpg)
 
 Instead of using layers non-anonymous save paths (layer identifiers) directly, all layers created in your session are anonymous layers (with Houdini specific metadata that tracks the save path). We're guessing that this is because all layers without a save path get merged into the next available layer with a save path on file save. If no layer has a save path, all content gets flattened into the layer file path you put on the USD rop.
 
-![Alt text](houdiniCompositionSublayerSavePath.jpg)
+![Alt text](../../../media/core/composition/houdiniCompositionSublayerSavePath.jpg)
 
 #### Value Clips <a name="compositionArcValueClips"></a>
 We cover value clips in our [animation section](../elements/animation.md). Value clips are USD's mechanism for loading per frame (or per chunk) files, so that we don't have a single gigantic file for large caches.
@@ -284,7 +284,7 @@ Here is a comparison between a layer with value clip metadata and time samples v
 Houdini's "Load Layer For Editing", simply does a `active_layer.TransferContent(Sdf.Layer.FindOrOpen("/Disk/Layer.usd"))`, in case you are wondering, so it fakes it as if we created the value clip metadata in the active layer.
 
 <video width="100%" height="100%" controls autoplay muted loop>
-  <source src="./houdiniCompositionSublayerValueClip.mp4" type="video/mp4" alt="Houdini Sublayer Value Clip">
+  <source src="../../../media/core/composition/houdiniCompositionSublayerValueClip.mp4" type="video/mp4" alt="Houdini Sublayer Value Clip">
 </video>
 
 ~~~admonish tip title="Pro Tip | How do we load value clipped files?"
@@ -342,15 +342,15 @@ Let's look at some more examples.
 As mentioned above, an inherit "only" searches the active layer stack and layer stacks the reference/payload the active layer stack. That means if we create an inherit in a "final" stage (A stage that never gets referenced or payloaded), there is little performance cost to using inherits.
 ~~~
 
-![Houdini Composition Inherit Styles](houdiniCompositionInheritStyles.jpg)
+![Houdini Composition Inherit Styles](../../../media/core/composition/houdiniCompositionInheritStyles.jpg)
 
 Here is the composition result for the left node stream. (For how to log this, see our [Inspecting composition](./pcp.md) section).
 
-![Houdini Composition Inherit - Classical Asset](houdiniCompositionInheritStyleClassicalAsset.svg)
+![Houdini Composition Inherit - Classical Asset](../../../media/core/composition/houdiniCompositionInheritStyleClassicalAsset.svg)
 
 Vs the right node stream:
 
-![Houdini Composition Inherit - Shot Asset](houdiniCompositionInheritStyleShot.svg)
+![Houdini Composition Inherit - Shot Asset](../../../media/core/composition/houdiniCompositionInheritStyleShot.svg)
 
 If we actually switch to an reference arc for the "shot style" inherit stream, we won't see a difference. So why use inherits here? As inherits are higher than variants, you should prefer inherits, for these kind of "broadcast" operations. As inherits also don't support time offsetting, they are the "simplest" arc in this scenario that does the job 100% of the time.
 
@@ -554,7 +554,7 @@ def Xform "root_grp" (
 Here is a comparison in Houdini with unloaded/loaded payloads with lofted variant data.
 
 <video width="100%" height="100%" controls autoplay muted loop>
-  <source src="./houdiniCompositionVariantLoft.mp4" type="video/mp4" alt="Houdini Composition Variant Loft">
+  <source src="../../../media/core/composition/houdiniCompositionVariantLoft.mp4" type="video/mp4" alt="Houdini Composition Variant Loft">
 </video>
 
 #### Sharing data among variants <a name="compositionArcVariantSharing"></a>
@@ -563,7 +563,7 @@ To share data among variants, we can either payload/reference the same data into
 Here is how it can be setup in Houdini:
 
 <video width="100%" height="100%" controls autoplay muted loop>
-  <source src="./houdiniCompositionVariantShare.mp4" type="video/mp4" alt="Houdini Composition Variant Share">
+  <source src="../../../media/core/composition/houdiniCompositionVariantShare.mp4" type="video/mp4" alt="Houdini Composition Variant Share">
 </video>
 
 #### Efficiently re-writing existing data as variants <a name="compositionArcVariantReauthor"></a>
@@ -572,7 +572,7 @@ Via the low level API we can also copy or move content on a layer into a variant
 Here is how it can be setup in Houdini:
 
 <video width="100%" height="100%" controls autoplay muted loop>
-  <source src="./houdiniCompositionVariantCopyMove.mp4" type="video/mp4" alt="Houdini Composition Variant Copy/Move">
+  <source src="../../../media/core/composition/houdiniCompositionVariantCopyMove.mp4" type="video/mp4" alt="Houdini Composition Variant Copy/Move">
 </video>
 
 Here is the code for moving variants:
@@ -609,7 +609,7 @@ If you want to create/edit reference arcs via code, see our [Composition Arc - C
 Let's have a look at encapsulation of the list-editable ops of composition arcs:
 
 <video width="100%" height="100%" controls autoplay muted loop>
-  <source src="houdiniCompositionReferenceEncapsulate.webm" type="video/mp4" alt="Houdini Reference Encapsulation">
+  <source src="../../../media/core/composition/houdiniCompositionReferenceEncapsulate.webm" type="video/mp4" alt="Houdini Reference Encapsulation">
 </video>
 
 As you can see, once we start loading another written USD file, we can't remove any composition arcs.
@@ -617,7 +617,7 @@ As you can see, once we start loading another written USD file, we can't remove 
 Let's compare this to other list-editable ops, like relationships:
 
 <video width="100%" height="100%" controls autoplay muted loop>
-  <source src="houdiniCompositionListEditableRelationship.mp4" type="video/mp4" alt="Houdini Relationship Encapsulation">
+  <source src="../../../media/core/composition/houdiniCompositionListEditableRelationship.mp4" type="video/mp4" alt="Houdini Relationship Encapsulation">
 </video>
 
 As you can see they don't have the same restrictions as composition arc list-editable ops.
@@ -627,7 +627,7 @@ Encapsulation also affects what referenced (payload) content "sees". Inherits an
 As mentioned in our [fundamentals section](./fundamentals.md), encapsulation affects the list-editable op. It also affects what payloads/references "see" when they load their content. Inherit and specialize arcs are kept "live", they always look at the current layer stack for what to load. Internal references do not, they only look at the active layer stack. As soon as the internally referenced content is loaded via a payload/reference into another layer stack, it only sees the layer stack where it came from. Let's look at an example:
 
 <video width="100%" height="100%" controls autoplay muted loop>
-  <source src="houdiniCompositionReferenceInheritSpecializeEncapsulate.mp4" type="video/mp4" alt="Houdini Reference/Inherit/Specialize Encapsulation">
+  <source src="../../../media/core/composition/houdiniCompositionReferenceInheritSpecializeEncapsulate.mp4" type="video/mp4" alt="Houdini Reference/Inherit/Specialize Encapsulation">
 </video>
 
 As you can see in the live layer stack, the edit to the radius has the same result on all internal arcs. As soon as we reference it though (same with if we payload it), "only" the inherit and specialize arc are kept live.
@@ -637,7 +637,7 @@ As you can see in the live layer stack, the edit to the radius has the same resu
 Remember how with list editable ops we can specify if we want to pre-/append to the list op? Let's take a look how that works, when working with nested references, for example in assemblies:
 
 <video width="100%" height="100%" controls autoplay muted loop>
-  <source src="houdiniCompositionReferenceStrongWeaker.mp4" type="video/mp4" alt="Houdini Relationship Encapsulation">
+  <source src="../../../media/core/composition/houdiniCompositionReferenceStrongWeaker.mp4" type="video/mp4" alt="Houdini Relationship Encapsulation">
 </video>
 
 As you can see, as soon as the encapsulated assembly ref is brought it, it doesn't matter if our asset scaled box ref is weaker or stronger. Why? In this case it is actually due to being the closer arc to the "box" prim. The closer (ancestor-wise) a composition arc is authored to a prim, the higher its strength will be when we have nested arcs.
@@ -665,7 +665,7 @@ If you want to create/edit payload arcs via code, see our [Composition Arc - Cod
 Let's take a look at how we can bring in payloads in shots:
 
 <video width="100%" height="100%" controls autoplay muted loop>
-  <source src="houdiniCompositionPayloadOverReference.mp4" type="video/mp4" alt="Houdini Payload over Reference">
+  <source src="../../../media/core/composition/houdiniCompositionPayloadOverReference.mp4" type="video/mp4" alt="Houdini Payload over Reference">
 </video>
 
 As you can see, we could bring it in as a reference, when it "collides" with an existing asset reference, so that the shot data wins (the color and updated position in this case). When we unload the asset payload, you'll notice that we still have reference shot data. Remember when we talked about how composition builds a value source index (prim/property index) in our [fundamentals section](./fundamentals.md)? In theory, USD doesn't load the actual values of attributes until a render delegate queries for it. So as long as we don't access the attributes (via UI panels/code), the hierarchy is still loaded, but the heavy data is not pulled yet. Now there are still downsides: USD still has to build the hierarchy, so there is a file read (USD is smart enough to only read the hierarchy structure and not load the full data). It also depends if your hydra delegate is smart enough to filter out prims, that can't be rendered. So in summary: We don't recommend doing this, but the option is there, and it will not impact performance as much as you think in small to midsize hierarchies.
@@ -710,30 +710,30 @@ Let's look at some more examples.
 As with inherits, an specialize "only" searches the active layer stack and layer stacks the reference/payload the active layer stack. That means if we create a specialize in a "final" stage (A stage that never gets referenced or payloaded), there is little performance cost to using specializes.
 ~~~
 
-![Houdini Composition Specialize Styles](houdiniCompositionSpecializeStyles.jpg)
+![Houdini Composition Specialize Styles](../../../media/core/composition/houdiniCompositionSpecializeStyles.jpg)
 
 Here is the composition result (For how to log this, see our [Inspecting composition](./pcp.md) section).
 
-![Houdini Composition Inherit - Classical Asset](houdiniCompositionSpecializeStyleClassicalAsset.svg)
+![Houdini Composition Inherit - Classical Asset](../../../media/core/composition/houdiniCompositionSpecializeStyleClassicalAsset.svg)
 
 Let's compare it to the inherit visualization:
 
-![Houdini Composition Specialize - Classical Asset](houdiniCompositionInheritStyleClassicalAsset.svg)
+![Houdini Composition Specialize - Classical Asset](../../../media/core/composition/houdiniCompositionInheritStyleClassicalAsset.svg)
 
 You might have expected it to look the exact same way, so why does it not? The answer lies in the composition calculation as described by our diagram in the [Composition Strength Ordering](#compositionStrengthOrdering) section. (At least that's how we read the graph, if this is wrong, please correct us!) Specializes are special (hehe) in that, since they are the lowest arc, they can just directly look at the layer stacks of where they should specialize from as to "following" the composition arc structure. (It still follows, but builds a list of flattened sources in full LIVRPS mode (because it always has to follow all arcs because it is the weakest arc) as to recursively following the source by looking into files in LIVRP mode (no "S") and stopping on first source hit).
 
 If we look at the right hand node output graph, this becomes more clear.
 
-![Houdini Composition Specialize - Classical Assembly](houdiniCompositionSpecializeClassicAssembly.svg)
+![Houdini Composition Specialize - Classical Assembly](../../../media/core/composition/houdiniCompositionSpecializeClassicAssembly.svg)
 
 Vs inherits:
 
-![Houdini Composition Inherit - Classical Assembly](houdiniCompositionInheritClassicAssembly.svg)
+![Houdini Composition Inherit - Classical Assembly](../../../media/core/composition/houdiniCompositionInheritClassicAssembly.svg)
 
 Let's have a look at the example from the [USD Glossary - Specializes](https://openusd.org/release/glossary.html#usdglossary-specializes) section:
 
 <video width="100%" height="100%" controls autoplay muted loop>
-  <source src="houdiniCompositionInheritVsInternalReferenceVsSpecialize.mp4" type="video/mp4" alt="Houdini Inherit vs Internal Reference vs Specialize">
+  <source src="../../../media/core/composition/houdiniCompositionInheritVsInternalReferenceVsSpecialize.mp4" type="video/mp4" alt="Houdini Inherit vs Internal Reference vs Specialize">
 </video>
 
 This shows the individual arcs in action and also again the effect of encapsulation when using internal references.
@@ -770,7 +770,7 @@ print("Prototype Count", len(stage.GetPrototypes()))
 
 In Houdini we can show the implicit prototypes by enabling the "Show Implicit Prototype Primitives" option in the sunglasses menu in our scene graph tree panel.
 
-![Houdini Instanceable](houdiniCompositionInstanceable.jpg)
+![Houdini Instanceable](../../../media/core/composition/houdiniCompositionInstanceable.jpg)
 
 Here is how we can check if a prim is inside an instance or inside a prototype:
 ~~~admonish tip title=""
@@ -782,6 +782,6 @@ Here is how we can check if a prim is inside an instance or inside a prototype:
 Here is an example of how we can't edit the content within an instanceable prim. Instead we have to create a hierarchy (in this case a `/__CLASS__` hierarchy) where we inherit from. As you can see the prototype count changes depending on if we apply the inherit to only a single reference or all. (Houdini shows the `/__class__` prim in the righ click menu, this is because the Houdini test assets where setup with an inherit by default that always runs on all assets. Since we only want to selectively broadcast our edit, we have to create a different class hierarchy.)
 
 <video width="100%" height="100%" controls autoplay muted loop>
-  <source src="./houdiniCompositionInstanceableInherit.mp4" type="video/mp4" alt="Houdini Composition Variant Copy/Move">
+  <source src="../../../media/core/composition/houdiniCompositionInstanceableInherit.mp4" type="video/mp4" alt="Houdini Composition Variant Copy/Move">
 </video>
 

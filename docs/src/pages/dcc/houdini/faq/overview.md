@@ -30,7 +30,7 @@ The very cool thing then is that in a Python node, we can then find the layers f
 Again you can also do this with a single layer, this is just to demonstrate that we can pull individual layers from another node.
 
 <video width="100%" height="100%" controls autoplay muted loop>
-  <source src="./houdiniCompositionReferencePayloadForLoop.mp4" type="video/mp4" alt="Houdini Reference/Payload For Loop">
+  <source src="../../../../media/dcc/houdini/faq/houdiniCompositionReferencePayloadForLoop.mp4" type="video/mp4" alt="Houdini Reference/Payload For Loop">
 </video>
 
 You can find this example in the composition.hipnc file in our [USD Survival Guide - GitHub Repo](https://github.com/LucaScheller/VFX-UsdSurvivalGuide/tree/main/files/dcc/houdini).
@@ -41,7 +41,7 @@ Via the low level API we can also copy or move content on a layer into a variant
 Here is how it can be setup in Houdini:
 
 <video width="100%" height="100%" controls autoplay muted loop>
-  <source src="../../../core/composition/houdiniCompositionVariantCopyMove.mp4" type="video/mp4" alt="Houdini Composition Variant Copy/Move">
+  <source src="../../../../media/core/composition/houdiniCompositionVariantCopyMove.mp4" type="video/mp4" alt="Houdini Composition Variant Copy/Move">
 </video>
 
 Here is the code for moving variants:
@@ -70,7 +70,7 @@ We typically drive the prim selection through a user defined [prim pattern/lop s
 ~~~
 
 <video width="100%" height="100%" controls autoplay muted loop>
-  <source src="./houdiniCompositionInheritInstanceable.mp4" type="video/mp4" alt="Houdini Composition Inherit">
+  <source src="../../../../media/dcc/houdini/faq/houdiniCompositionInheritInstanceable.mp4" type="video/mp4" alt="Houdini Composition Inherit">
 </video>
 
 ## How do I check if an attribute has time samples (if there is only a single time sample)? <a name="timeSampleValueMightBeTimeVarying"></a>
@@ -92,7 +92,7 @@ When looking at on disk files, use the `ValueMightBeTimeVarying`, as it is the f
 
 You can find the shown file here: [UsdSurvivalGuide - GitHub](https://github.com/LucaScheller/VFX-UsdSurvivalGuide/tree/main/files/dcc/houdini/timeSamples)
 
-![Houdini Attribute Value Might Be Time Varying](houdiniAttributeValueMightBeTimeVarying.jpg)
+![Houdini Attribute Value Might Be Time Varying](../../../../media/dcc/houdini/faq/houdiniAttributeValueMightBeTimeVarying.jpg)
 
 
 ## Where are Houdini's internal lop utils stored? <a name="houLopUtils"></a>
@@ -153,7 +153,7 @@ prim.SetCustomDataByKey("HoudiniPrimEditorNodes", Vt.IntArray(houdini_prim_edito
 ~~~
 
 The Houdini custom data gets stripped from the file, if you enable it on the USD rop (by default it gets removed).
-![Alt text](houdiniNodeBySessionId.jpg)
+![Alt text](../../../../media/dcc/houdini/faq/houdiniNodeBySessionId.jpg)
 
 ## How do I store side car data from node to node? <a name="houSidecarData"></a>
 To have a similar mechanism like SOPs detail attributes to track data through your network, we can write our data to the `/HoudiniLayerInfo` prim. This is a special prim that Houdini creates (and strips before USD file write) to track Houdini internal data. It is hidden by default, you have to enable "Show Layer Info Primitives" in your scene graph tree under the sunglasses icon to see it. We can't track data on the root or session layer customData as Houdini handles these different than with bare bone USD to enable efficient node based stage workflows.

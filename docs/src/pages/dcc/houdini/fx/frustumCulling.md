@@ -8,7 +8,7 @@ The code also works on "normal" non point instancer boundable prims.
 You can find all the .hip files of our shown examples in our [USD Survival Guide - GitHub Repo](https://github.com/LucaScheller/VFX-UsdSurvivalGuide/tree/main/files/dcc/houdini).
 
 <video width="100%" height="100%" controls autoplay muted loop>
-  <source src="./media/frustumCullingPointIInstancer.mp4" type="video/mp4" alt="Houdini Frustum Culling">
+  <source src="../../../../media/dcc/houdini/fx/frustumCullingPointIInstancer.mp4" type="video/mp4" alt="Houdini Frustum Culling">
 </video>
 
 If you look closely you'll notice that the python LOP node does not cause any time dependencies. This is where the power of USD really shines, as we can sample the full animation range at once. It also allows us to average the culling data.

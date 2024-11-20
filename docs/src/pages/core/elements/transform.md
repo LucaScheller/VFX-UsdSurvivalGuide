@@ -41,7 +41,7 @@ All shown examples can be found in the [xforms .hip file](https://github.com/Luc
 ### Creating and animating transforms <a name="xformCreate"></a>
 USD evaluates xform attributes on all sub types of the xformable schema.
 
-![Usd Xformable](xformXformableClassInheritance.jpg)
+![Usd Xformable](../../../media/core/elements/xformXformableClassInheritance.jpg)
 
 Transforms are encoded via the following naming scheme and attributes:
 - **xformOpOrder**: This (non-animatable) attribute controls what **xformOp:** namespaced attributes affect the prims local space transform.
@@ -67,7 +67,7 @@ The final world transform is computed based on a prims local transform and that 
 Here is the snippet in action:
 
 <video width="100%" height="100%" controls autoplay muted loop>
-  <source src="./xformCreation.mp4" type="video/mp4" alt="Houdini Xform Creation">
+  <source src="../../../media/core/elements/xformCreation.mp4" type="video/mp4" alt="Houdini Xform Creation">
 </video>
 
 ### Ignoring parent transforms by resetting the xform stack <a name="xformResetXformStack"></a>
@@ -86,7 +86,7 @@ This should only be used as a last resort to enforce a prim to have a specific t
 ~~~
 
 <video width="100%" height="100%" controls autoplay muted loop>
-  <source src="./xformResetXformStack.mp4" type="video/mp4" alt="Houdini Xform Stack Reset">
+  <source src="../../../media/core/elements/xformResetXformStack.mp4" type="video/mp4" alt="Houdini Xform Stack Reset">
 </video>
 
 ### Querying transforms<a name="xformQuery"></a>
@@ -115,7 +115,7 @@ Here's how we can achieve that (This example is a bit abstract, we'll add someth
 ~~~
 
 <video width="100%" height="100%" controls autoplay muted loop>
-  <source src="./xformWorldSpaceLocalSpace.mp4" type="video/mp4" alt="Houdini Xform Localize Xform">
+  <source src="../../../media/core/elements/xformWorldSpaceLocalSpace.mp4" type="video/mp4" alt="Houdini Xform Localize Xform">
 </video>
 
 ### Baking transforms for constraint like behavior <a name="xformBake"></a>
@@ -128,7 +128,7 @@ If we want a parent constraint like behavior, we have to bake down the transform
 ~~~
 
 <video width="100%" height="100%" controls autoplay muted loop>
-  <source src="./xformBake.mp4" type="video/mp4" alt="Houdini Xform Localize Xform">
+  <source src="../../../media/core/elements/xformBake.mp4" type="video/mp4" alt="Houdini Xform Localize Xform">
 </video>
 
 

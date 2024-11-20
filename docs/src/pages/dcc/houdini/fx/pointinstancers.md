@@ -49,7 +49,7 @@ Luckily, we can fix this behavior, by tracking the prototypes ourselves per fram
 Let's take a look at the full implementation:
 
 <video width="100%" height="100%" controls autoplay muted loop>
-  <source src="./media/pointInstancerPrototypeReorder.mp4" type="video/mp4" alt="Houdini Prototype Re-Order">
+  <source src="../../../../media/dcc/houdini/fx/pointInstancerPrototypeReorder.mp4" type="video/mp4" alt="Houdini Prototype Re-Order">
 </video>
 
 As you can see, all looks good, when we only look at the active frame, because the active frame does not know about the other frames. As soon as we cache it to disk though, it "breaks", because the protoIndices map to the wrong prototype.
@@ -80,7 +80,7 @@ You may have noticed, that we always have to create packed prims on SOP level, t
 Is this something you need to be doing? No, Houdini's LOPs import as well as the packed prim generation are highly performant, the following solution is really only necessary, if you are really picky about making your export a few hundred milliseconds faster with very large instance counts.
 
 <video width="100%" height="100%" controls autoplay muted loop>
-  <source src="./media/pointInstancerPerformance.mp4" type="video/mp4" alt="Houdini Prototype Re-Order">
+  <source src="../../../../media/dcc/houdini/fx/pointInstancerPerformance.mp4" type="video/mp4" alt="Houdini Prototype Re-Order">
 </video>
 
 As you can see we are at a factor 20 (1 seconds : 50 milliseconds). Wow! Now what we don't show is, that we actually have to conform the point instances attributes to what the PointInstancer prim schema expects. So the ratio we just mentioned is the best case scenario, but it can be a bit slower, when we have to map for example `N`/`up` to `orientations`. This is also only this performant because we are importing a single PointInstancer prim, which means we don't have to segment any of the protoIndices.
@@ -90,7 +90,7 @@ We also loose the benefit of being able to work with our packed prims in SOP lev
 Let's look at the details:
 
 <video width="100%" height="100%" controls autoplay muted loop>
-  <source src="./media/pointInstancerPerformanceDetails.mp4" type="video/mp4" alt="Houdini Prototype Re-Order">
+  <source src="../../../../media/dcc/houdini/fx/pointInstancerPerformanceDetails.mp4" type="video/mp4" alt="Houdini Prototype Re-Order">
 </video>
 
 On SOP level:

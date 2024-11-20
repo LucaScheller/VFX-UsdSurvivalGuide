@@ -79,7 +79,7 @@ When working in Houdini, we can't directly sublayer onto the root layer as with 
 
 Here is the result:
 
-![Alt text](houdiniCompositionSublayerPython.jpg)
+![Alt text](../../../media/core/composition/houdiniCompositionSublayerPython.jpg)
 
 #### Value Clips <a name="compositionArcValueClips"></a>
 ~~~admonish tip title="Pro Tip | What do I use value clips for?"

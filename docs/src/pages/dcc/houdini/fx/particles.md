@@ -21,7 +21,7 @@ For an exercise, let's build a simple SOP import ourselves. Should we use this i
 ~~~
 
 <video width="100%" height="100%" controls autoplay muted loop>
-  <source src="./media/pointsNativeStream.mp4" type="video/mp4" alt="Houdini Python Wrangle">
+  <source src="../../../../media/dcc/houdini/fx/pointsNativeStream.mp4" type="video/mp4" alt="Houdini Python Wrangle">
 </video>
 
 Why should we do it ourselves, you might ask? Because there are instances, where we can directly load in the array, because we know we are only editing a single prim. Some of Houdini's nodes actually use this mechanism in a few of the point instancer related nodes.
@@ -36,13 +36,13 @@ In the near future, this can probably also be done by Houdini's render procedura
 To showcase how we manipulate arrays at render time, we've built a "Python Wrangle" .hda. Here is the basic .hda structure:
 
 <video width="100%" height="100%" controls autoplay muted loop>
-  <source src="./media/pointsPythonWrangleOverview.mp4" type="video/mp4" alt="Houdini Python Wrangle">
+  <source src="../../../../media/dcc/houdini/fx/pointsPythonWrangleOverview.mp4" type="video/mp4" alt="Houdini Python Wrangle">
 </video>
 
 As discussed in our [Creating efficient LOPs .Hdas](../hda/overview.md) section, we start and end the Hda with a new layer to ensure that we don't "suffer" from the problem of our layer getting to data heavy. Then we have two python nodes: The first one serializes the Hda parms to a json dict and stores it on our point prims, the second one modifies the attributes based on the parm settings. Why do we need to separate the data storage and execution? Because we want to only opt-in into the python code execution at render-time. So that's why we put down a switch node that is driven via a context variable. Context variables are similar to global Houdini variables, the main difference is they are scoped to a section of our node graph or are only set when we trigger a render.
 
 <video width="100%" height="100%" controls autoplay muted loop>
-  <source src="./media/pointsPythonWrangleHusk.mp4" type="video/mp4" alt="Houdini Python Wrangle Husk">
+  <source src="../../../../media/dcc/houdini/fx/pointsPythonWrangleHusk.mp4" type="video/mp4" alt="Houdini Python Wrangle Husk">
 </video>
 
 This means that when rendering the USD file to disk, all the points will store is our wrangle code (and the original point data, in production this usually comes from another already cached USD file that was payloaded in). In our pre render scripts, we can then iterate over our stage and execute our code.
@@ -52,7 +52,7 @@ Let's talk about performance: The more attributes we manipulate, the slower it w
 Here is a demo of a point replicator:
 
 <video width="100%" height="100%" controls autoplay muted loop>
-  <source src="./media/pointsPythonWranglePointReplicate.mp4" type="video/mp4" alt="Houdini Python Wrangle Husk">
+  <source src="../../../../media/dcc/houdini/fx/pointsPythonWranglePointReplicate.mp4" type="video/mp4" alt="Houdini Python Wrangle Husk">
 </video>
 
 Another cool thing is, that this is actually not limited to points prims (We lied in our intro 😱). Since all attributes are is arrays of data, we can run the python wrangle on any prim. For example if we just wan't to increase our pscale width or multiply our velocities, operating on an array via numpy is incredibly fast, we're talking a few 100 milliseconds at most for a few millions points. As mentioned in our [data types](../../../core/elements/data_type.md) section, USD implements the buffer protocol, so we don't actually duplicate any memory until really needed and mapping `Vt.Array`s to numpy is as straight forward as casting the array to a numpy array.

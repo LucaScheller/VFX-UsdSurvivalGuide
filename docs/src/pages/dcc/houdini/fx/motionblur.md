@@ -6,7 +6,7 @@ You can find all the .hip files of our shown examples in our [USD Survival Guide
 As noted in our [Motion Blur - Computing Velocities and Accelerations](../../../core/elements/animation.md#animationMotionVelocityAcceleration),
 we can also easily derive the velocity and acceleration data from our position data, if the point count doesn't change.
 
-![Houdini Motion Data Compute](media/motionblurDeformingVelocityAcceleration.png)
+![Houdini Motion Data Compute](../../../../media/dcc/houdini/fx/motionblurDeformingVelocityAcceleration.png)
 
 ~~~admonish warning
 Depending on the delegate, you will likely have to set specific primvars that control the sample rate of the position/acceleration data.

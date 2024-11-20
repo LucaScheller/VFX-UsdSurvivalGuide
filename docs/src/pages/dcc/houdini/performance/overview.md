@@ -76,12 +76,12 @@ Why does Houdini do this? As mentioned hierarchy loading is fast, streaming the 
 Let's have a look at the differences, as you can see anything we do with the configure stage node actually affects our hierarchy, whereas scene graph tree panel edits are only for the viewport:
 
 <video width="100%" height="100%" controls autoplay muted loop>
-  <source src="./loadingMechanisms.mp4" type="video/mp4" alt="Scene Graph Tree vs Configure Stage">
+  <source src="../../../../media/dcc/houdini/hda/loadingMechanisms.mp4" type="video/mp4" alt="Scene Graph Tree vs Configure Stage">
 </video>
 
 Another great tip is to disable tieing the scene graph panel to the active selected node:
 
-![Scene Graph Tree Panel Node Displayed](houdiniSceneGraphTreePanelActiveNode.jpg)
+![Scene Graph Tree Panel Node Displayed](../../../../media/dcc/houdini/performance/houdiniSceneGraphTreePanelActiveNode.jpg)
 
 Instead it is then tied to you active display flag, which makes things a lot faster when clicking through your network.
 
@@ -95,7 +95,7 @@ We have two ways of caching the animation, so that the node itself loses its tim
 Starting with H19.5 most LOP nodes can whole frame range cache their edits. This does mean that a node can cook longer for very long frame ranges, but overall your network will not have a time dependency, which means when writing your node network to disk (for example for rendering), we only have to write a single frame and still have all the animation data. How cool is that! 
 
 <video width="100%" height="100%" controls autoplay muted loop>
-  <source src="../hda/hdaTimeDependencyPerNode.mp4" type="video/mp4" alt="Houdini Time Sample Per Node">
+  <source src="../../../../media/dcc/houdini/hda/hdaTimeDependencyPerNode.mp4" type="video/mp4" alt="Houdini Time Sample Per Node">
 </video>
 
 If a node doesn't have that option, we can almost always isolate that part of the network and pre cache it, that way we have the same effect but for a group of nodes.
@@ -103,7 +103,7 @@ If a node doesn't have that option, we can almost always isolate that part of th
 The common workflow is to link the shutter samples count to your camera/scene xform sample count and cache out the frames you need.
 
 <video width="100%" height="100%" controls autoplay muted loop>
-  <source src="./timeSample.mp4" type="video/mp4" alt="Houdini Time Sample Subframes">
+  <source src="../../../../media/dcc/houdini/performance/timeSample.mp4" type="video/mp4" alt="Houdini Time Sample Subframes">
 </video>
 
 We recommend driving the parms through global variables or functions, that you can attach to any node via the node [onLoaded](https://www.sidefx.com/docs/houdini/hom/locations.html#scene_events) scripts.
@@ -163,7 +163,7 @@ What does this mean for our .hda setups? The answer is simple: As there is no do
 Here is a comparison video:
 
 <video width="100%" height="100%" controls autoplay muted loop>
-  <source src="./layerContentSize.mp4" type="video/mp4" alt="Layer Size">
+  <source src="../../../../media/dcc/houdini/performance/layerContentSize.mp4" type="video/mp4" alt="Layer Size">
 </video>
 
 ## Layer Count <a name="layerCount"></a>
@@ -181,7 +181,7 @@ In LOPs we also often work with the principle of having a "main" node stream (th
 LOPs "for each loops" work a bit different: Each iteration of the loop is either merged with the active layer or kept as a separate layer, depending on the set merge style.
 When we want to spawn a large hierarchy, we recommend doing it via Python, as it is a lot faster. We mainly use the "for each loop" nodes for stuff we can't do in Python code. For example for each looping a sop import.
 
-![Houdini For Each Loop Merge Style](houdiniForEachMergeStyle.jpg)
+![Houdini For Each Loop Merge Style](../../../../media/dcc/houdini/performance/houdiniForEachMergeStyle.jpg)
 ~~~
 
 ## AOV Count <a name="renderAOVCount"></a>
@@ -227,6 +227,6 @@ def Scope "Render"
 In Houdini this is as simple as editing the relationship and putting the edit behind a switch node with a context option switch. On our render USD rop we can then set the context option to 1 and there you go, it is now always on for the USD rop write.
 
 <video width="100%" height="100%" controls autoplay muted loop>
-  <source src="./houdiniRenderAOVCount.mp4" type="video/mp4" alt="Houdini Render AOV Count">
+  <source src="../../../../media/dcc/houdini/performance/houdiniRenderAOVCount.mp4" type="video/mp4" alt="Houdini Render AOV Count">
 </video>
 

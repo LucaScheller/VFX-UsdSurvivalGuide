@@ -24,7 +24,7 @@ The answer depends on your knowledge level of USD and the pipeline resources you
 
 If you want to go the "expert" route, this is the minimal working set of nodes you'll be using:
 
-![HDA Minimal Working Set Nodes](hdaMinimalNodeWorkingSet.jpg)
+![HDA Minimal Working Set Nodes](../../../../media/dcc/houdini/hda/hdaMinimalNodeWorkingSet.jpg)
 
 Technically we won't be needing more, because everything else can be done in Python. 
 (There are also the standard control flow related nodes, we skipped those in the above image).
@@ -41,13 +41,13 @@ We'll always use the "Material Library" and "SOP Import" nodes as these pull dat
 
 There are also a lot of UI related nodes, which are simply awesome. We won't be putting these in our HDAs, but they should be used by artists to complement our workflows.
 
-![Houdini UI Custom Panel Nodes](houdiniUICustomPanelNodes.jpg)
+![Houdini UI Custom Panel Nodes](../../../../media/dcc/houdini/hda/houdiniUICustomPanelNodes.jpg)
 
 ## HDA Template Setup <a name="hdaTemplate"></a>
 Let's take a look at how we can typically structure HDAs:
 
 <video width="100%" height="100%" controls autoplay muted loop>
-  <source src="./hdaTemplateStructure.mp4" type="video/mp4" alt="Houdini Hda Template Structure">
+  <source src="../../../../media/dcc/houdini/hda/hdaTemplateStructure.mp4" type="video/mp4" alt="Houdini Hda Template Structure">
 </video>
 
 For parms we can make use of Houdini's internal loputils under the following path:
@@ -77,13 +77,13 @@ The same as within SOPs, we have to pay attention to how we build our node netwo
 Let's look at a wrong example and how to fix it:
 
 <video width="100%" height="100%" controls autoplay muted loop>
-  <source src="./hdaOrderOfOperationSlow.mp4" type="video/mp4" alt="Houdini Order of Operations slow">
+  <source src="../../../../media/dcc/houdini/hda/hdaOrderOfOperationSlow.mp4" type="video/mp4" alt="Houdini Order of Operations slow">
 </video>
 
 Here is a more optimized result:
 
 <video width="100%" height="100%" controls autoplay muted loop>
-  <source src="./hdaOrderOfOperationOptimized.mp4" type="video/mp4" alt="Houdini Order of Operations fast">
+  <source src="../../../../media/dcc/houdini/hda/hdaOrderOfOperationOptimized.mp4" type="video/mp4" alt="Houdini Order of Operations fast">
 </video>
 
 The name of the game is isolating your time dependencies. Now the above is often different how a production setup might look, but the important part is that we try to isolate each individual component that can stand by itself to a separate node stream before combining it into the scene via a merge node.
@@ -103,7 +103,7 @@ Don't cross the streams!*
 The solution is simple, add a layer break (and make sure that your have the "Strip Layers Above Layer Breaks" toggle turned on). We have these "diamond" shaped networks quite a lot, so make sure you always layer break them correctly. For artists it can be convenient to build a HDA that does this for them.
 
 <video width="100%" height="100%" controls autoplay muted loop>
-  <source src="./hdaOrderOfOperationsLayerBreak.mp4" type="video/mp4" alt="Houdini Merge Order">
+  <source src="../../../../media/dcc/houdini/hda/hdaOrderOfOperationsLayerBreak.mp4" type="video/mp4" alt="Houdini Merge Order">
 </video>
 
 ~~~admonish danger title="Important | Merging a layer stack with itself"
@@ -116,7 +116,7 @@ Now if we load a reference that is itself referenced, it is another story due to
 Check out this video for comparison:
 
 <video width="100%" height="100%" controls autoplay muted loop>
-  <source src="./hdaOrderOfOperationsLayerStackDuplication.mp4" type="video/mp4" alt="Houdini Layer Stack Duplication">
+  <source src="../../../../media/dcc/houdini/hda/hdaOrderOfOperationsLayerStackDuplication.mp4" type="video/mp4" alt="Houdini Layer Stack Duplication">
 </video>
 
 ~~~
@@ -127,7 +127,7 @@ What also is important, is the merge order. Now in SOPs we can just merge in any
 For LOPs this is different: The merge order is the sublayer order and therefore effects composition. As you can see in the video below, if we have an attribute that is the same in both layers (in this case the transform matrix), the order matters.
 
 <video width="100%" height="100%" controls autoplay muted loop>
-  <source src="./hdaOrderOfOperationsMergeOrder.mp4" type="video/mp4" alt="Houdini Merge Order">
+  <source src="../../../../media/dcc/houdini/hda/hdaOrderOfOperationsMergeOrder.mp4" type="video/mp4" alt="Houdini Merge Order">
 </video>
 
 ### Dealing with time dependencies <a name="hdaTimeDependencies"></a>
@@ -146,13 +146,13 @@ Essentially the goal with LOPs is to have no time dependency (at least when not 
 Starting with H19.5 most LOP nodes can also whole frame range cache their edits. This does mean that a node can cook longer for very long frame ranges, but overall your network will not have a time dependency, which means when writing your node network to disk (for example for rendering), we only have to write a single frame and still have all the animation data. How cool is that! 
 
 <video width="100%" height="100%" controls autoplay muted loop>
-  <source src="./hdaTimeDependencyPerNode.mp4" type="video/mp4" alt="Houdini Time Sample Per Node">
+  <source src="../../../../media/dcc/houdini/hda/hdaTimeDependencyPerNode.mp4" type="video/mp4" alt="Houdini Time Sample Per Node">
 </video>
 
 If a node doesn't have that option, we can almost always isolate that part of the network and pre cache it, that way we have the same effect but for a group of nodes.
 
 <video width="100%" height="100%" controls autoplay muted loop>
-  <source src="./hdaTimeDependencyCache.mp4" type="video/mp4" alt="Houdini Time Sample Per Node">
+  <source src="../../../../media/dcc/houdini/hda/hdaTimeDependencyCache.mp4" type="video/mp4" alt="Houdini Time Sample Per Node">
 </video>
 
 ~~~admonish danger title="Important | Previewing Xform/Deformation Motionblur"

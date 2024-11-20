@@ -106,7 +106,7 @@ All the blue colored endpoints are the ones you'll set/apply/use via code, the g
 
 Here is an example of the inheritance graph of the [UsdGeom.Imageable](https://openusd.org/dev/api/class_usd_geom_imageable.html) typed non-concrete schema:
 ~~~admonish note title="Click to expand content" collapsible=true
-![](./schemasTypedNonConcreteUsdGeomImageable.jpg#center)
+![](../../../media/core/elements/schemasTypedNonConcreteUsdGeomImageable.jpg#center)
 ~~~
 
 - `API Schemas (Usd.APISchemaBase)`

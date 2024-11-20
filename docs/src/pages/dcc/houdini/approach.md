@@ -56,7 +56,7 @@ We'll be using LOPs to create awesome VFX via USD!
 
 ## Overview <a name="overview"></a>
 <video width="100%" height="100%" controls autoplay muted loop>
-  <source src="./houdiniNodeCategories.mp4" type="video/mp4" alt="Houdini Node Categories">
+  <source src="../../../media/dcc/houdini/houdiniNodeCategories.mp4" type="video/mp4" alt="Houdini Node Categories">
 </video>
 
 You can find all the examples we take a look at in our [USD Survival Guide - GitHub Repository](https://github.com/LucaScheller/VFX-UsdSurvivalGuide/blob/main/files/dcc/houdini)
@@ -65,7 +65,7 @@ We have a lot of really cool nodes available for us what ship natively with Houd
 
 Now for pipeline developers, these are the nodes you'll primarily be interacting with:
 
-![Houdini Pipeline Nodes](houdiniNodePipeline.jpg)
+![Houdini Pipeline Nodes](../../../media/dcc/houdini/houdiniNodePipeline.jpg)
 
 You favorite node will be the Python LOP node, as we have exposure to the full USD API and can modify the stage to our needs.
 
@@ -109,7 +109,7 @@ To handle the SOPs to LOPs conversion we can either configure the import setting
 
 | LOPs Sop Import                                  | SOPs USD Configure Name                            |
 |--------------------------------------------------|----------------------------------------------------|
-| ![LOPs SOP Import](houdiniLOPsSOPImportPath.jpg) | ![SOPs Usd Configure](houdiniSOPsUsdConfigure.jpg) |
+| ![LOPs SOP Import](../../../media/dcc/houdini/houdiniLOPsSOPImportPath.jpg) | ![SOPs Usd Configure](../../../media/dcc/houdini/houdiniSOPsUsdConfigure.jpg) |
 
 We strongly recommend reading the official docs [Importing SOP geometry into USD](https://www.sidefx.com/docs/houdini/solaris/sop_import.html) as supplementary reading material.
 
@@ -153,7 +153,7 @@ When these two attributes are active, our path attributes that are relative, are
 Here's a video showing all variations, you can find the file, as mentioned above, in our GitHub repo:
 
 <video width="100%" height="100%" controls autoplay muted loop>
-  <source src="./houdiniPathAbsoluteVsRelative.mp4" type="video/mp4" alt="Houdini Node Path">
+  <source src="../../../media/dcc/houdini/houdiniPathAbsoluteVsRelative.mp4" type="video/mp4" alt="Houdini Node Path">
 </video>
 
 ### Importing from LOPs to SOPs <a name="IOLopsToSops"></a>
@@ -162,7 +162,7 @@ Importing from LOPs is done via two nodes:
 - **USD Unpack**: This unpacks the packed USD prims to polygons.
 
 <video width="100%" height="100%" controls autoplay muted loop>
-  <source src="./houdiniSOPsLOPImportTraversal.mp4" type="video/mp4" alt="Houdini LOP Import Traversal">
+  <source src="../../../media/dcc/houdini/houdiniSOPsLOPImportTraversal.mp4" type="video/mp4" alt="Houdini LOP Import Traversal">
 </video>
 
 ~~~admonish danger title="Selecting Parent & Child Prims"
@@ -186,7 +186,7 @@ We recommend unpacking to polygons as "fast" as possible and/or pre-filtering th
 ~~~
 
 <video width="100%" height="100%" controls autoplay muted loop>
-  <source src="./houdiniSOPsLOPImportPointInstancer.mp4" type="video/mp4" alt="Houdini LOP Import PointInstancer">
+  <source src="../../../media/dcc/houdini/houdiniSOPsLOPImportPointInstancer.mp4" type="video/mp4" alt="Houdini LOP Import PointInstancer">
 </video>
 
 ### Exporting from SOPs to LOPs <a name="IOSopsToLops"></a>
@@ -221,7 +221,7 @@ To solve this USD has two solutions:
 Houdini has the option to track visibility for frame ranges (that are cooked in the same session) to prevent this. For large production scenes, we usually have to resort to the above to have better scalability.
 
 <video width="100%" height="100%" controls autoplay muted loop>
-  <source src="./houdiniLOPsSOPImportTimeVisibility.mp4" type="video/mp4" alt="Houdini SOP Import Time Visibility">
+  <source src="../../../media/dcc/houdini/houdiniLOPsSOPImportTimeVisibility.mp4" type="video/mp4" alt="Houdini SOP Import Time Visibility">
 </video>
 
 ### Stage/Layer Metrics <a name="IOLayerMetrics"></a>
@@ -229,7 +229,7 @@ As mentioned in our [stage/layer](../../core/elements/layer.md#layerMetrics) and
 
 They work the same way in Houdini, the only difference is we have to use Houdini's [Configure Layer](https://www.sidefx.com/docs/houdini/nodes/lop/configurelayer.html) node to set them, if we want to set them on the root layer/stage (due to how Houdini manages stages).
 
-![Houdini Stage/Layer metrics](houdiniLayerMetrics.jpg)
+![Houdini Stage/Layer metrics](../../../media/dcc/houdini/houdiniLayerMetrics.jpg)
 
 ## Composition <a name="composition"></a>
 
@@ -242,7 +242,7 @@ We can pass in our [asset resolver context](../../core/plugins/assetresolver.md#
 
 | Node Tree                                               | Global Context                                               |
 |---------------------------------------------------------|--------------------------------------------------------------|
-| ![LOPs SOP Import](houdiniAssetResolverContextNode.jpg) | ![SOPs Usd Configure](houdiniAssetResolverContextGlobal.jpg) |
+| ![LOPs SOP Import](../../../media/dcc/houdini/houdiniAssetResolverContextNode.jpg) | ![SOPs Usd Configure](../../../media/dcc/houdini/houdiniAssetResolverContextGlobal.jpg) |
 
 For more info about resolvers, check out our [asset resolver](../../core/plugins/assetresolver.md) section.
 We provide reference resolver implementations that are ready to be used in production.

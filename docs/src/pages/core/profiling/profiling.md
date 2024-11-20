@@ -3,7 +3,7 @@ For low level profiling Usd ships with the `trace` profiling module.
 
 This is also what a few DCCs (like Houdini) expose to profile Usd writing/rendering.
 
-![](./GoogleChromeTraceProfiling.jpg#center)
+![](../../../media/core/profiling/GoogleChromeTraceProfiling.jpg#center)
 
 ## TL;DR - Profiling In-A-Nutshell
 - The trace module offers easy to attach Python decorators (`@Trace.TraceMethod/TraceFunction`) that you can wrap your functions with to expose them to the profiler.
@@ -63,7 +63,7 @@ Tree view  ==============
 
 Here is an example of a report to a Google Chrome trace .json file opened at [`chrome://tracing`](chrome://tracing) in Google Chrome with a custom python trace marked scope.
 
-![](./GoogleChromePythonScopeTraceProfiling.jpg#center)
+![](../../../media/core/profiling/GoogleChromePythonScopeTraceProfiling.jpg#center)
 
 
 ### Measuring time deltas

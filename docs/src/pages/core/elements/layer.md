@@ -110,7 +110,7 @@ As also mentioned in the next section, the layer identifier is made up of the UR
 To demonstrate the singleton behavior let's try changing a layers content in Houdini and then view the layer through two different unrelated stages. (In Houdini every LOPs node is a separate stage):
 
 <video width="100%" height="100%" controls autoplay muted loop>
-  <source src="layerSingleton.mp4" type="video/mp4" alt="Houdini Layer Singleton">
+  <source src="../../../media/core/elements/layerSingleton.mp4" type="video/mp4" alt="Houdini Layer Singleton">
 </video>
 
 The snippet from the video:

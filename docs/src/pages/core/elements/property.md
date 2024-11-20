@@ -112,7 +112,7 @@ We cover how to work with data classes in detail in our [data types/roles](./dat
 The role specifies the intent of the data, e.g. `points`, `normals`, `color` and will affect how renderers/DCCs handle the attribute. This is not a concept only for USD, it is there in all DCCs. For example a color vector doesn't need to be influenced by transform operations where as normals and points do.
 
 Here is a comparison to when we create an attribute a float3 normal attribute in Houdini.
-![](./attributesDataRole.jpg#center)
+![](../../../media/core/elements/attributesDataRole.jpg#center)
 
 ### Static (Default) Values vs Time Samples vs Value Blocking <a name="attributeAnimation"></a>
 We talk about how animation works in our [animation](./animation.md) section.
@@ -321,7 +321,7 @@ This is useful, if you for example want to load a whole scene in `proxy` purpose
 The purpose is provided by the `UsdGeom.Imageable` (renderable) typed non-concrete schema, and is therefore on anything that is renderable.
 
 ~~~admonish tip title="Usd.GeomImageable inheritance graph | Click to expand code" collapsible=true
-![](./schemasTypedNonConcreteUsdGeomImageable.jpg#center)
+![](../../../media/core/elements/schemasTypedNonConcreteUsdGeomImageable.jpg#center)
 ~~~
 
 There are 4 different purposes:
@@ -365,7 +365,7 @@ E.g.: `Vt.Vec3fArray(2, (Gf.Vec3f(-5.0, 0.0, -5.0), Gf.Vec3f(5.0, 0.0, 5.0)))`
 Here are all boundable prims (prims that have a bounding box).
 
 ~~~admonish tip title="UsdGeom.Boundable inheritance graph | Click to view" collapsible=true
-![](./schemasTypedNonConcreteUsdBoundable.jpg#center)
+![](../../../media/core/elements/schemasTypedNonConcreteUsdBoundable.jpg#center)
 ~~~
 
 Since boundable prims are leaf prims (they have (or at least should have) no children), a prim higher in the hierarchy can easily compute an accurate bounding box representation, by iterating over all leaf prims and reading the `extent` attribute. This way, if a single leaf prim changes, the parent prims can reflect the update without having to do expensive per prim point position attribute lookups.

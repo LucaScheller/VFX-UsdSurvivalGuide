@@ -82,11 +82,11 @@ Houdini exposes all three in two different ways:
 - **Scene Graph Tree** panel: In Houdini, that stage that gets rendered, is actually not the stage of your node (at least what we gather from reverse engineering). Instead it is a duplicate, that has overrides in the session layer and loading mechanisms listed above.
 
 <video width="100%" height="100%" controls autoplay muted loop>
-  <source src="houdiniLoadingMechanisms.mp4" type="video/mp4" alt="Houdini Configure Stage Node">
+  <source src="../../../media/core/elements/houdiniLoadingMechanisms.mp4" type="video/mp4" alt="Houdini Configure Stage Node">
 </video>
 
 <video width="100%" height="100%" controls autoplay muted loop>
-  <source src="houdiniSceneGraphTreePanel.mp4" type="video/mp4" alt="Houdini Scene Graph Tree Panel">
+  <source src="../../../media/core/elements/houdiniSceneGraphTreePanel.mp4" type="video/mp4" alt="Houdini Scene Graph Tree Panel">
 </video>
 
 More Houdini specific information can be found in our [Houdini - Performance Optimizations](../../dcc/houdini/performance/overview.md#loadingMechanisms) section.
@@ -120,7 +120,7 @@ We use layer muting in production for two things:
 Here is an example of global layer muting:
 
 <video width="100%" height="100%" controls autoplay muted loop>
-  <source src="layerMutingGlobal.mp4" type="video/mp4" alt="Houdini Layer Muting Global">
+  <source src="../../../media/core/elements/layerMutingGlobal.mp4" type="video/mp4" alt="Houdini Layer Muting Global">
 </video>
 
 We have to re-cook the node for it to take effect, due to how Houdini caches stages.
@@ -152,7 +152,7 @@ stage.ExpandPopulationMask(relationshipPredicate=lambda r: r.GetName() == 'mater
 ~~~
 
 <video width="100%" height="100%" controls autoplay muted loop>
-  <source src="houdiniPopulationMaskExpand.mp4" type="video/mp4" alt="Houdini Population Mask Expand">
+  <source src="../../../media/core/elements/houdiniPopulationMaskExpand.mp4" type="video/mp4" alt="Houdini Population Mask Expand">
 </video>
 
 ### Payload Loading <a name="loadingMechanismsLayerPayloadLoading"></a>
@@ -197,7 +197,7 @@ Here is how we can set it via Python, it is part of the `UsdGeomModelAPI`:
 ~~~
 
 <video width="100%" height="100%" controls autoplay muted loop>
-  <source src="houdiniLoadingMechanismsDrawMode.mp4" type="video/mp4" alt="Houdini Draw Mode">
+  <source src="../../../media/core/elements/houdiniLoadingMechanismsDrawMode.mp4" type="video/mp4" alt="Houdini Draw Mode">
 </video>
 
 
@@ -295,7 +295,7 @@ You can adjust the `create_hierarchy(layer, prim_path, <level>)`, be aware this 
 
 The output will be something like this:
 
-![Houdini Traversal Profiling Hierarchy](traversalProfilingHierarchy.jpg)
+![Houdini Traversal Profiling Hierarchy](../../../media/core/composition/traversalProfilingHierarchy.jpg)
 
 ~~~admonish tip title=""
 ```python

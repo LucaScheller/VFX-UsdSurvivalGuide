@@ -282,7 +282,7 @@ We can supply a default render settings prim path on our root layer. This will b
 
 For example in Houdini we can then see it marked with the "Default" prefix in our viewport display options.
 
-![Houdini Viewport Display Options - Default Render Settings](metadataRenderSettingsPrimPath.jpg)
+![Houdini Viewport Display Options - Default Render Settings](../../../media/core/elements/metadataRenderSettingsPrimPath.jpg)
 
 
 #### Stage and layer metrics (FPS/Scene Unit Scale/Up Axis) (High/Low level API) <a name="metadataMetricsLayer"></a>
