@@ -118,7 +118,7 @@ Here is a comparison to when we create an attribute a float3 normal attribute in
 We talk about how animation works in our [animation](./animation.md) section.
 
 ~~~admonish important
-Attributes are the only part of USD than can encode time varying data.
+Attributes are the only part of USD that can encode time-varying data.
 ~~~
 
 ~~~admonish info title=""
