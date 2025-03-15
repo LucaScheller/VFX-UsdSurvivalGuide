@@ -429,7 +429,7 @@ print(prim_spec.name) # Returns: "bicycle"
 # If you want to batch-rename, you should use the Sdf.BatchNamespaceEdit class, see our explanation [here]()
 prim_spec.name = "coolBicycle"
 print(prim_spec.nameParent) # Returns: Sdf.PrimSpec("/set")
-print(prim_spec.nameParent.nameChildren) # Returns: {'coolCube': Sdf.Find('anon:0x7f6e5a0e3c00:LOP:/stage/pythonscript3', '/set/coolBicycle')}
+print(prim_spec.nameParent.nameChildren) # Returns: {'coolBicycle': Sdf.Find('anon:0x7f6e5a0e3c00:LOP:/stage/pythonscript3', '/set/coolBicycle')}
 print(prim_spec.layer) # Returns: The active layer object the spec is on.
 #// ANCHOR_END: dataContainerPrimHierarchy
 
@@ -551,7 +551,7 @@ prim_spec = Sdf.CreatePrimInLayer(layer, prim_path)
 prim_spec.active = False
 # prim_spec.ClearActive()
 ## Visibility: Controls the visiblity for render delegates (subhierarchy will still be loaded)
-visibility_attr_spec = Sdf.AttributeSpec(prim_spec, UsdGeom.Tokens.purpose, Sdf.ValueTypeNames.Token)
+visibility_attr_spec = Sdf.AttributeSpec(prim_spec, UsdGeom.Tokens.visibility, Sdf.ValueTypeNames.Token)
 visibility_attr_spec.default = UsdGeom.Tokens.invisible
 ## Purpose: Controls if the prim is visible for what the renderer requested.
 purpose_attr_spec = Sdf.AttributeSpec(prim_spec, UsdGeom.Tokens.purpose, Sdf.ValueTypeNames.Token)
@@ -626,7 +626,7 @@ box_prim_path = Sdf.Path("/box")
 box_prim_spec = Sdf.CreatePrimInLayer(layer, box_prim_path)
 box_prim_spec.specifier = Sdf.SpecifierDef
 rel_spec = Sdf.RelationshipSpec(prim_spec, "proxyPrim")
-rel_spec.targetPathList.explicitItems = [prim_path]
+rel_spec.targetPathList.explicitItems = [box_prim_path]
 # Get all authored properties (in the active layer only)
 print(prim_spec.properties)
 # Returns:
@@ -2543,9 +2543,9 @@ attr_spec = Sdf.AttributeSpec(prim_spec, "someAssetPathArray", Sdf.ValueTypeName
 attr_spec.default = Sdf.AssetPathArray(["testA.usd", "testB.usd"])
 # Creating an attribute spec with the same data type as an existing attribute (spec)
 # is as easy as passing in the type name from the existing attribute (spec)
-same_type_attr_spec = Sdf.AttributeSpec(prim_spec, "tire:size", attr.GetTypeName())
+same_type_attr_spec = Sdf.AttributeSpec(prim_spec, "tire:radius", attr.GetTypeName())
 # Or
-same_type_attr_spec = Sdf.AttributeSpec(prim_spec, "tire:size", attr_spec.typeName)
+same_type_attr_spec = Sdf.AttributeSpec(prim_spec, "tire:radius", attr_spec.typeName)
 #// ANCHOR_END: attributeDataTypeRole
 
 
