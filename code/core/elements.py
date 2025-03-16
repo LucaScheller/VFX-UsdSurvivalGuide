@@ -3388,7 +3388,7 @@ instance = cls()
 
 ##### Types - pxr.Vt.Type Registry #####
 from pxr import Vt
-# For Python usage, the only thing of interest for data types in the Vt.Type module are the `*Array`ending classes.`
+# For Python usage, the only thing of interest for data types in the Vt.Type module are the `*Array`ending classes.
 # You will only use these array types to handle the auto conversion
 # form buffer protocol arrays like numpy arrays, the rest is auto converted and you don't need
 # to worry about it. Normal Python lists do not support the buffer protocol.
