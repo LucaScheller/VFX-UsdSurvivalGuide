@@ -308,7 +308,7 @@ Now that we got the basics down, let's have a look at some common attributes (an
 #### Purpose <a name="attributePurpose"></a>
 The `purpose` is a special USD attribute that:
 - Affects certain scene traversal methods (e.g. [bounding box or xform cache lookups](../../production/caches.md) can be limited to a specific purpose).
-- Is a mechanism for Hydra (USD's render abstraction interface) to only pull in data with a specific purpose. Since any rendering (viewport or final image) is run via Hydra, this allows users to load in only prims tagged with a specific purpose. For example, the `pxr.UsdGeom.Tokens.preview` purpose is used for scene navigation and previewing only, while the ``UsdGeom.Tokens.render` purpose is used for final frame rendering.
+- Is a mechanism for Hydra (USD's render abstraction interface) to only pull in data with a specific purpose. Since any rendering (viewport or final image) is run via Hydra, this allows users to load in only prims tagged with a specific purpose. For example, the `pxr.UsdGeom.Tokens.preview` purpose is used for scene navigation and previewing only, while the `UsdGeom.Tokens.render` purpose is used for final frame rendering.
 - It is inherited (like [primvars](#the-primvars-primvars-namespace)) down the hierarchy. You won't see this in UIs unlike with primvars.
 
 ~~~admonish tip title="Pro Tip | Where to mark the purpose"
