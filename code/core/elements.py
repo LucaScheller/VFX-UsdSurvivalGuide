@@ -2757,7 +2757,7 @@ print(UsdGeom.Primvar.IsPrimvar(attr)) # Returns: True
 # This returns an instance of UsdGeom.Primvar
 primvar_api = UsdGeom.PrimvarsAPI(prim)
 primvar = primvar_api.CreatePrimvar("height", Sdf.ValueTypeNames.StringArray)
-print(UsdGeom.Primvar.IsPrimvar(primvar))  # Returns: False
+print(UsdGeom.Primvar.IsPrimvar(primvar))  # Returns: True
 print(primvar.GetPrimvarName()) # Returns: "height"
 primvar.Set(["testA", "testB"])
 print(primvar.ComputeFlattened()) # Returns: ["testA", "testB"]
