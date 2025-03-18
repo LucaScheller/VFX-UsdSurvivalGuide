@@ -3564,6 +3564,7 @@ layer.endTimeCode = time_samples[-1]
 # Clear: 'Clear', 'Reload', 'ReloadLayers'
 # See all open layers: 'GetLoadedLayers'
 from pxr import Sdf
+import os
 layer = Sdf.Layer.CreateAnonymous()
 ## The .CreateNew command will check if the layer is saveable at the file location and create an empty file.
 layer_file_path = os.path.expanduser("~/Desktop/layer_identifier_example.usd")
