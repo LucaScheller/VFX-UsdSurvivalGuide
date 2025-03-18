@@ -430,7 +430,7 @@ In Houdini we don't have to manage this, it is always the highest layer in the a
 More info about edit targets in our [composition fundamentals](../composition/fundamentals.md) section.
 
 ### Loading mechanisms <a name="stageLoadingMechanisms"></a>
-Stages are the controller of how our [Prim Cache Population (PCP)](../composition/pcp.md) cache loads our composed layers. We cover this in detail in our [Traversing/Loading Data](./loading_mechanisms.md) section. Technically the stage just exposes the PCP cache in a nice API, that forwards its requests to the its pcp cache `stage._GetPcpCache()`, similar how all `Usd` ops are wrappers around `Sdf` calls.
+Stages are the controller of how our [Prim Cache Population (PCP)](../composition/pcp.md) cache loads our composed layers. We cover this in detail in our [Traversing/Loading Data](./loading_mechanisms.md) section. Technically the stage just exposes the PCP cache in a nice API, that forwards its requests to its PCP cache `stage._GetPcpCache()`, similar how all `Usd` ops are wrappers around `Sdf` calls.
 
 Stages control:
 - **Layer Muting**: This controls what layers are allowd to contribute to the composition result.
