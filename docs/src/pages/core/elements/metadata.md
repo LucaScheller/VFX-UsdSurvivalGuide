@@ -87,7 +87,7 @@ Metadata is different in that it:
 - Is strongly typed via schemas, so you need to register a custom schema if you want custom keys. This way we can ensure fallback values/documentation per key/value and avoid random data flying through your pipelines. For example all your mesh attributes have metadata for exactly what type/role they must match.
 - There are two special metadata keys for prims:
     - `assetInfo`: Here you should dump asset related data. This is just a predefined standardized location all vendors/companies should adhere to when writing asset data that should be tracked.
-    - `customData`: Here you can dump any data you want, a kind of scratch space, so you don't need to add you own schema. If you catch yourself misusing it too much, you should probably generate your own schema.
+    - `customData`: Here you can dump any data you want, a kind of scratch space, so you don't need to add your own schema. If you catch yourself misusing it too much, you should probably generate your own schema.
 
 
 ~~~admonish tip
@@ -200,7 +200,7 @@ to manage the content of this list to be synced with the actual payload(s) conte
 ~~~
 
 #### Custom Data <a name="metadataCustomData"></a>
-The `customData` field can be for any data you want, a kind of scratch space, so you don't need to add you own schema. If you catch yourself misusing it too much, you should probably generate your own schema.
+The `customData` field can be for any data you want, a kind of scratch space, so you don't need to add your own schema. If you catch yourself misusing it too much, you should probably generate your own schema.
 ~~~admonish info title=""
 ```python
 {{#include ../../../../../code/core/elements.py:metadataCustomData}}
