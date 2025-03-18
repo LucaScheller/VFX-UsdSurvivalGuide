@@ -215,7 +215,7 @@ The `metersPerUnit` and `upAxis` are only intent hints, it is up to the applicat
 The time related metrics should be written into all layers, as we can then use them to quickly inspect time related data in the file without having to fully parse it.
 
 ### Permissions <a name="layerPermissions"></a>
-We can lock a layer to not have editing or save permissions. Depending on the DCC, this is automatically done for your depending on how you access the stage, some applications leave this up to the user though.
+We can lock a layer to not allow editing or save permissions. Depending on the DCC, this is automatically done for you depending on how you access the stage. However, some applications leave this up to the user.
 
 Anonymous layers can't be saved to disk, therefore for them `layer.permissionToSave` is always `False`.
 
