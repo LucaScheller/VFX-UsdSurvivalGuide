@@ -3570,7 +3570,7 @@ layer_file_path = os.path.expanduser("~/Desktop/layer_identifier_example.usd")
 layer = Sdf.Layer.CreateNew(layer_file_path)
 print(layer.dirty) # Returns: False
 ## Our layers are marked as "dirty" (edited) as soon as we make an edit.
-prin_spec = Sdf.CreatePrimInLayer(layer, Sdf.Path("/pig"))
+prim_spec = Sdf.CreatePrimInLayer(layer, Sdf.Path("/pig"))
 print(layer.dirty) # Returns: True
 layer.Save()
 # Only edited (dirty) layers are saved, when layer.Save() is called
@@ -3591,7 +3591,7 @@ layer.TransferContent(layer.FindOrOpen((layer_file_path)))
 # this is quite usefull for debugging and inspecting the active layer.
 # layer.ImportFromString(other_layer.ExportAsString())
 layer = Sdf.Layer.CreateAnonymous()
-prin_spec = Sdf.CreatePrimInLayer(layer, Sdf.Path("/pig"))
+prim_spec = Sdf.CreatePrimInLayer(layer, Sdf.Path("/pig"))
 print(layer.ExportToString())
 # Returns:
 """
