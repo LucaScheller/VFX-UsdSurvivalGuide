@@ -250,7 +250,7 @@ If you want to create/edit sublayer arcs via code, see our [Composition Arc - Co
 Let's look at how sublayers are used in native USD:
 
 When creating a stage we have two layers by default:
-- **Session Layer**: This is a temp layer than doesn't get applied on disk save. Here we usually put things like viewport overrides.
+- **Session Layer**: This is a temp layer that doesn't get applied on disk save. Here we usually put things like viewport overrides.
 - **Root Layer**: This is the base layer all edits target by default. We can add sublayers based on what we need to it. When calling `stage.Save()`, all sublayers that are dirty and not anonymous, will be saved. 
 
 How are sublayers setup in Houdini?

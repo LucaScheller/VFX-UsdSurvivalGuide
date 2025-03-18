@@ -42,7 +42,7 @@ Layers and stages are the main entry point to accessing our data stored in USD.
 **Stages**
 - A stage is a view of a set of composed layers. You can think of it as the viewer in a view--model design. Each layer that the stage opens is a data source to the data model. When "asking" the stage for data, we ask the view for the combined (composed) data, which then queries into the layers based on the value source found by our composition rules.
 - When creating a stage we have two layers by default:
-    - **Session Layer**: This is a temp layer than doesn't get applied on disk save. Here we usually put things like viewport overrides.
+    - **Session Layer**: This is a temp layer that doesn't get applied on disk save. Here we usually put things like viewport overrides.
     - **Root Layer**: This is the base layer all edits target by default. We can add sublayers based on what we need to it. When calling `stage.Save()`, all sublayers that are dirty and not anonymous, will be saved. 
 
 ## What should I use it for? <a name="usage"></a>
@@ -327,7 +327,7 @@ Unlike layers, stages are not managed via a singleton. There is the [Usd.StageCa
 If a stage goes out of scope in our code, it will be deleted. Should we still have access the to Python object, we can check if it actually points to a valid layer via the `stage.expired` property.
 
 When creating a stage we have two layers by default:
-- **Session Layer**: This is a temp layer than doesn't get applied on disk save. Here we usually put things like viewport overrides.
+- **Session Layer**: This is a temp layer that doesn't get applied on disk save. Here we usually put things like viewport overrides.
 - **Root Layer**: This is the base layer all edits target by default. We can add sublayers based on what we need to it. When calling `stage.Save()`, all sublayers that are dirty and not anonymous, will be saved. 
 
 
@@ -439,7 +439,7 @@ Stages control:
 
 ### Stage Layer Management (Creation/Save/Export) <a name="stageLayerManagement"></a>
 When creating a stage we have two layers by default:
-- **Session Layer**: This is a temp layer than doesn't get applied on disk save. Here we usually put things like viewport overrides.
+- **Session Layer**: This is a temp layer that doesn't get applied on disk save. Here we usually put things like viewport overrides.
 - **Root Layer**: This is the base layer all edits target by default. We can add sublayers based on what we need to it. When calling `stage.Save()`, all sublayers that are dirty and not anonymous, will be saved. 
 
 Let's first look at layer access, there are two methods of special interest to us:
