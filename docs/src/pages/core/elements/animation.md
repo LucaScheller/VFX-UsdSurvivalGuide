@@ -116,7 +116,7 @@ Usually we'll only have one or the other, it is quite common to run into this at
 ~~~
 
 ### Time Code <a name="animationTimeCode"></a>
-The `Usd.TimeCode` class is a small wrapper class for handling time encoding. Currently it does nothing more that storing if it is a `default` time code or a `time/frame` time code with a specific frame. In the future it may get the concept of encoding in `time` instead of `frame`, so to future proof your code, you should always use this class instead of setting a time value directly.
+The `Usd.TimeCode` class is a small wrapper class for handling time encoding. Currently it does nothing more than storing if it is a `default` time code or a `time/frame` time code with a specific frame. In the future it may get the concept of encoding in `time` instead of `frame`, so to future proof your code, you should always use this class instead of setting a time value directly.
 
 ~~~admonish info title=""
 ```python
