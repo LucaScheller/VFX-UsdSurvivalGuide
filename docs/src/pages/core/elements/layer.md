@@ -103,7 +103,7 @@ for layer in Sdf.Layer.GetLoadedLayers():
 ```
 ~~~
 
-If a layer is not used anymore in a stage and goes out of scope in our code, it will be deleted. Should we still have access the to Python object, we can check if it actually points to a valid layer via the `layer.expired` property.
+If a layer is no longer used in a stage and goes out of scope in our code, it will be deleted. If we still have access to the Python object, we can check whether it points to a valid layer using the `layer.expired` property.
 
 As also mentioned in the next section, the layer identifier is made up of the URI(Unique Resource Identifier) and optional arguments. The layer identifier includes the optional args. This is on purpose, because different args can potentially mean a different file.
 
