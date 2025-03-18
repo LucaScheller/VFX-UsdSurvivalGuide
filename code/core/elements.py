@@ -3699,7 +3699,7 @@ tire_diameter_attr_spec = Sdf.AttributeSpec(bicycle_prim_spec, "tire:diameter", 
 tire_diameter_attr_spec.connectionPathList.explicitItems = [tire_size_attr_spec.path]
 def traversal_kernel(path):
     if path.IsTargetPath():
-        print(">> IsTargetPath", path) 
+        print("IsTargetPath", path) 
 layer.Traverse(layer.pseudoRoot.path, traversal_kernel)
 """ Returns:
 IsTargetPath /set/yard/bicycle.tire:diameter[/set/yard/bicycle.tire:size]
