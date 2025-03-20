@@ -3151,7 +3151,10 @@ print(Usd.CollectionAPI.GetAllCollections(set_prim)) # Returns: [Usd.CollectionA
 print(Usd.CollectionAPI.GetCollection(set_prim, "vehicles")) # Returns: Usd.CollectionAPI(Usd.Prim(</set>), 'vehicles')
 collection_query = collection_api.ComputeMembershipQuery()
 print(collection_api.ComputeIncludedPaths(collection_query, stage))
-# Returns: [Sdf.Path('/set'), Sdf.Path('/set/garage'), Sdf.Path('/set/garage/car'), Sdf.Path('/set/yard')]
+# Returns: 
+# [Sdf.Path('/set'), Sdf.Path('/set/garage'), Sdf.Path('/set/garage/boat'),
+#  Sdf.Path('/set/garage/car'), Sdf.Path('/set/garage/helicopter'),
+#  Sdf.Path('/set/garage/tractor'), Sdf.Path('/set/yard')]
 # Set it to explicit only
 collection_api.GetExpansionRuleAttr().Set(Usd.Tokens.explicitOnly)
 collection_query = collection_api.ComputeMembershipQuery()
