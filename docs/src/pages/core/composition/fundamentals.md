@@ -21,7 +21,7 @@ If you detect an error or have useful production examples, please [submit a tick
 
 ## TL;DR - Composition Fundamentals In-A-Nutshell <a name="summary"></a>
 - Composition editing works in the active [layer stack](#compositionFundamentalsLayerStack) via [list editable ops](#compositionFundamentalsListEditableOps). 
-- When loading a layer (stack) from disk via `Reference` and `Payload` arcs, the contained composition structure is immutable (USD speak [encapsulated](#compositionFundamentalsEncapsulation)). This means you can't remove the arcs within the loaded files. As for what the arcs can use for value resolution: The `Inherit` and `Specialize` arcs still target the "live" composed stage and therefore still reflect changes on top of the encapsulated arcs, the `Reference` arc is limited to seeing the encapsulated layer stack.
+- When loading a layer (stack) from disk via `Reference` and `Payload` arcs, the contained composition structure is immutable (USD speak [encapsulated](#compositionFundamentalsEncapsulation)). This means you can't remove the arcs within the loaded files. As for what the arcs can use for value resolution: The `Inherit` and `Specialize` arcs still target the "live" composed stage and therefore still reflect changes on top of the encapsulated arcs, while the `Reference` arc is limited to seeing the encapsulated layer stack.
 
 ## Why should I understand the editing fundamentals? <a name="usage"></a>
 ~~~admonish tip

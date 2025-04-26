@@ -17,7 +17,7 @@ Plugins (Covered in our [plugins](../core/plugins/overview.md) section):
 
 Data IO and Data Flow:
 - As a pipeline/software developer the core thing that has to work is data IO. This is something a user should never have to think about. What does this mean for you:
-    - Make sure your UX experience isn't to far from what artists already know.
+    - Make sure your UX experience isn't too far from what artists already know.
 - Make sure that your system of tracking layers and how your assets/shots are structured is solid enough to handle these cases:
     - Assets with different layers (model/material/fx/lighting)
     - FX (Asset and Shot FX, also make sure that you can also track non USD dependencies, like .bgeo, via metadata/other means)

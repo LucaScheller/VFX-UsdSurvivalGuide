@@ -23,7 +23,7 @@ There are three ways to influence the data load, from lowest to highest granular
 - **Prim Population Mask**: This controls what prim paths to consider for loading at all.
 - **Payload Loading**: This controls what prim paths, that have payloads, to load.
 - **GeomModelAPI->Draw Mode**: This controls per prim how it should be drawn by delegates. It can be one of "Full Geometry"/"Origin Axes"/"Bounding Box"/"Texture Cards". It requires the kind to be set on the prim and all its ancestors. Therefore it is "limited" to (asset-) root prims and ancestors.
-- **Activation**: Control per prim whether load itself and its child hierarchy. This is more a an artist facing mechanism, as we end up writing the data to the stage, which we don't do with the other methods.
+- **Activation**: Control per prim whether load itself and its child hierarchy. This is more an artist facing mechanism, as we end up writing the data to the stage, which we don't do with the other methods.
 
 #### Traversing/Iterating over our stage/layer
 To inspect our stage, we can iterate (traverse) over it:
@@ -72,9 +72,9 @@ There are three ways to influence the data load, from lowest to highest granular
 - **Prim Population Mask**: This controls what prim paths to consider for loading at all.
 - **Payload Loading**: This controls what prim paths, that have payloads, to load.
 - **GeomModelAPI->Draw Mode**: This controls per prim how it should be drawn by delegates. It can be one of "Full Geometry"/"Origin Axes"/"Bounding Box"/"Texture Cards". It requires the kind to be set on the prim and all its ancestors. Therefore it is "limited" to (asset-) root prims and ancestors.
-- **Activation**: Control per prim whether load itself and its child hierarchy. This is more a an artist facing mechanism, as we end up writing the data to the stage, which we don't do with the other methods.
+- **Activation**: Control per prim whether load itself and its child hierarchy. This is more an artist facing mechanism, as we end up writing the data to the stage, which we don't do with the other methods.
 
-Stages are the controller of how our [Prim Cache Population (PCP)](../composition/pcp.md) cache loads our composed layers. Technically the stage just exposes the PCP cache in a nice API, that forwards its requests to the its pcp cache `stage._GetPcpCache()`, similar how all `Usd` ops are wrappers around `Sdf` calls.
+Stages are the controller of how our [Prim Cache Population (PCP)](../composition/pcp.md) cache loads our composed layers. Technically the stage just exposes the PCP cache in a nice API, that forwards its requests to its PCP cache `stage._GetPcpCache()`, similar how all `Usd` ops are wrappers around `Sdf` calls.
 
 
 Houdini exposes all three in two different ways:

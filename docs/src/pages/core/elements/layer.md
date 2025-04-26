@@ -42,7 +42,7 @@ Layers and stages are the main entry point to accessing our data stored in USD.
 **Stages**
 - A stage is a view of a set of composed layers. You can think of it as the viewer in a view--model design. Each layer that the stage opens is a data source to the data model. When "asking" the stage for data, we ask the view for the combined (composed) data, which then queries into the layers based on the value source found by our composition rules.
 - When creating a stage we have two layers by default:
-    - **Session Layer**: This is a temp layer than doesn't get applied on disk save. Here we usually put things like viewport overrides.
+    - **Session Layer**: This is a temp layer that doesn't get applied on disk save. Here we usually put things like viewport overrides.
     - **Root Layer**: This is the base layer all edits target by default. We can add sublayers based on what we need to it. When calling `stage.Save()`, all sublayers that are dirty and not anonymous, will be saved. 
 
 ## What should I use it for? <a name="usage"></a>
@@ -103,7 +103,7 @@ for layer in Sdf.Layer.GetLoadedLayers():
 ```
 ~~~
 
-If a layer is not used anymore in a stage and goes out of scope in our code, it will be deleted. Should we still have access the to Python object, we can check if it actually points to a valid layer via the `layer.expired` property.
+If a layer is no longer used in a stage and goes out of scope in our code, it will be deleted. If we still have access to the Python object, we can check whether it points to a valid layer using the `layer.expired` property.
 
 As also mentioned in the next section, the layer identifier is made up of the URI(Unique Resource Identifier) and optional arguments. The layer identifier includes the optional args. This is on purpose, because different args can potentially mean a different file.
 
@@ -215,7 +215,7 @@ The `metersPerUnit` and `upAxis` are only intent hints, it is up to the applicat
 The time related metrics should be written into all layers, as we can then use them to quickly inspect time related data in the file without having to fully parse it.
 
 ### Permissions <a name="layerPermissions"></a>
-We can lock a layer to not have editing or save permissions. Depending on the DCC, this is automatically done for your depending on how you access the stage, some applications leave this up to the user though.
+We can lock a layer to not allow editing or save permissions. Depending on the DCC, this is automatically done for you depending on how you access the stage. However, some applications leave this up to the user.
 
 Anonymous layers can't be saved to disk, therefore for them `layer.permissionToSave` is always `False`.
 
@@ -250,7 +250,7 @@ For more info on composition arcs (especially the sublayer arc) see our [Composi
 
 
 #### Default Prim
-As discussed in more detail in our [composition](../composition/overview.md) section, the default prim specifies the default root prim to import via reference and payload arcs. If it is not specified, the first prim in the layer is used, that is not [abstract](./prim.md#primSpecifier) (not a prim with a class specifier) and that is [defined](./prim.md#primSpecifier) (has a `Sdf.SpecifierDef` define specifier), unless we specify them explicitly. We cannot specify nested prim paths, the path must be in the root (`Sdf.Path("/example").IsRootPrimPath()` must return `True`), setting an invalid path will not error, but it will not working when referencing/payloading the file.
+As discussed in more detail in our [composition](../composition/overview.md) section, the default prim specifies the default root prim to import via reference and payload arcs. If it is not specified, the first prim in the layer is used, that is not [abstract](./prim.md#primSpecifier) (not a prim with a class specifier) and that is [defined](./prim.md#primSpecifier) (has a `Sdf.SpecifierDef` define specifier), unless we specify them explicitly. We cannot specify nested prim paths, the path must be in the root (`Sdf.Path("/example").IsRootPrimPath()` must return `True`). Setting an invalid path will not cause an error, but it will not work when referencing or payloading the file.
 
 We typically use this in asset layers to specify the root prim that is the asset.
 
@@ -327,7 +327,7 @@ Unlike layers, stages are not managed via a singleton. There is the [Usd.StageCa
 If a stage goes out of scope in our code, it will be deleted. Should we still have access the to Python object, we can check if it actually points to a valid layer via the `stage.expired` property.
 
 When creating a stage we have two layers by default:
-- **Session Layer**: This is a temp layer than doesn't get applied on disk save. Here we usually put things like viewport overrides.
+- **Session Layer**: This is a temp layer that doesn't get applied on disk save. Here we usually put things like viewport overrides.
 - **Root Layer**: This is the base layer all edits target by default. We can add sublayers based on what we need to it. When calling `stage.Save()`, all sublayers that are dirty and not anonymous, will be saved. 
 
 
@@ -430,7 +430,7 @@ In Houdini we don't have to manage this, it is always the highest layer in the a
 More info about edit targets in our [composition fundamentals](../composition/fundamentals.md) section.
 
 ### Loading mechanisms <a name="stageLoadingMechanisms"></a>
-Stages are the controller of how our [Prim Cache Population (PCP)](../composition/pcp.md) cache loads our composed layers. We cover this in detail in our [Traversing/Loading Data](./loading_mechanisms.md) section. Technically the stage just exposes the PCP cache in a nice API, that forwards its requests to the its pcp cache `stage._GetPcpCache()`, similar how all `Usd` ops are wrappers around `Sdf` calls.
+Stages are the controller of how our [Prim Cache Population (PCP)](../composition/pcp.md) cache loads our composed layers. We cover this in detail in our [Traversing/Loading Data](./loading_mechanisms.md) section. Technically the stage just exposes the PCP cache in a nice API, that forwards its requests to its PCP cache `stage._GetPcpCache()`, similar how all `Usd` ops are wrappers around `Sdf` calls.
 
 Stages control:
 - **Layer Muting**: This controls what layers are allowd to contribute to the composition result.
@@ -439,7 +439,7 @@ Stages control:
 
 ### Stage Layer Management (Creation/Save/Export) <a name="stageLayerManagement"></a>
 When creating a stage we have two layers by default:
-- **Session Layer**: This is a temp layer than doesn't get applied on disk save. Here we usually put things like viewport overrides.
+- **Session Layer**: This is a temp layer that doesn't get applied on disk save. Here we usually put things like viewport overrides.
 - **Root Layer**: This is the base layer all edits target by default. We can add sublayers based on what we need to it. When calling `stage.Save()`, all sublayers that are dirty and not anonymous, will be saved. 
 
 Let's first look at layer access, there are two methods of special interest to us:

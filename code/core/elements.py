@@ -429,7 +429,7 @@ print(prim_spec.name) # Returns: "bicycle"
 # If you want to batch-rename, you should use the Sdf.BatchNamespaceEdit class, see our explanation [here]()
 prim_spec.name = "coolBicycle"
 print(prim_spec.nameParent) # Returns: Sdf.PrimSpec("/set")
-print(prim_spec.nameParent.nameChildren) # Returns: {'coolCube': Sdf.Find('anon:0x7f6e5a0e3c00:LOP:/stage/pythonscript3', '/set/coolBicycle')}
+print(prim_spec.nameParent.nameChildren) # Returns: {'coolBicycle': Sdf.Find('anon:0x7f6e5a0e3c00:LOP:/stage/pythonscript3', '/set/coolBicycle')}
 print(prim_spec.layer) # Returns: The active layer object the spec is on.
 #// ANCHOR_END: dataContainerPrimHierarchy
 
@@ -551,7 +551,7 @@ prim_spec = Sdf.CreatePrimInLayer(layer, prim_path)
 prim_spec.active = False
 # prim_spec.ClearActive()
 ## Visibility: Controls the visiblity for render delegates (subhierarchy will still be loaded)
-visibility_attr_spec = Sdf.AttributeSpec(prim_spec, UsdGeom.Tokens.purpose, Sdf.ValueTypeNames.Token)
+visibility_attr_spec = Sdf.AttributeSpec(prim_spec, UsdGeom.Tokens.visibility, Sdf.ValueTypeNames.Token)
 visibility_attr_spec.default = UsdGeom.Tokens.invisible
 ## Purpose: Controls if the prim is visible for what the renderer requested.
 purpose_attr_spec = Sdf.AttributeSpec(prim_spec, UsdGeom.Tokens.purpose, Sdf.ValueTypeNames.Token)
@@ -626,7 +626,7 @@ box_prim_path = Sdf.Path("/box")
 box_prim_spec = Sdf.CreatePrimInLayer(layer, box_prim_path)
 box_prim_spec.specifier = Sdf.SpecifierDef
 rel_spec = Sdf.RelationshipSpec(prim_spec, "proxyPrim")
-rel_spec.targetPathList.explicitItems = [prim_path]
+rel_spec.targetPathList.explicitItems = [box_prim_path]
 # Get all authored properties (in the active layer only)
 print(prim_spec.properties)
 # Returns:
@@ -2543,9 +2543,9 @@ attr_spec = Sdf.AttributeSpec(prim_spec, "someAssetPathArray", Sdf.ValueTypeName
 attr_spec.default = Sdf.AssetPathArray(["testA.usd", "testB.usd"])
 # Creating an attribute spec with the same data type as an existing attribute (spec)
 # is as easy as passing in the type name from the existing attribute (spec)
-same_type_attr_spec = Sdf.AttributeSpec(prim_spec, "tire:size", attr.GetTypeName())
+same_type_attr_spec = Sdf.AttributeSpec(prim_spec, "tire:radius", attr.GetTypeName())
 # Or
-same_type_attr_spec = Sdf.AttributeSpec(prim_spec, "tire:size", attr_spec.typeName)
+same_type_attr_spec = Sdf.AttributeSpec(prim_spec, "tire:radius", attr_spec.typeName)
 #// ANCHOR_END: attributeDataTypeRole
 
 
@@ -2757,7 +2757,7 @@ print(UsdGeom.Primvar.IsPrimvar(attr)) # Returns: True
 # This returns an instance of UsdGeom.Primvar
 primvar_api = UsdGeom.PrimvarsAPI(prim)
 primvar = primvar_api.CreatePrimvar("height", Sdf.ValueTypeNames.StringArray)
-print(UsdGeom.Primvar.IsPrimvar(primvar))  # Returns: False
+print(UsdGeom.Primvar.IsPrimvar(primvar))  # Returns: True
 print(primvar.GetPrimvarName()) # Returns: "height"
 primvar.Set(["testA", "testB"])
 print(primvar.ComputeFlattened()) # Returns: ["testA", "testB"]
@@ -3151,7 +3151,10 @@ print(Usd.CollectionAPI.GetAllCollections(set_prim)) # Returns: [Usd.CollectionA
 print(Usd.CollectionAPI.GetCollection(set_prim, "vehicles")) # Returns: Usd.CollectionAPI(Usd.Prim(</set>), 'vehicles')
 collection_query = collection_api.ComputeMembershipQuery()
 print(collection_api.ComputeIncludedPaths(collection_query, stage))
-# Returns: [Sdf.Path('/set'), Sdf.Path('/set/garage'), Sdf.Path('/set/garage/car'), Sdf.Path('/set/yard')]
+# Returns: 
+# [Sdf.Path('/set'), Sdf.Path('/set/garage'), Sdf.Path('/set/garage/boat'),
+#  Sdf.Path('/set/garage/car'), Sdf.Path('/set/garage/helicopter'),
+#  Sdf.Path('/set/garage/tractor'), Sdf.Path('/set/yard')]
 # Set it to explicit only
 collection_api.GetExpansionRuleAttr().Set(Usd.Tokens.explicitOnly)
 collection_query = collection_api.ComputeMembershipQuery()
@@ -3388,7 +3391,7 @@ instance = cls()
 
 ##### Types - pxr.Vt.Type Registry #####
 from pxr import Vt
-# For Python usage, the only thing of interest for data types in the Vt.Type module are the `*Array`ending classes.`
+# For Python usage, the only thing of interest for data types in the Vt.Type module are the `*Array`ending classes.
 # You will only use these array types to handle the auto conversion
 # form buffer protocol arrays like numpy arrays, the rest is auto converted and you don't need
 # to worry about it. Normal Python lists do not support the buffer protocol.
@@ -3564,13 +3567,14 @@ layer.endTimeCode = time_samples[-1]
 # Clear: 'Clear', 'Reload', 'ReloadLayers'
 # See all open layers: 'GetLoadedLayers'
 from pxr import Sdf
+import os
 layer = Sdf.Layer.CreateAnonymous()
 ## The .CreateNew command will check if the layer is saveable at the file location and create an empty file.
 layer_file_path = os.path.expanduser("~/Desktop/layer_identifier_example.usd")
 layer = Sdf.Layer.CreateNew(layer_file_path)
 print(layer.dirty) # Returns: False
 ## Our layers are marked as "dirty" (edited) as soon as we make an edit.
-prin_spec = Sdf.CreatePrimInLayer(layer, Sdf.Path("/pig"))
+prim_spec = Sdf.CreatePrimInLayer(layer, Sdf.Path("/pig"))
 print(layer.dirty) # Returns: True
 layer.Save()
 # Only edited (dirty) layers are saved, when layer.Save() is called
@@ -3591,7 +3595,7 @@ layer.TransferContent(layer.FindOrOpen((layer_file_path)))
 # this is quite usefull for debugging and inspecting the active layer.
 # layer.ImportFromString(other_layer.ExportAsString())
 layer = Sdf.Layer.CreateAnonymous()
-prin_spec = Sdf.CreatePrimInLayer(layer, Sdf.Path("/pig"))
+prim_spec = Sdf.CreatePrimInLayer(layer, Sdf.Path("/pig"))
 print(layer.ExportToString())
 # Returns:
 """
@@ -3698,7 +3702,7 @@ tire_diameter_attr_spec = Sdf.AttributeSpec(bicycle_prim_spec, "tire:diameter", 
 tire_diameter_attr_spec.connectionPathList.explicitItems = [tire_size_attr_spec.path]
 def traversal_kernel(path):
     if path.IsTargetPath():
-        print(">> IsTargetPath", path) 
+        print("IsTargetPath", path) 
 layer.Traverse(layer.pseudoRoot.path, traversal_kernel)
 """ Returns:
 IsTargetPath /set/yard/bicycle.tire:diameter[/set/yard/bicycle.tire:size]

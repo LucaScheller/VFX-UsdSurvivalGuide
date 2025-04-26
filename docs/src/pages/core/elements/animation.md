@@ -116,7 +116,7 @@ Usually we'll only have one or the other, it is quite common to run into this at
 ~~~
 
 ### Time Code <a name="animationTimeCode"></a>
-The `Usd.TimeCode` class is a small wrapper class for handling time encoding. Currently it does nothing more that storing if it is a `default` time code or a `time/frame` time code with a specific frame. In the future it may get the concept of encoding in `time` instead of `frame`, so to future proof your code, you should always use this class instead of setting a time value directly.
+The `Usd.TimeCode` class is a small wrapper class for handling time encoding. Currently it does nothing more than storing if it is a `default` time code or a `time/frame` time code with a specific frame. In the future it may get the concept of encoding in `time` instead of `frame`, so to future proof your code, you should always use this class instead of setting a time value directly.
 
 ~~~admonish info title=""
 ```python
@@ -278,7 +278,7 @@ Stitching multiple files to a single file is usually used for small per frame US
 A typical production use case we use it for, is rendering out the render USD files per frame and then stitching these, as these are usually a few mb per frame at most.
 
 ~~~admonish warning
-When working with collections, make sure that they are not to big, by selecting parent prims where possible. Currently USD stitches target path lists a bit inefficiently, which will result in your stitching either not going through at all or taking forever. See our [collections](../composition/relationships.md) section for more details.
+When working with collections, make sure that they are not too big, by selecting parent prims where possible. Currently USD stitches target path lists a bit inefficiently, which will result in your stitching either not going through at all or taking forever. See our [collections](../composition/relationships.md) section for more details.
 ~~~
 
 USD ships with a standalone `usdstitch` commandline tool, which is a small Python wrapper around the `UsdUtils.StitchLayers()` function. You can read more it in our [standalone tools](./standalone_utilities.md) section.

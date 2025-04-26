@@ -208,7 +208,7 @@ root_layer.subLayerPaths.append(layer_a.identifier)
 root_layer.subLayerPaths.append(layer_b.identifier)
 # Once we have added the sublayers, we can also access their layer offsets:
 print(root_layer.subLayerOffsets) # Returns: [Sdf.LayerOffset(), Sdf.LayerOffset()]
-# Since layer offsets are ready only copies, we need to assign a newly created 
+# Since layer offsets are read only copies, we need to assign a newly created 
 # layer offset if we want to modify them. We also can't replace the whole list, as
 # it needs to keep a pointer to the array.
 layer_offset_a = root_layer.subLayerOffsets[0]
@@ -222,7 +222,7 @@ print(root_layer.subLayerOffsets) # Returns: [Sdf.LayerOffset(10, 2), Sdf.LayerO
 # If we want to sublayer on the active layer, we just add it there.
 layer_c = Sdf.Layer.CreateAnonymous()
 active_layer = stage.GetEditTarget().GetLayer()
-root_layer.subLayerPaths.append(layer_c.identifier)
+active_layer.subLayerPaths.append(layer_c.identifier)
 #// ANCHOR_END: compositionArcSublayer
 
 
