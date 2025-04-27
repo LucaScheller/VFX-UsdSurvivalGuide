@@ -25,7 +25,7 @@ jobs:
       MDBOOK_SITEMAP_VERSION: 0.1.0
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Install mdBook
         run: |
           mkdir ~/tools
@@ -37,7 +37,7 @@ jobs:
         run: npm install static-sitemap-cli
       - name: Setup Pages
         id: pages
-        uses: actions/configure-pages@v3
+        uses: actions/configure-pages@v5
       - name: Build with mdBook
         run: mdbook build -d book docs
       - name: Generate sitemap
@@ -46,7 +46,7 @@ jobs:
           npx sscli --no-clean --base https://lucascheller.github.io/VFX-UsdSurvivalGuide
           cd ../..
       - name: Upload artifact
-        uses: actions/upload-pages-artifact@v1
+        uses: actions/upload-pages-artifact@v3
         with:
           path: docs/book
 
@@ -59,4 +59,4 @@ jobs:
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v2
+        uses: actions/deploy-pages@v4
