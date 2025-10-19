@@ -242,7 +242,11 @@ We can pass in our [asset resolver context](../../core/plugins/assetresolver.md#
 
 | Node Tree                                               | Global Context                                               |
 |---------------------------------------------------------|--------------------------------------------------------------|
-| ![LOPs SOP Import](../../../media/dcc/houdini/houdiniAssetResolverContextNode.jpg) | ![SOPs Usd Configure](../../../media/dcc/houdini/houdiniAssetResolverContextGlobal.jpg) |
+| ![LOPs Configure Stage Node](../../../media/dcc/houdini/houdiniAssetResolverContextNode.jpg) | ![LOPs Stage Settings](../../../media/dcc/houdini/houdiniAssetResolverContextGlobal.jpg) |
+
+If you are using the scene graph tree panel settings, be sure to turn off "Set Asset Resolver Context From LOP Node Parameters" in the preferences.
+
+![Asset Resolver Preferences](../../../media/dcc/houdini/houdiniAssetResolverContextPreferences.jpg)
 
 For more info about resolvers, check out our [asset resolver](../../core/plugins/assetresolver.md) section.
 We provide reference resolver implementations that are ready to be used in production.
